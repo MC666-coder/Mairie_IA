@@ -1,0 +1,32 @@
+# Secrets et configuration locale
+.env
+.env.local
+.env.*.local
+
+# Journaux et fichiers de debug (peuvent contenir des clés API ou données RGPD)
+*.log
+debug_prompt.txt
+Backend/Agent_API/ia_agent_debug.log
+Backend/Agent_API/errors.log
+Backend/ajax/debug_lu.log
+Agent-prenium/logs/
+
+# Dépendances (réinstaller avec composer install / npm install)
+/vendor/
+/node_modules/
+
+# Fichiers uploadés par les utilisateurs
+Backend/uploads/demandes/*
+!Backend/uploads/demandes/.htaccess
+
+# Système et IDE
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Build front-end
+Frontend/dist/

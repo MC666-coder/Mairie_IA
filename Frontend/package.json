@@ -1,0 +1,25 @@
+{
+  "name": "site_officiel",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "devDependencies": {
+    "tailwindcss": "^4.1.18",
+    "vite": "^7.3.1"
+  },
+  "dependencies": {
+    "@fullcalendar/core": "^6.1.20",
+    "@fullcalendar/daygrid": "^6.1.20",
+    "@fullcalendar/list": "^6.1.20",
+    "@fullcalendar/rrule": "^6.1.20",
+    "rrule": "^2.8.1"
+  }
+}

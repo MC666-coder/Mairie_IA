@@ -1,0 +1,555 @@
+/* ================================
+   MENU LATÉRAL PREMIUM
+================================ */
+
+#sidebar-premium {
+    width: 260px;
+    background: #003b8e; /* Bleu République Française */
+    color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    padding-top: 20px;
+    box-shadow: 3px 0 10px rgba(0,0,0,0.2);
+    z-index: 1000;
+}
+
+#sidebar-premium h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+/* Liens du menu */
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    padding: 14px 20px;
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    transition: 0.2s;
+}
+
+.sidebar-link:hover,
+.sidebar-link.active {
+    background: #002a63; /* Bleu plus foncé */
+}
+
+.sidebar-link svg {
+    margin-right: 12px;
+}
+
+/* Bouton déconnexion */
+.sidebar-link.logout {
+    background: #b30000;
+    margin-top: 40px;
+}
+
+.sidebar-link.logout:hover {
+    background: #7a0000;
+}
+
+/* Décalage du contenu principal */
+.page-wrapper {
+    margin-left: 260px;
+}
+
+/* ================================
+   BULLE D’INFORMATION AGENT
+================================ */
+
+#bulle-connexion-agent {
+    background: #f5f5f5;
+    padding: 15px;
+    border-radius: 8px;
+    margin: 20px;
+    color: #003b8e;
+    font-size: 14px;
+    line-height: 1.5;
+    border-left: 4px solid #003b8e;
+}
+
+/* ================================
+   RESPONSIVE
+================================ */
+
+@media (max-width: 900px) {
+
+    #sidebar-premium {
+        width: 220px;
+    }
+
+    .page-wrapper {
+        margin-left: 220px;
+    }
+}
+
+@media (max-width: 700px) {
+
+    #sidebar-premium {
+        position: fixed;
+        width: 200px;
+        transform: translateX(-200px);
+        transition: 0.3s ease;
+    }
+
+    #sidebar-premium.open {
+        transform: translateX(0);
+    }
+
+    .page-wrapper {
+        margin-left: 0;
+    }
+}
+
+/* ================================
+   CARTES DEMANDES PREMIUM
+================================ */
+
+.demande-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-left: 6px solid #003b8e;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.demande-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+}
+
+/* Header de la carte */
+.demande-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.demande-id {
+    font-weight: bold;
+    font-size: 18px;
+    color: #003b8e;
+}
+
+/* Statuts premium */
+.statut {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+}
+
+.statut-nouvelle { background: linear-gradient(135deg, #1e3c72, #2a5298); }
+.statut-analyse_ia { background: linear-gradient(135deg, #0bbcd6, #0694a8); }
+.statut-en_cours { background: linear-gradient(135deg, #ffcf33, #e6b400); color: #333; }
+.statut-resolue { background: linear-gradient(135deg, #28a745, #1e7e34); }
+.statut-cloturee { background: linear-gradient(135deg, #3a3f47, #2c3036); }
+
+/* Icônes */
+.demande-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 6px;
+    vertical-align: middle;
+}
+
+/* Grille responsive */
+.demandes-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+
+/* ---------------------------------------------------------
+   RESET & BASE
+--------------------------------------------------------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+body {
+    background: #f5f7fa;
+    color: #1a1a1a;
+    line-height: 1.6;
+}
+
+/* ---------------------------------------------------------
+   PAGE WRAPPER
+--------------------------------------------------------- */
+.page-wrapper {
+    max-width: 1400px;
+    margin: auto;
+    padding-bottom: 50px;
+}
+
+/* ---------------------------------------------------------
+   HEADER PREMIUM
+--------------------------------------------------------- */
+#header-agent {
+    background: white;
+    border-bottom: 3px solid #003b8e;
+    padding-bottom: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.rf-banner {
+    background: #003b8e;
+    color: white;
+    padding: 8px 20px;
+    font-size: 14px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.header-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 25px;
+}
+
+/* ---------------------------------------------------------
+   NAVIGATION
+--------------------------------------------------------- */
+#nav-agent a {
+    margin-right: 20px;
+    text-decoration: none;
+    color: #003b8e;
+    font-weight: 600;
+    padding-bottom: 4px;
+    border-bottom: 2px solid transparent;
+    transition: 0.2s;
+}
+
+#nav-agent a:hover {
+    border-bottom: 2px solid #003b8e;
+}
+
+#nav-agent .active {
+    border-bottom: 2px solid #003b8e;
+}
+
+.nav-btn {
+    background: #003b8e;
+    color: white !important;
+    padding: 8px 14px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: 0.2s;
+}
+
+.nav-btn:hover {
+    background: #002a63;
+}
+
+/* ---------------------------------------------------------
+   BULLE AGENT
+--------------------------------------------------------- */
+#bulle-connexion-agent {
+    background: #eef3fa;
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    border-left: 4px solid #003b8e;
+}
+
+/* ---------------------------------------------------------
+   HERO SECTION
+--------------------------------------------------------- */
+.hero-page {
+    position: relative;
+    height: 180px;
+    /*background: url('../img/hero-agent.jpg') center/cover no-repeat;*/
+    margin-bottom: 30px;
+}
+
+.hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    color: white;
+    padding: 40px;
+}
+
+.hero-content h1 {
+    font-size: 32px;
+    margin-bottom: 10px;
+}
+
+/* ---------------------------------------------------------
+   TITRES
+--------------------------------------------------------- */
+.section-title {
+    font-size: 26px;
+    margin: 20px 0;
+    color: #003b8e;
+    font-weight: 700;
+}
+
+/* ---------------------------------------------------------
+   STATISTIQUES
+--------------------------------------------------------- */
+.stats-agent {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+    text-align: center;
+    transition: 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+}
+
+.stat-card h3 {
+    color: #003b8e;
+    margin-bottom: 10px;
+}
+
+.stat-card p {
+    font-size: 28px;
+    font-weight: bold;
+}
+
+/* ---------------------------------------------------------
+   DEMANDES PREMIUM
+--------------------------------------------------------- */
+.demandes-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 25px;
+}
+
+.demande-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+    transition: 0.2s;
+}
+
+.demande-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 14px rgba(0,0,0,0.12);
+}
+
+.demande-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.demande-id {
+    font-weight: bold;
+    color: #003b8e;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* ---------------------------------------------------------
+   STATUT BADGES
+--------------------------------------------------------- */
+.statut {
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: bold;
+    color: white;
+}
+
+.statut-nouvelle { background: #007bff; }
+.statut-analyse_ia { background: #6f42c1; }
+.statut-en_cours { background: #ffc107; color: #333; }
+.statut-resolue { background: #28a745; }
+.statut-cloturee { background: #6c757d; }
+
+/* ---------------------------------------------------------
+   BOUTON GESTION DEMANDE
+--------------------------------------------------------- */
+.btn-gestion {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 14px;
+    background: #003b8e;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.btn-gestion:hover {
+    background: #002a63;
+}
+
+/* ---------------------------------------------------------
+   BANDE TRICOLORE
+--------------------------------------------------------- */
+.bande-tricolore {
+    display: flex;
+    height: 6px;
+    margin-top: 40px;
+}
+
+.bande-tricolore .bleu { flex: 1; background: #003b8e; }
+.bande-tricolore .blanc { flex: 1; background: white; }
+.bande-tricolore .rouge { flex: 1; background: #e1000f; }
+
+/* ---------------------------------------------------------
+   RESPONSIVE
+--------------------------------------------------------- */
+@media (max-width: 900px) {
+    .stats-agent {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .demandes-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+.notes-internes {
+    margin-top: 40px;
+    padding: 20px;
+    background: #f7f9fc;
+    border-radius: 10px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+}
+
+.form-note textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+}
+
+.liste-notes {
+    margin-top: 20px;
+}
+
+.note-card {
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.note-meta {
+    font-size: 13px;
+    color: #555;
+    margin-top: 8px;
+}
+
+.historique-actions {
+    margin-top: 40px;
+    padding: 20px;
+    background: #f7f9fc;
+    border-radius: 10px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+}
+
+.timeline {
+    margin-top: 20px;
+    border-left: 3px solid #003b8e;
+    padding-left: 20px;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.timeline-dot {
+    width: 14px;
+    height: 14px;
+    background: #003b8e;
+    border-radius: 50%;
+    position: absolute;
+    left: -30px;
+    top: 4px;
+}
+
+.timeline-content {
+    background: white;
+    padding: 12px 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.action-title {
+    font-size: 16px;
+    margin-bottom: 5px;
+}
+
+.action-details {
+    font-size: 14px;
+    color: #444;
+    margin-bottom: 8px;
+}
+
+.action-meta {
+    font-size: 12px;
+    color: #666;
+}
+
+.pieces-jointes {
+    margin-top: 40px;
+    padding: 20px;
+    background: #eef3fa;
+    border-radius: 10px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+}
+
+.form-upload {
+    margin-bottom: 20px;
+}
+
+.form-upload input[type="file"] {
+    margin: 10px 0;
+}
+
+.liste-pj .pj-item {
+    background: white;
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.liste-pj a {
+    text-decoration: none;
+    color: #003b8e;
+    font-weight: bold;
+}

@@ -1,0 +1,2954 @@
+
+/* Style pour la page de choix d'inscription */
+.content{
+    display: flex;
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.buttons{
+    flex: 1;
+    padding: 30px;
+    border: 2px solid #ccc;
+    text-align: center;
+    text-decoration: none;
+    color: #000;
+    border-radius: 10px;
+}
+.buttons:hover{
+    border-color: #000;
+    
+}
+/*bulle de connexion pour les profils agents et citoyens */
+#bulle_connexion {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #ffffff;
+    padding: 12px 18px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+#bulle_connexion strong {
+    font-weight: bold;
+}
+/* === HEADER AGENT === */
+#header-agent {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px;
+    background: #004b8d;
+    color: #fff;
+}
+
+.logo-agent {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+#nav-agent {
+    display: flex;
+    gap: 14px;
+}
+
+#nav-agent a {
+    color: #fff;
+    text-decoration: none;
+    font-size: 14px;
+    padding: 6px 10px;
+    border-radius: 4px;
+    transition: background 0.2s;
+}
+
+#nav-agent a:hover {
+    background: #003366;
+}
+
+.nav-btn {
+    background: #ff4d4d;
+    border-radius: 4px;
+}
+
+/* === BULLE DE CONNEXION AGENT === */
+#bulle-connexion-agent {
+    background: #ffffff;
+    padding: 12px 18px;
+    border-radius: 12px;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.08);
+    border: 1px solid rgba(0,0,0,0.06);
+
+    font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+    font-size: 14px;
+    color: #2c3e50;
+
+    min-width: 180px;
+    text-align: right;
+}
+
+
+/* === DASHBOARD === */
+.dashboard-agent {
+    padding: 24px;
+    font-family: Arial, sans-serif;
+}
+
+.stats-agent {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.stat-card {
+    background: #fff;
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    flex: 1 1 200px;
+    text-align: center;
+}
+
+.stat-card h2 {
+    font-size: 16px;
+    margin-bottom: 8px;
+    color: #004b8d;
+}
+
+.stat-card p {
+    font-size: 24px;
+    font-weight: bold;
+    color: #007bff;
+}
+
+/* === DERNIÈRES DEMANDES === */
+.last-requette {
+    margin-top: 32px;
+}
+
+.request-card {
+    background: #fff;
+    border-left: 4px solid #007bff;
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.request-card p {
+    margin: 4px 0;
+    font-size: 14px;
+}
+.request-card .status {
+    font-weight: bold;
+    color: #28a745;
+}
+
+/*dernières demandes affichées avec scroll*/
+.last-requette {
+    margin-top: 32px;
+    max-height: 400px; /* hauteur du bloc */
+    overflow-y: auto; /* scroll vertical */
+    padding-right: 10px;
+}
+
+.request-card {
+    background: #fff;
+    border-left: 4px solid #007bff;
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+}
+
+.request-card p {
+    margin: 4px 0;
+    font-size: 14px;
+} 
+/*dernières demandes - barre de scroll personnalisée */
+.last-requette {
+    margin-top: 30px;
+}
+
+.last-requests-container {
+    max-height: 350px;        /* hauteur du bloc */
+    overflow-y: auto;         /* scroll vertical */
+    padding-right: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+}
+
+.request-card {
+    background: white;
+    border-left: 4px solid #007bff;
+    margin: 12px;
+    padding: 12px 16px;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.request-card p {
+    margin: 4px 0;
+    font-size: 14px;
+}
+
+.no-data {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+    font-style: italic;
+}
+/* du bloc de la gestion des demandes */
+/* Conteneur scrollable */
+.demandes-container {
+    max-height: 500px;      /* hauteur du bloc */
+    overflow-y: auto;       /* scroll vertical */
+    padding-right: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+}
+
+/* Carte d'une demande */
+.demande-card {
+    background: white;
+    border-left: 4px solid #007bff;
+    margin: 12px;
+    padding: 15px;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.demande-card h3 {
+    margin-top: 0;
+    font-size: 18px;
+}
+
+
+.btn-modifier {
+    background-color: #007bff;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    text-decoration: none;
+    margin-right: 10px;
+}
+
+.btn-modifier:hover {
+    background-color: #0056b3;
+}
+
+.btn-supprimer {
+    background-color: #dc3545;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 5px;
+    text-decoration: none;
+}
+
+.btn-supprimer:hover {
+    background-color: #a71d2a;
+}
+
+/* Message si aucune demande */
+.no-data {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+    font-style: italic;
+}
+
+/* Style pour la page de détails d'une demande */
+.demande-details {
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    max-width: 750px;
+    margin: 40px auto;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.12);
+    position: relative;
+    border-left: 6px solid #ccc;
+    transition: 0.3s ease;
+}
+
+.demande-details p {
+    font-size: 16px;
+    margin: 10px 0;
+    line-height: 1.5;
+}
+
+.demande-details h2 {
+    margin-top: 30px;
+    font-size: 20px;
+    color: #333;
+}
+
+/* Badge du statut */
+/* Badge du statut */
+.statut-badge {
+    position: absolute;
+    top: -15px;
+    right: -15px;
+    background-color: #ccc;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* Couleurs dynamiques */
+.statut-nouvelle {
+    background-color: #007bff !important; /* bleu */
+}
+
+.statut-analyse_ia {
+    background-color: #6f42c1 !important; /* violet */
+}
+
+.statut-en_cours {
+    background-color: #ffc107 !important; /* jaune */
+    color: #333 !important;
+}
+
+.statut-resolue {
+    background-color: #28a745 !important; /* vert */
+}
+/* style tricolore en bas de page */
+.bande-tricolore {
+    display: flex;
+    width: 100%;
+    height: 16px;
+    margin-top: 30px;
+    border: 1px solid #ccc;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+/* Segments tricolores */
+.bande-tricolore .bleu {
+    flex: 1;
+    background-color: #0055A4; /* Bleu France */
+}
+
+.bande-tricolore .blanc {
+    flex: 1;
+    background-color: #FFFFFF; /* Blanc central */
+}
+
+.bande-tricolore .rouge {
+    flex: 1;
+    background-color: #EF4135; /* Rouge France */
+}
+/*footer collant en bas de page*/
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.page-wrapper {
+    min-height: calc(100vh - 120px); /* hauteur estimée du footer */
+    display: flex;
+    flex-direction: column;
+}
+
+#content_portail_citoyen {
+    flex: 1;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+/* Bande tricolore */
+.bande-tricolore {
+    display: flex;
+    width: 100%;
+    height: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px 4px 0 0;
+    overflow: hidden;
+    margin-top: 40px;
+}
+
+.bande-tricolore .bleu {
+    flex: 1;
+    background-color: #0055A4;
+}
+
+.bande-tricolore .blanc {
+    flex: 1;
+    background-color: #FFFFFF;
+}
+
+.bande-tricolore .rouge {
+    flex: 1;
+    background-color: #EF4135;
+}
+
+/* Footer */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.page-wrapper {
+    min-height: calc(100vh - 120px); /* hauteur estimée du footer */
+    display: flex;
+    flex-direction: column;
+}
+
+#content_portail_citoyen {
+    flex: 1;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+/* Bande tricolore */
+.bande-tricolore {
+    display: flex;
+    width: 100%;
+    height: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px 4px 0 0;
+    overflow: hidden;
+    margin-top: 40px;
+}
+
+.bande-tricolore .bleu {
+    flex: 1;
+    background-color: #0055A4;
+}
+
+.bande-tricolore .blanc {
+    flex: 1;
+    background-color: #FFFFFF;
+}
+
+.bande-tricolore .rouge {
+    flex: 1;
+    background-color: #EF4135;
+}
+
+/* Footer */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.page-wrapper {
+    min-height: calc(100vh - 120px); /* hauteur estimée du footer */
+    display: flex;
+    flex-direction: column;
+}
+
+#content_portail_citoyen {
+    flex: 1;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+/* Bande tricolore */
+.bande-tricolore {
+    display: flex;
+    width: 100%;
+    height: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px 4px 0 0;
+    overflow: hidden;
+    margin-top: 40px;
+}
+
+.bande-tricolore .bleu {
+    flex: 1;
+    background-color: #0055A4;
+}
+
+.bande-tricolore .blanc {
+    flex: 1;
+    background-color: #FFFFFF;
+}
+
+.bande-tricolore .rouge {
+    flex: 1;
+    background-color: #EF4135;
+}
+
+/* Footer */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.page-wrapper {
+    min-height: calc(100vh - 120px); /* hauteur estimée du footer */
+    display: flex;
+    flex-direction: column;
+}
+
+#content_portail_citoyen {
+    flex: 1;
+    padding: 40px 20px;
+    text-align: center;
+}
+
+/* Bande tricolore */
+.bande-tricolore {
+    display: flex;
+    width: 100%;
+    height: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px 4px 0 0;
+    overflow: hidden;
+    margin-top: 40px;
+}
+
+.bande-tricolore .bleu {
+    flex: 1;
+    background-color: #0055A4;
+}
+
+.bande-tricolore .blanc {
+    flex: 1;
+    background-color: #FFFFFF;
+}
+
+.bande-tricolore .rouge {
+    flex: 1;
+    background-color: #EF4135;
+}
+
+/* Footer */
+footer {
+    background-color: #f8f8f8;
+    padding: 25px;
+    text-align: center;
+    font-size: 14px;
+    color: #333;
+    border-top: 1px solid #ccc;
+    width: 100%;
+}
+/* style pour le reste des pages */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.page-wrapper {
+    min-height: calc(100vh - 120px); /* hauteur du footer */
+    display: flex;
+    flex-direction: column;
+}
+
+#content_portail_citoyen {
+    flex: 1;
+    padding: 40px 20px;
+    max-width: 900px;
+    margin: auto;
+}
+
+/* Bande tricolore */
+.bande-tricolore {
+    display: flex;
+    width: 100%;
+    height: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px 4px 0 0;
+    overflow: hidden;
+    margin-top: 40px;
+}
+
+.bande-tricolore .bleu { flex: 1; background: #0055A4; }
+.bande-tricolore .blanc { flex: 1; background: #FFFFFF; }
+.bande-tricolore .rouge { flex: 1; background: #EF4135; }
+
+/* Footer */
+footer {
+    background-color: #f8f8f8;
+    padding: 25px;
+    text-align: center;
+    font-size: 14px;
+    color: #333;
+    border-top: 1px solid #ccc;
+    width: 100%;
+}
+/* --- Conteneur général du chatbot --- */
+#chatbot {
+    width: 420px;
+    margin: 40px auto;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border: 2px solid #1A2E5A; /* Bleu républicain */
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+}
+
+/* --- En-tête du chatbot --- */
+#chatbot-header {
+    background: linear-gradient(90deg, #002395, #ffffff, #ED2939);
+    color: #fff;
+    padding: 15px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 18px;
+    letter-spacing: 1px;
+}
+
+/* --- Fenêtre de chat --- */
+#chat-window {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    background: #f7f7f7;
+}
+
+/* --- Messages --- */
+.message {
+    margin-bottom: 15px;
+    padding: 12px 15px;
+    border-radius: 10px;
+    max-width: 80%;
+    line-height: 1.4;
+    font-size: 15px;
+}
+
+/* Message utilisateur */
+.user {
+    background: #dce6ff;
+    color: #1A2E5A;
+    align-self: flex-end;
+    border-left: 4px solid #002395;
+}
+
+/* Message IA */
+.bot {
+    background: #ffffff;
+    color: #333;
+    align-self: flex-start;
+    border-left: 4px solid #ED2939;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+/* --- Zone d'entrée --- */
+#chat-input {
+    display: flex;
+    padding: 12px;
+    border-top: 2px solid #1A2E5A;
+    background: #ffffff;
+}
+
+#message {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 15px;
+}
+
+#send {
+    margin-left: 10px;
+    padding: 12px 18px;
+    background: #002395;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+#send:hover {
+    background: #ED2939;
+}
+
+/* --- Animation "IA en train d'écrire" --- */
+.typing {
+    width: 60px;
+    height: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.typing div {
+    width: 10px;
+    height: 10px;
+    background: #ED2939;
+    border-radius: 50%;
+    animation: blink 1.4s infinite both;
+}
+
+.typing div:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing div:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes blink {
+    0% { opacity: .2; }
+    20% { opacity: 1; }
+    100% { opacity: .2; }
+}
+/* Carte de connexion */
+.connexion-card {
+    max-width: 450px;
+    margin: 40px auto;
+    padding: 25px;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 2px solid #002395; /* bleu républicain */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    text-align: center;
+}
+
+.connexion-card h2 {
+    margin-bottom: 20px;
+    color: #002395;
+}
+
+.connexion-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btn-connexion {
+    display: block;
+    padding: 12px 20px;
+    background: #F7F9FC;
+    color: #000;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.btn-connexion:hover {
+    background: #1a1a1a;      /* Noir légèrement éclairci */
+    transform: translateY(-2px);
+}
+
+/* Carte de connexion / inscription */
+.connexion-card {
+    max-width: 450px;
+    margin: 40px auto;
+    padding: 25px;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 2px solid #002395; /* bleu républicain */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    text-align: center;
+}
+
+.connexion-card h2 {
+    margin-bottom: 20px;
+    color: #002395;
+}
+
+.connexion-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.btn-connexion {
+    display: block;
+    padding: 12px 20px;
+    background: #F7F9FC;
+    color: white;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.btn-connexion:hover {
+    background: #ED2939; /* rouge républicain */
+}
+/* Carte du formulaire */
+.form-card {
+    max-width: 450px;
+    margin: 40px auto;
+    padding: 25px;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 2px solid #002395; /* bleu républicain */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+/* Labels */
+.form-card label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+    color: #002395;
+}
+
+/* Champs de saisie */
+.form-card input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+/* Bouton */
+.btn-submit {
+    width: 100%;
+    margin-top: 25px;
+    padding: 12px;
+    background: #002395;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-submit:hover {
+    background: #ED2939; /* rouge républicain */
+}
+/* Carte du formulaire */
+.form-card {
+    max-width: 450px;
+    margin: 40px auto;
+    padding: 25px;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 2px solid #002395; /* bleu républicain */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+/* Labels */
+.form-card label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+    color: #002395;
+}
+
+/* Champs de saisie */
+.form-card input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+/* Bouton */
+.btn-submit {
+    width: 100%;
+    margin-top: 25px;
+    padding: 12px;
+    background: #002395;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-submit:hover {
+    background: #ED2939; /* rouge républicain */
+}
+/* Carte du formulaire */
+.form-card {
+    max-width: 450px;
+    margin: 40px auto;
+    padding: 25px;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 2px solid #002395; /* bleu républicain */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+/* Labels */
+.form-card label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+    color: #002395;
+}
+
+/* Champs de saisie */
+.form-card input,
+.form-card select {
+    width: 100%;
+    padding: 12px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+/* Bouton */
+.btn-submit {
+    width: 100%;
+    margin-top: 25px;
+    padding: 12px;
+    background: #002395;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-submit:hover {
+    background: #ED2939; /* rouge républicain */
+}
+/* Carte du formulaire */
+.form-card {
+    max-width: 450px;
+    margin: 40px auto;
+    padding: 25px;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 2px solid #002395; /* bleu républicain */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+/* Labels */
+.form-card label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+    color: #002395;
+}
+
+/* Champs */
+.form-card input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+/* Bouton */
+.btn-submit {
+    width: 100%;
+    margin-top: 25px;
+    padding: 12px;
+    background: #002395;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-submit:hover {
+    background: #ED2939;
+}
+/* Carte du formulaire */
+.form-card {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 25px;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 2px solid #002395;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.form-card p {
+    margin-bottom: 12px;
+}
+
+.form-card label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+    color: #002395;
+}
+
+.form-card select {
+    width: 100%;
+    padding: 12px;
+    margin-top: 5px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+.btn-submit {
+    width: 100%;
+    margin-top: 25px;
+    padding: 12px;
+    background: #002395;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-submit:hover {
+    background: #ED2939;
+}
+
+.btn-retour {
+    display: inline-block;
+    margin-top: 15px;
+    padding: 10px 15px;
+    background: #6c757d;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+.btn-retour:hover {
+    background: #5a6268;
+}
+/* Carte du formulaire */
+.form-card {
+    max-width: 450px;
+    margin: 40px auto;
+    padding: 25px;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 2px solid #002395; /* bleu républicain */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+/* Labels */
+.form-card label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+    color: #002395;
+}
+
+/* Champs */
+.form-card input {
+    width: 100%;
+    padding: 12px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+}
+
+/* Bouton */
+.btn-submit {
+    width: 100%;
+    margin-top: 25px;
+    padding: 12px;
+    background: #002395;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.btn-submit:hover {
+    background: #ED2939;
+}
+/* Carte du formulaire */
+.form-card {
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 25px;
+    background: #ffffff;
+    border-radius: 12px;
+    border: 2px solid #002395;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+/* Labels */
+.form-card label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+    color: #002395;
+}
+
+/* Champs */
+.form-card input,
+.form-card select,
+.form-card textarea {
+    width: 100%;
+    padding: 12px;
+    margin-top: 5px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+
+.form-card textarea {
+    height: 120px;
+    resize: vertical;
+}
+
+/* Bouton */
+.btn-submit {
+    width: 100%;
+    margin-top: 25px;
+    padding: 12px;
+    background: #002395;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.btn-submit:hover {
+    background: #ED2939;
+}
+/* Chatbot */
+#chatbot {
+    margin-top: 40px;
+}
+
+#chatbot-header {
+    background: #002395;
+    color: white;
+    padding: 12px;
+    border-radius: 8px 8px 0 0;
+    font-weight: bold;
+    text-align: center;
+}
+
+#chat-window {
+    height: 250px;
+    overflow-y: auto;
+    padding: 15px;
+    background: #f7f7f7;
+    border: 1px solid #ccc;
+}
+
+#chat-input {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+#chat-input input {
+    flex: 1;
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+}
+
+#chat-input button {
+    padding: 10px 20px;
+    background: #002395;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+#chat-input button:hover {
+    background: #ED2939;
+}
+/* Liste des fonctionnalités */
+.liste-fonctionnalites {
+    list-style: none;
+    padding: 0;
+    margin: 25px 0;
+    font-size: 18px;
+}
+
+.liste-fonctionnalites li {
+    margin-bottom: 10px;
+}
+
+/* Boutons d'accueil */
+.actions-accueil {
+    margin-top: 30px;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.actions-accueil .btn-submit {
+    padding: 12px 20px;
+    background: #002395;
+    color: white;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+.actions-accueil .btn-submit:hover {
+    background: #ED2939;
+}
+/* Conteneur des services */
+.services-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+    margin-top: 30px;
+}
+
+/* Carte de service */
+.service-card {
+    background: #ffffff;
+    border: 2px solid #002395;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.service-card h2 {
+    color: #002395;
+    margin-bottom: 10px;
+}
+
+.service-card .keywords {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #555;
+    font-style: italic;
+}
+.statut-badge {
+    position: relative;
+    top: -15px;
+    right: -15px;
+    background-color: #ccc;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    text-transform: uppercase;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    z-index: 10;
+}
+
+/* Couleurs dynamiques */
+.statut-nouvelle {
+    background-color: #007bff !important;
+}
+
+.statut-analyse_ia {
+    background-color: #6f42c1 !important;
+}
+
+.statut-en_cours {
+    background-color: #ffc107 !important;
+    color: #333 !important;
+}
+
+.statut-resolue {
+    background-color: #28a745 !important;
+}
+/* Conteneur du header (assure le positionnement) */
+
+/* Bulle de connexion */
+header {
+    position: relative;
+    background: #f8f9fa;
+    padding: 20px 30px;
+    border-bottom: 1px solid #e0e0e0;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Bulle de connexion */
+#bulle-connexion-agent {
+    background: #ffffff;
+    padding: 12px 18px;
+    border-radius: 10px;
+
+    font-size: 14px;
+    line-height: 1.4;
+    color: #333;
+
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    border: 1px solid #e5e5e5;
+
+    min-width: 180px;
+    text-align: left;
+
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+#bulle-connexion-agent strong {
+    font-weight: 600;
+}
+.demande-details {
+    position: relative; /* nécessaire pour positionner le badge */
+    background: #ffffff;
+    border: 2px solid #002395;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+/* Badge en haut à droite */
+.statut-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    color: white;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 13px;
+}
+
+/* Couleurs selon le statut */
+.statut-nouvelle { background: #007bff; }
+.statut-analyse_ia { background: #6f42c1; }
+.statut-en_cours { background: #fd7e14; }
+.statut-resolue { background: #28a745; }
+ #chatbot {
+    width: 380px;
+    height: 520px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 12px;
+    overflow: hidden;
+    background: #ffffff;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    font-family: "Segoe UI", sans-serif;
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+}
+
+#chatbot-header {
+    background: #002f6c; /* Bleu républicain */
+    color: white;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+}
+
+#chat-window {
+    flex: 1;
+    padding: 12px;
+    overflow-y: auto;
+    background: #f5f7fa;
+}
+
+.message {
+    max-width: 80%;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    line-height: 1.4;
+    font-size: 14px;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.user-message {
+    background: #d9eaff;
+    align-self: flex-end;
+    border-bottom-right-radius: 2px;
+}
+
+.bot-message {
+    background: #ffffff;
+    border: 1px solid #dcdcdc;
+    align-self: flex-start;
+    border-bottom-left-radius: 2px;
+}
+
+#chat-input {
+    display: flex;
+    padding: 10px;
+    background: #ffffff;
+    border-top: 1px solid #ddd;
+}
+
+#chat-input input {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+}
+
+#chat-input button {
+    margin-left: 8px;
+    padding: 10px 16px;
+    background: #002f6c;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#chat-input button:hover {
+    background: #00408f;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+/* loading de l'ia */
+#ia-loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    color: #444;
+    font-size: 14px;
+    font-style: italic;
+}
+
+.loader {
+    width: 16px;
+    height: 16px;
+    border: 3px solid #ccc;
+    border-top-color: #0078ff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ----------------------------------------------------
+   RESET & BASE
+---------------------------------------------------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: "Inter", "Roboto", Arial, sans-serif;
+    background: #f5f6fa;
+    color: #1d1d1d;
+    line-height: 1.7;
+}
+
+/* ----------------------------------------------------
+   HEADER
+---------------------------------------------------- */
+#header-agent {
+    background: white;
+    padding: 20px 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid #111;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+#logo-agent {
+    font-size: 28px;
+    font-weight: 800;
+    color: #111;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ----------------------------------------------------
+   NAVIGATION
+---------------------------------------------------- */
+#nav-agent {
+    display: flex;
+    gap: 25px;
+}
+
+#nav-agent a {
+    text-decoration: none;
+    color: #111;
+    font-weight: 600;
+    font-size: 15px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: 0.25s ease;
+}
+
+#nav-agent a:hover {
+    background: #111;
+    color: white;
+}
+
+.nav-btn {
+    background: #eaeaea;
+    border: 1px solid #d0d0d0;
+}
+
+.nav-btn:hover {
+    background: #d5d5d5;
+}
+
+/* ----------------------------------------------------
+   TITRES & TEXTES
+---------------------------------------------------- */
+h1 {
+    font-size: 42px;
+    font-weight: 900;
+    color: #111;
+    margin-bottom: 20px;
+}
+
+h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    margin: 25px 0 10px;
+}
+
+p {
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+/* ----------------------------------------------------
+   CONTENU PRINCIPAL
+---------------------------------------------------- */
+#content_portail_citoyen {
+    max-width: 1100px;
+    margin: 60px auto;
+    background: white;
+    padding: 50px 60px;
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    animation: fadeIn 0.6s ease;
+    border-left: 8px solid #111;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ----------------------------------------------------
+   CHATBOT CONTAINER
+---------------------------------------------------- */
+.chatbot_container {
+    width: 100%;
+    height: 380px;
+    background: #f0f2f5;
+    border: 2px solid #d1d1d1;
+    border-radius: 12px;
+    margin-top: 25px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+}
+
+/* ----------------------------------------------------
+   BANDE TRICOLORE
+---------------------------------------------------- */
+.bande-tricolore {
+    display: flex;
+    height: 14px;
+    margin-top: 50px;
+}
+
+.bleu { background: #002654; flex: 1; }
+.blanc { background: #ffffff; flex: 1; }
+.rouge { background: #ce1126; flex: 1; }
+
+/* ----------------------------------------------------
+   FOOTER
+---------------------------------------------------- */
+#footer {
+    background: #111;
+    color: white;
+    text-align: center;
+    padding: 35px 0;
+    margin-top: 60px;
+}
+
+#footer p {
+    margin: 6px 0;
+}
+
+#slogan {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+/* ----------------------------------------------------
+   RESPONSIVE DESIGN
+---------------------------------------------------- */
+@media (max-width: 900px) {
+    #header-agent {
+        flex-direction: column;
+        gap: 15px;
+        padding: 20px;
+    }
+
+    #nav-agent {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    #content_portail_citoyen {
+        padding: 35px 25px;
+    }
+
+    h1 {
+        font-size: 32px;
+    }
+}
+
+@media (max-width: 600px) {
+    #logo-agent {
+        font-size: 20px;
+        text-align: center;
+    }
+
+    #nav-agent a {
+        font-size: 14px;
+        padding: 6px 10px;
+    }
+
+    .chatbot_container {
+        height: 300px;
+    }
+}
+/* ----------------------------------------------------
+   RESET & BASE
+---------------------------------------------------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: "Inter", "Roboto", Arial, sans-serif;
+    background: #f5f6fa;
+    color: #1d1d1d;
+    line-height: 1.7;
+}
+
+/* ----------------------------------------------------
+   HEADER
+---------------------------------------------------- */
+#header-agent {
+    background: white;
+    padding: 20px 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 3px solid #111;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+#logo-agent {
+    font-size: 28px;
+    font-weight: 800;
+    color: #111;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* ----------------------------------------------------
+   NAVIGATION
+---------------------------------------------------- */
+#nav-agent {
+    display: flex;
+    gap: 25px;
+}
+
+#nav-agent a {
+    text-decoration: none;
+    color: #111;
+    font-weight: 600;
+    font-size: 15px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: 0.25s ease;
+}
+
+#nav-agent a:hover {
+    background: #111;
+    color: white;
+}
+
+.nav-btn {
+    background: #eaeaea;
+    border: 1px solid #d0d0d0;
+}
+
+.nav-btn:hover {
+    background: #d5d5d5;
+}
+
+/* ----------------------------------------------------
+   TITRES & TEXTES
+---------------------------------------------------- */
+h1 {
+    font-size: 42px;
+    font-weight: 900;
+    color: #111;
+    margin-bottom: 20px;
+}
+
+h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    margin: 25px 0 10px;
+}
+
+p {
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+/* ----------------------------------------------------
+   CONTENU PRINCIPAL
+---------------------------------------------------- */
+#content_portail_citoyen {
+    max-width: 1100px;
+    margin: 60px auto;
+    background: white;
+    padding: 50px 60px;
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    animation: fadeIn 0.6s ease;
+    border-left: 8px solid #111;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* ----------------------------------------------------
+   CHATBOT CONTAINER
+---------------------------------------------------- */
+.chatbot_container {
+    width: 100%;
+    height: 380px;
+    background: #f0f2f5;
+    border: 2px solid #d1d1d1;
+    border-radius: 12px;
+    margin-top: 25px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+}
+
+/* ----------------------------------------------------
+   BANDE TRICOLORE
+---------------------------------------------------- */
+.bande-tricolore {
+    display: flex;
+    height: 14px;
+    margin-top: 50px;
+}
+
+.bleu { background: #002654; flex: 1; }
+.blanc { background: #ffffff; flex: 1; }
+.rouge { background: #ce1126; flex: 1; }
+
+/* ----------------------------------------------------
+   FOOTER
+---------------------------------------------------- */
+#footer {
+    background: #111;
+    color: white;
+    text-align: center;
+    padding: 35px 0;
+    margin-top: 60px;
+}
+
+#footer p {
+    margin: 6px 0;
+}
+
+#slogan {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+/* ----------------------------------------------------
+   RESPONSIVE DESIGN
+---------------------------------------------------- */
+@media (max-width: 900px) {
+    #header-agent {
+        flex-direction: column;
+        gap: 15px;
+        padding: 20px;
+    }
+
+    #nav-agent {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    #content_portail_citoyen {
+        padding: 35px 25px;
+    }
+
+    h1 {
+        font-size: 32px;
+    }
+}
+
+@media (max-width: 600px) {
+    #logo-agent {
+        font-size: 20px;
+        text-align: center;
+    }
+
+    #nav-agent a {
+        font-size: 14px;
+        padding: 6px 10px;
+    }
+
+    .chatbot_container {
+        height: 300px;
+    }
+}
+/* ----------------------------------------------------
+   HEADER INSTITUTIONNEL COMPACT
+---------------------------------------------------- */
+
+#header-agent {
+    background: white;
+    border-bottom: 2px solid #111;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+/* Bandeau République Française (plus fin) */
+.rf-banner {
+    background: #f4f4f4;
+    padding: 4px 18px;
+    font-size: 11px;
+    border-bottom: 1px solid #ddd;
+}
+
+.rf-title {
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #111;
+}
+
+.rf-subtitle {
+    color: #666;
+    margin-left: 6px;
+}
+
+/* Ligne principale du header (compactée) */
+.header-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 14px 24px;
+    background: #ffffff;
+
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    box-sizing: border-box;
+}
+
+
+/* Logo plus petit */
+#logo-agent {
+    font-size: 18px; /* réduit */
+    font-weight: 700;
+    color: #111;
+    max-width: 260px;
+    line-height: 1.1;
+}
+
+/* Navigation plus compacte */
+#nav-agent {
+    display: flex;
+    gap: 24px; /* ESPACEMENT PREMIUM */
+}
+
+#nav-agent a {
+    text-decoration: none;
+    font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: #003b8e;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+#nav-agent a:hover {
+    background: rgba(0, 59, 142, 0.08);
+}
+
+#nav-agent a.active {
+    background: #003b8e;
+    color: white;
+}
+
+
+/* Boutons connexion/inscription plus petits */
+.nav-btn {
+    background: #e8e8e8;
+    border: 1px solid #ccc;
+    font-size: 13px;
+    padding: 5px 10px;
+}
+
+.nav-btn:hover {
+    background: #dcdcdc;
+}
+/* ----------------------------------------------------
+   BANDE D'ACTUALITÉS RAPIDES (STYLE NANTES)
+---------------------------------------------------- */
+
+.actu-flash {
+    background: #eef3f8;
+    border-bottom: 1px solid #d6dce3;
+    padding: 10px 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 15px;
+    overflow: hidden;
+}
+
+.actu-label {
+    font-weight: 700;
+    color: #003b8e;
+    text-transform: uppercase;
+    font-size: 14px;
+}
+
+.actu-items {
+    display: flex;
+    gap: 30px;
+    white-space: nowrap;
+    animation: actuScroll 18s linear infinite;
+}
+
+.actu-items span {
+    color: #333;
+}
+
+/* Animation défilante */
+@keyframes actuScroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .actu-flash {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .actu-items {
+        animation: none;
+        flex-direction: column;
+        gap: 6px;
+    }
+}
+/* ----------------------------------------------------
+   ALERTES IMPORTANTES (STYLE NANTES MÉTROPOLE)
+---------------------------------------------------- */
+
+.alertes-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 15px 25px;
+    background: #f7f9fc;
+    border-bottom: 1px solid #d6dce3;
+}
+
+/* Style général d'une alerte */
+.alerte {
+    padding: 12px 18px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #222;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+/* Label */
+.alerte-label {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 13px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: white;
+}
+
+/* Types d'alertes */
+.alerte-meteo {
+    background: #DFFBF0;
+    border-left: 5px solid #7ED9BD;
+
+}
+
+
+.alerte-meteo .alerte-label {
+    background: #7ED9BD;
+}
+
+.alerte-travaux {
+    background: #fff4e5;
+    border-left: 5px solid #ff9800;
+}
+
+.alerte-travaux .alerte-label {
+    background: #ff9800;
+}
+
+.alerte-evenement {
+    background: #f3e8ff;
+    border-left: 5px solid #8e24aa;
+}
+
+.alerte-evenement .alerte-label {
+    background: #8e24aa;
+}
+/* ----------------------------------------------------
+   SECTION SERVICES PREMIUM
+---------------------------------------------------- */
+
+.services-premium {
+    padding: 60px 20px;
+    background: #f7f9fc;
+    text-align: center;
+}
+
+.section-title {
+    font-size: 32px;
+    font-weight: 900;
+    margin-bottom: 10px;
+    color: #111;
+}
+
+.section-subtitle {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 40px;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 30px;
+    max-width: 1100px;
+    margin: auto;
+}
+
+.service-card {
+    background: white;
+    padding: 30px 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    transition: 0.25s;
+    border: 1px solid #e5e5e5;
+}
+
+.service-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 22px rgba(0,0,0,0.12);
+}
+
+.service-icon {
+    margin-bottom: 15px;
+}
+
+.service-icon svg {
+    width: 48px;
+    height: 48px;
+    stroke: #003b8e;
+    transition: 0.3s;
+}
+
+.service-card:hover svg {
+    stroke: #001f4d;
+    transform: scale(1.08);
+}
+
+.service-card h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.service-card p {
+    color: #555;
+    margin-bottom: 20px;
+}
+
+.service-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background: #003b8e;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.25s;
+}
+
+.service-btn:hover {
+    background: #002a66;
+}
+/* ----------------------------------------------------
+   ASSISTANT CITOYEN PREMIUM
+---------------------------------------------------- */
+
+.assistant-premium {
+    padding: 60px 20px;
+    background: #ffffff;
+    text-align: center;
+}
+
+.assistant-premium .section-title {
+    font-size: 32px;
+    font-weight: 900;
+    margin-bottom: 10px;
+    color: #111;
+}
+
+.assistant-premium .section-subtitle {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 40px;
+}
+
+.assistant-card {
+    max-width: 600px;
+    margin: auto;
+    background: #f7f9fc;
+    padding: 40px 30px;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    border: 1px solid #e5e5e5;
+    transition: 0.3s;
+}
+
+.assistant-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 22px rgba(0,0,0,0.12);
+}
+
+.assistant-icon {
+    margin-bottom: 20px;
+}
+
+.assistant-icon svg {
+    stroke: #003b8e;
+    transition: 0.3s;
+}
+
+.assistant-card:hover svg {
+    stroke: #001f4d;
+    transform: scale(1.08);
+}
+
+.assistant-text {
+    font-size: 17px;
+    color: #444;
+    margin-bottom: 25px;
+}
+
+.assistant-cta {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.assistant-btn {
+    padding: 12px 26px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.25s;
+}
+
+/* Bouton principal */
+.assistant-btn.primary {
+    background: #003b8e;
+    color: white;
+}
+
+.assistant-btn.primary:hover {
+    background: #002a66;
+}
+
+/* Bouton secondaire */
+.assistant-btn.secondary {
+    background: rgba(0,59,142,0.1);
+    border: 1px solid rgba(0,59,142,0.3);
+    color: #003b8e;
+}
+
+.assistant-btn.secondary:hover {
+    background: rgba(0,59,142,0.2);
+}
+
+/* Icônes dans la navigation */
+#nav-agent .nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: 0.25s;
+}
+
+#nav-agent .nav-btn:hover {
+    background: rgba(0,59,142,0.1);
+}
+
+#nav-agent .nav-icon svg {
+    width: 20px;
+    height: 20px;
+    transition: 0.25s;
+}
+
+#nav-agent .nav-btn:hover .nav-icon svg {
+    transform: scale(1.12);
+}
+/* ----------------------------------------------------
+   FOOTER PREMIUM - STYLE MÉTROPOLE
+---------------------------------------------------- */
+
+#footer-premium {
+    background: #0d1b2a;
+    color: #ffffff;
+    padding: 50px 20px 0;
+    margin-top: 60px;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 40px;
+    padding-bottom: 40px;
+}
+
+.footer-title {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.footer-slogan {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #dce3ea;
+}
+
+.footer-col h4 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #e5edf5;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-links li {
+    margin-bottom: 8px;
+}
+
+.footer-links li a {
+    color: #cfd8e3;
+    text-decoration: none;
+    transition: 0.25s;
+}
+
+.footer-links li a:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+.footer-col p {
+    margin: 6px 0;
+    color: #cfd8e3;
+}
+
+/* Bandeau final */
+.footer-bottom {
+    background: #0a1623;
+    text-align: center;
+    padding: 15px 10px;
+    font-size: 14px;
+    color: #b8c4d1;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+/* ----------------------------------------------------
+   CARTES D’ACTUALITÉS — STYLE PREMIUM (niveau métropole)
+---------------------------------------------------- */
+
+.actualites-container {
+    max-width: 1200px;
+    margin: 60px auto;
+    padding: 0 20px;
+}
+
+.actualites-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+    gap: 35px;
+    margin-top: 40px;
+}
+
+/* Carte */
+.actu-card {
+    background: #ffffff;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 1px solid #e3e8ef;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    display: flex;
+    flex-direction: column;
+}
+
+.actu-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+}
+
+/* Image */
+.actu-image {
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    background-color: #dfe6ee;
+}
+
+/* Contenu */
+.actu-content {
+    padding: 22px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Titre */
+.actu-title {
+    font-size: 21px;
+    font-weight: 800;
+    color: #0d1b2a;
+    margin-bottom: 12px;
+    line-height: 1.3;
+}
+
+/* Résumé */
+.actu-extrait {
+    color: #4a5568;
+    font-size: 15px;
+    line-height: 1.55;
+    margin-bottom: 22px;
+    flex: 1;
+}
+
+/* Bouton */
+.actu-btn {
+    display: inline-block;
+    padding: 12px 20px;
+    background: #003b8e;
+    color: #ffffff;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+    text-align: center;
+    transition: background 0.25s ease, transform 0.2s ease;
+}
+
+.actu-btn:hover {
+    background: #002a66;
+    transform: translateY(-2px);
+}
+
+/* Placeholder (si pas d'image) */
+.placeholder {
+    background: linear-gradient(135deg, #dfe6ee, #c9d4df);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .actu-title {
+        font-size: 19px;
+    }
+    .actu-extrait {
+        font-size: 14px;
+    }
+}
+/* ----------------------------------------------------
+   PAGE ARTICLE - STYLE PREMIUM
+---------------------------------------------------- */
+
+.article-container {
+    max-width: 900px;
+    margin: 60px auto;
+    padding: 0 20px;
+}
+
+.retour-btn {
+    display: inline-block;
+    margin-bottom: 25px;
+    background: #e6ecf3;
+    color: #003b8e;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.25s;
+}
+
+.retour-btn:hover {
+    background: #d2dbe6;
+}
+
+.retour-btn.bottom {
+    margin-top: 40px;
+}
+
+/* Image principale */
+.article-image {
+    width: 100%;
+    height: 320px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+}
+
+/* Contenu */
+.article-content {
+    font-size: 17px;
+    line-height: 1.7;
+    color: #2d3748;
+    margin-bottom: 40px;
+    white-space: pre-line;
+}
+
+
+.weather-icon {
+    width: 48px;
+    height: px;
+    vertical-align: middle;
+    display: inline-block;
+}
+/* --- BOUTON FLOTTANT IA --- */
+.ia-floating-btn {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    background: #003b8e;
+    border: none;
+    border-radius: 50%;
+    width: 65px;
+    height: 65px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    transition: 0.3s ease;
+    z-index: 9999;
+}
+.ia-floating-btn:hover {
+    background: #002d6b;
+    transform: scale(1.05);
+}
+
+/* Tooltip IA */
+.ia-floating-btn::after {
+    content: "Assistant IA";
+    position: absolute;
+    right: 75px;
+    bottom: 18px;
+    background: #003b8e;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    transition: opacity 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+.ia-floating-btn:hover::after {
+    opacity: 1;
+}
+
+/* --- CHATBOT PREMIUM SLIDE-IN --- */
+#chatbot {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 380px;
+    height: 520px;
+    background: white;
+    border-left: 3px solid #003b8e;
+    border-top: 3px solid #003b8e;
+    box-shadow: -4px 0 12px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.35s ease;
+    z-index: 9998;
+}
+
+.chatbot-hidden {
+    transform: translateX(110%);
+}
+
+.chatbot-visible {
+    transform: translateX(0);
+}
+
+#chatbot-header {
+    background: #003b8e;
+    color: white;
+    padding: 12px;
+    font-weight: bold;
+    text-align: center;
+    border-bottom: 2px solid #002d6b;
+}
+
+#chat-window {
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+#chat-input {
+    display: flex;
+    border-top: 1px solid #ddd;
+}
+
+#chat-input input {
+    flex: 1;
+    padding: 10px;
+    border: none;
+}
+
+#chat-input button {
+    background: #003b8e;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+}
+.btn-connexion-label {     /* Fond blanc pour contraste */
+    color: #000000;           /* Texte noir */
+}
+.error-message {
+    background: #fdeaea;
+    color: #b30000;
+    padding: 12px 15px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    font-weight: 600;
+    border: 1px solid #f5b5b5;
+    text-align: center;
+}
+.popup-success {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.55);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.popup-box {
+    background: #ffffff;
+    padding: 30px 40px;
+    border-radius: 12px;
+    text-align: center;
+    width: 350px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    animation: fadeIn 0.3s ease;
+}
+
+.popup-box h2 {
+    margin-top: 15px;
+    color: #2ecc71;
+}
+
+.popup-box p {
+    margin: 10px 0 20px;
+    color: #333;
+}
+
+#popupOk {
+    background: #2ecc71;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+#popupOk:hover {
+    background: #27ae60;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.popup-box {
+    background: #fff;
+    padding: 30px 40px;
+    border-radius: 14px;
+    text-align: center;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    font-family: "Inter", sans-serif;
+    max-width: 380px;
+}
+
+.popup-box h3 {
+    margin-top: 15px;
+    font-size: 22px;
+    color: #2ecc71;
+}
+
+.popup-box p {
+    margin: 10px 0 20px;
+    color: #333;
+    line-height: 1.5;
+}
+
+#popup-ok {
+    background: #2ecc71;
+    color: white;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 15px;
+    transition: 0.2s;
+}
+
+#popup-ok:hover {
+    background: #27ae60;
+}
+.alert {
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.alert-error {
+    background: #ffe5e5;
+    color: #b30000;
+    border-left: 4px solid #cc0000;
+}
+
+/* ================================
+   FULLCALENDAR - STYLE PREMIUM
+   ================================ */
+
+/* Conteneur général du calendrier */
+.agenda-calendar {
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.06);
+    padding: 20px;
+    border: 1px solid #e3e7ef;
+}
+
+/* Police et couleurs globales */
+#calendar {
+    font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #1f2933;
+}
+
+/* En-tête du calendrier (titre + boutons) */
+.fc .fc-toolbar.fc-header-toolbar {
+    margin-bottom: 20px;
+}
+
+.fc .fc-toolbar-title {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #1b3a61; /* Bleu institutionnel */
+}
+
+/* Boutons de navigation */
+.fc .fc-button {
+    background: #ffffff;
+    border: 1px solid #d0d7e2;
+    color: #1b3a61;
+    font-size: 0.85rem;
+    font-weight: 500;
+    border-radius: 999px;
+    padding: 6px 14px;
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.06);
+    transition: all 0.15s ease-in-out;
+}
+
+.fc .fc-button:hover {
+    background: #1b3a61;
+    color: #ffffff;
+    border-color: #1b3a61;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.18);
+}
+
+.fc .fc-button.fc-button-primary:disabled,
+.fc .fc-button:disabled {
+    background: #e5e9f2;
+    color: #9aa5b1;
+    border-color: #d0d7e2;
+    box-shadow: none;
+}
+
+/* Bouton "Aujourd'hui" mis en avant */
+.fc .fc-today-button {
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.75rem;
+}
+
+/* En-tête des jours (Lun, Mar, ...) */
+.fc .fc-col-header-cell {
+    background: #f5f7fb;
+    padding: 8px 0;
+    border-bottom: 1px solid #e1e7f0;
+}
+
+.fc .fc-col-header-cell-cushion {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #4b5563;
+}
+
+/* Cases des jours */
+.fc .fc-daygrid-day {
+    border-color: #edf0f7;
+}
+
+.fc .fc-daygrid-day-frame {
+    padding: 4px;
+}
+
+/* Numéro du jour */
+.fc .fc-daygrid-day-top {
+    justify-content: flex-end;
+    padding: 4px 6px;
+}
+
+.fc .fc-daygrid-day-number {
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: #4b5563;
+}
+
+/* Jour d'aujourd'hui */
+.fc .fc-day-today {
+    background: #f0f5ff;
+}
+
+.fc .fc-day-today .fc-daygrid-day-number {
+    color: #1b3a61;
+    font-weight: 700;
+}
+
+/* Événements dans le calendrier */
+.fc .fc-daygrid-event {
+    border-radius: 999px;
+    padding: 2px 8px;
+    margin-bottom: 3px;
+    border: none;
+    font-size: 0.75rem;
+    font-weight: 500;
+    background: #1b3a61;
+    color: #ffffff;
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.18);
+    transition: transform 0.12s ease-out, box-shadow 0.12s ease-out, background 0.12s ease-out;
+}
+
+.fc .fc-daygrid-event:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.25);
+    background: #163152;
+}
+
+/* Texte des événements */
+.fc .fc-event-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Vue liste (listMonth) */
+.fc .fc-list {
+    border-radius: 10px;
+    border: 1px solid #e1e7f0;
+    overflow: hidden;
+}
+
+.fc .fc-list-day-cushion {
+    background: #f5f7fb;
+    font-weight: 600;
+    color: #1b3a61;
+}
+
+.fc .fc-list-event {
+    font-size: 0.85rem;
+}
+
+.fc .fc-list-event:hover td {
+    background: #f0f5ff;
+}
+
+/* Scroll & responsive */
+@media (max-width: 900px) {
+    .agenda-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .agenda-calendar {
+        margin-bottom: 20px;
+    }
+}
+
+/* ================================
+   LÉGENDE DU CALENDRIER
+   ================================ */
+
+.agenda-legende {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 0.85rem;
+    color: #1f2933;
+}
+
+.agenda-legende span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #f5f7fb;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border: 1px solid #e1e7f0;
+}
+
+.legende-couleur {
+    width: 14px;
+    height: 14px;
+    border-radius: 4px;
+    display: inline-block;
+}
+/* ================================
+   FILTRES AGENDA PREMIUM
+   ================================ */
+
+.agenda-filtres {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+
+.agenda-filtres select {
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid #d0d7e2;
+    background: #ffffff;
+    font-size: 0.9rem;
+    color: #1f2933;
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.06);
+    transition: all 0.15s ease-in-out;
+}
+
+.agenda-filtres select:hover {
+    border-color: #1b3a61;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
+}

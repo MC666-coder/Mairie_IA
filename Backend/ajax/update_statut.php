@@ -1,0 +1,135 @@
+<?php
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
+
+session_start();
+header('Content-Type: application/json; charset=utf-8');
+
+require_once __DIR__ . '/../Config/db.php';
+/*/ ajout : fonction notification
+require_once __DIR__ . '/../Fonctions/pushnotification.php';
+require_once __DIR__ . '/../Fonctions/getCitoyenIdFromDemande.php';
+require_once __DIR__ . '/../Fonctions/getEmailCitoyen.php';
+require_once __DIR__ . '/../Fonctions/sendMail.php';*/
+
+// Vérification session
+if (!isset($_SESSION['agent_id'])) {
+    echo json_encode(["success" => false, "message" => "Session expirée."]);
+    exit;
+}
+
+$agent_id = $_SESSION['agent_id'];
+
+// Vérification ID demande
+if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
+    echo json_encode(["success" => false, "message" => "ID de demande invalide."]);
+    exit;
+}
+
+$demande_id = intval($_GET['id']);
+$nouveau_statut = $_POST['statut'] ?? null;
+
+if (!$nouveau_statut) {
+    echo json_encode(["success" => false, "message" => "Statut manquant."]);
+    exit;
+}
+
+try {
+    // Mise à jour du statut
+    $update = $pdo->prepare("
+        UPDATE demandes 
+        SET statut = ?, date_mise_a_jour = NOW()
+        WHERE id = ?
+    ");
+    $update->execute([$nouveau_statut, $demande_id]);
+
+    $newDate = date('Y-m-d H:i:s');
+    /* CETTE PARTIE CONCERNE LA NOTIFICATION ET L'ENVOIE D4EMAIL AU CITOYEN APRES LE CHANGEMENT DE STATUT, je dois mette en place le portail citoyen et je reviens ici*/
+    /*/ recuperer le citoyen
+    $citoyen_id = getCitoyenIdFromDemande($pdo, $demande_id);
+    // envoie de la notification
+    pushNotifications($pdo, $citoyen_id, $demande_id, 'statut', 'Le statut de votre demande a été mis à jour : ' . $nouveau_statut);
+    // Récupérer email citoyen
+    $email_citoyen = getEmailCitoyen($pdo, $citoyen_id);
+
+    // Envoyer email
+    // Construction du mail en HEREDOC (aucun risque de casser la chaîne)
+    $body = <<<HTML
+    <p>Bonjour,</p>
+    <p>Le statut de votre demande a été mis à jour :</p>
+    <p><strong>$nouveau_statut</strong></p>
+    <p><a href="https://ton-site.fr/espace-citoyen/demande.php?id=$demande_id">
+        Accéder à ma demande
+    </a></p>
+    HTML;
+
+    // Envoi de l'email (sécurisé)
+    try {
+        sendMail($email_citoyen, "Mise à jour de votre demande", $body);
+    } catch (Exception $e) {
+        error_log("Erreur email : " . $e->getMessage());
+    }*/
+
+    // Récupération agent
+    $agent = $pdo->prepare("SELECT prenom, nom FROM agents WHERE id = ?");
+    $agent->execute([$agent_id]);
+    $info = $agent->fetch();
+
+    if (!$info) {
+        echo json_encode(["success" => false, "message" => "Agent introuvable."]);
+        exit;
+    }
+
+    $initiales = mb_strtoupper(
+        mb_substr($info['prenom'], 0, 1) .
+        mb_substr($info['nom'], 0, 1)
+    );
+
+    // AJOUT DANS L'HISTORIQUE
+    $log = $pdo->prepare("
+        INSERT INTO historique_demandes (demande_id, agent_id, action, details, created_at)
+        VALUES (?, ?, ?, ?, NOW())
+    ");
+    $log->execute([
+        $demande_id,
+        $agent_id,
+        "Changement de statut",
+        "Nouveau statut : {$nouveau_statut}"
+    ]);
+
+    // HTML pour la timeline historique
+    $history_html = "
+        <div class='history-item' data-type='status' data-text='Nouveau statut : {$nouveau_statut}'>
+            <div class='history-dot history-dot-status'></div>
+            <div class='history-content'>
+                <div class='history-header'>
+                    <div class='history-avatar'>{$initiales}</div>
+                    <div class='history-meta'>
+                        <span class='history-author'>{$info['prenom']} {$info['nom']}</span>
+                        <span class='history-time'>{$newDate}</span>
+                    </div>
+                    <span class='history-tag history-tag-status'>Statut</span>
+                </div>
+                <div class='history-body'>
+                    <strong>Changement de statut</strong><br>
+                    Nouveau statut : {$nouveau_statut}
+                </div>
+            </div>
+        </div>
+    ";
+
+    echo json_encode([
+        "success" => true,
+        "message" => "Statut mis à jour !",
+        "date_mise_a_jour" => $newDate,
+        "history_html" => $history_html
+    ]);
+
+} catch (Exception $e) {
+    echo json_encode([
+        "success" => false,
+        "message" => "Erreur lors de la mise à jour."
+    ]);
+}
+
+exit;

@@ -1,0 +1,47 @@
+###############################################
+# SÉCURITÉ MAXIMALE POUR DOSSIER UPLOAD
+###############################################
+
+# Empêche l’indexation du dossier
+Options -Indexes
+
+# Désactive toute exécution de scripts
+php_flag engine off
+Options -ExecCGI
+
+# Supprime les handlers PHP (empêche l’exécution même si engine off saute)
+RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .php8
+RemoveType .php .phtml .php3 .php4 .php5 .php7 .php8
+
+# Bloque l’accès aux fichiers dangereux
+<FilesMatch "\.(php|php5|php7|php8|phtml|phar|cgi|pl|py|asp|aspx)$">
+    Deny from all
+</FilesMatch>
+
+# Empêche l’exécution de fichiers .htaccess uploadés
+<Files ".htaccess">
+    Deny from all
+</Files>
+
+# Force le téléchargement pour certains fichiers (évite l’ouverture dans le navigateur)
+<FilesMatch "\.(docx|xlsx|xls|pptx|csv)$">
+    ForceType application/octet-stream
+    Header set Content-Disposition attachment
+</FilesMatch>
+
+# Désactive le traitement des fichiers .svg (risque XSS)
+<FilesMatch "\.(svg)$">
+    Header set Content-Type "image/svg+xml"
+    Header set X-Content-Type-Options "nosniff"
+</FilesMatch>
+
+# Empêche le sniffing MIME (sécurité navigateur)
+Header set X-Content-Type-Options "nosniff"
+
+# Empêche l’affichage dans un iframe (anti clickjacking)
+Header always append X-Frame-Options SAMEORIGIN
+
+# Empêche la mise en cache des fichiers sensibles
+Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+Header set Pragma "no-cache"
+Header set Expires 0
