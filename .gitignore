@@ -8,6 +8,7 @@
 debug_prompt.txt
 Backend/Agent_API/ia_agent_debug.log
 Backend/Agent_API/errors.log
+Backend/Config/db.php
 Backend/ajax/debug_lu.log
 Agent-prenium/logs/
 
