@@ -1,5 +1,45 @@
+Pendant mon année sabbatique, et n’ayant toujours pas trouvé d’alternance, j’ai décidé de me challenger afin de gagner en compétences et d’augmenter mes chances dans ma recherche d’alternance.
+Je me suis donc intéressé à un problème réel rencontré par de nombreuses structures publiques, notamment les mairies : comment les agents municipaux peuvent-ils gérer efficacement un grand nombre de demandes, et comment les citoyens peuvent-ils s’orienter et réaliser leurs démarches en ligne de manière simple et rapide ?
+À partir de cette réflexion, j’ai développé un site web complet dans le cadre d’un entraînement personnel, avec pour objectif de reproduire les fonctionnalités essentielles d’un portail municipal moderne.
+
 Ce projet est un site web permettant aux citoyens de réaliser leurs démarches en ligne et aux agents municipaux de gérer les demandes, les messages et les événements.
 Ce dernier inclut deux assistants IA (portail citoyen et portail agent) basés sur Google Gemini.
+
+----------------------------------------------------
+FONCTIONNALITÉS PRINCIPALES
+----------------------------------------------------
+ **Portail Citoyen**:
+ - création et suivis des démarches en ligne
+ - Envoie de documents et pièces jointes
+ - Messagerie intégrée avec la mairie
+ - Historique complet des demandes (avec filtres)
+ - Assistant IA citoyen (Google Gemini) pour guider l'utilisateur et même executer des demandes à la place de l'utilisateur si ce dernier l'autorise.
+   
+**Portail Agent Municipal**:
+ - Gestion des demandes citoyennes
+ - Consultation et réponse aux messages
+ - Ajout de notes internes sur les dossiers
+ - Suivi des statuts et historique des actions effectuées sur un dossier citoyen
+ - Assistant IA agent (Google Gemini) pour accélérer le traitement
+   
+**Événements & Agenda**:
+ - Gestion des événements municipaux
+ - Affichage dynamique via Fullcalendar (en cours....)
+ - Vue calendrier pour les agents (en cours....)
+   
+**Actualités & Communication**:
+ - Publication d'actualités municipales
+ - Système d'abonnement newsletter
+ - gestion des abonnés
+   
+**Services municipaux**:
+ - Listes des services disponibles
+ - Informations sur les travaux en cours
+   
+**Modules en développement**:
+ - Système de notifications (en cours.....)
+ - Mini-jeu "énigmes" avec classement (en cours....)    
+   
 
 
 ----------------------------------------------------
@@ -25,38 +65,38 @@ La base de donnée mairie_ia est organisée autour de plusieurs modules.
 
 
 **CITOYENS & AGENTS**
-- `citoyens`
-- `agents`
+- `citoyens` : Stocke les comptes citoyens(identité, email, mot de passe, informations personnelles).
+- `agents` : Contient les comptes des agents municpaux (rôle, service, accès back-office).
 
 **DÉMARCHES**
-- `demandes`
-- `types_demandes`
-- `fichiers_demandes`
-- `historique_demandes`
-- `notes_demandes`
-- `messages_demandes`
+- `demandes` : Enregistre chaque démarche effectuée par un citoyen (type, description, statut, dates).
+- `types_demandes` : Liste les catégories de démarches disponibles (ex: carte d'identité, attestation.....).
+- `fichiers_demandes` : stocke les pièces jointes envoyées par les citoyens.
+- `historique_demandes` : Trace etoutes les actions affectuées sur une demande (création, modification, validation....).
+- `notes_demandes` : Permet aux agents d'ajouter des notes internes sur un dossier.
+- `messages_demandes` : Gère la messagerie entre citoyens et agents pour chaque demande.
 
 **INTELLIGENCE ARTIFICIELLE**
-- `ai_conversations`
-- `ai_conversations_agents`
-- `ai_decisions`
-- `historique_recherche`
-- `ia_conn_ville`
+- `ai_conversations` : historique des conversations entre le citoyen et l’IA.
+- `ai_conversations_agents` : historique des conversations entre les agents et l’IA.
+- `ai_decisions` : enregistre les actions que l’IA a proposées ou exécutées (ex : remplir un formulaire).
+- `historique_recherche` : sauvegarde les recherches effectuées par les utilisateurs via l’IA.
+- `ia_conn_ville` : stocke les informations de connexion ou d’interaction entre l’IA et la mairie.
 
 **ÉVÈNEMENTS**
-- `evenements` (utilisé par FullCalendar)
+- `evenements` (utilisé par FullCalendar) : contient les événements municipaux affichés dans FullCalendar (titre, date, description).
 
 **ACTUALITÉS & NEWSLETTER**
-- `news`
-- `newsletter_subscribers`
+- `news` : articles et actualités publiés par la mairie.
+- `newsletter_subscribers`  : liste des abonnés à la newsletter.
 
 **SERVICES MUNICIPAUX**
-- `services`
-- `travaux`
+- `services` : liste les services municipaux (urbanisme, état civil, jeunesse…).
+- `travaux` : informations sur les travaux en cours dans la commune.
 
 **MODULES EN COURS DE DÉVELOPPEMENT**
-- `notifications` (en cours)
-- `enigmes et enigma_scores` (jeu non encore créé)
+- `notifications` (en cours) : Futur système de notifications (status, alertes, messages)
+- `enigmes et enigma_scores` (jeu non encore créé) : Mini-jeu "énigmes" avec classement (gamification).
 
 Contenu de db.php :
 --------------------------------------------------
@@ -74,6 +114,10 @@ try {
     $pdo = NULL;
 }
 ```
+
+----------------------------------------------------
+CAPTURE d'écran & vidéos (vide pour l'instant)
+----------------------------------------------------
 
 
 
