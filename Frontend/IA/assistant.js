@@ -1,12 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
 
+    // Débogage côté navigateur uniquement : les fichiers .log du serveur ne sont pas accessibles par URL
     function jsLog(message) {
         console.log("[JS LOG] " + message);
-        fetch("../Backend/Agent_API/errors.log", {
-            method: "POST",
-            headers: { "Content-Type": "text/plain" },
-            body: message
-        });
     }
 
     jsLog("assistant.js chargé");

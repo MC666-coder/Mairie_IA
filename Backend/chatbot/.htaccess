@@ -1,0 +1,5 @@
+# Seul send_message.php est un endpoint ; les autres fichiers sont des bibliothèques internes
+Require all denied
+<Files "send_message.php">
+    Require all granted
+</Files>

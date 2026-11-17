@@ -1,0 +1,5 @@
+# Seul chat_agent.php est un endpoint ; les autres fichiers sont des bibliothèques internes
+Require all denied
+<Files "chat_agent.php">
+    Require all granted
+</Files>

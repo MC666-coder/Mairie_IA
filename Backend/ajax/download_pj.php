@@ -1,11 +1,9 @@
 <?php
-/*vérification de la session pour éviter que n'importe qui téléchrage un file juste avec l'url*/
 require_once __DIR__ . '/../Config/session_init.php';
+require_once __DIR__ . '/../Middleware/auth.php';
+$agent_id = exiger_agent(); // endpoint réservé aux agents connectés
 require_once __DIR__ . '/../Config/db.php';
 
-if (!isset($_SESSION['agent_id'])) {
-    die("Accès refusé");
-}
 
 $id = intval($_GET['id'] ?? 0);
 if ($id <= 0) {

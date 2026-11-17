@@ -1,7 +1,15 @@
 <?php
+require_once __DIR__ . '/../Config/session_init.php';
+require_once __DIR__ . '/../Middleware/auth.php';
+$agent_id = exiger_agent(); // endpoint réservé aux agents connectés
 require_once __DIR__ . '/../Config/db.php';
+header('Content-Type: application/json; charset=utf-8');
 
-$id = $_POST['id'];
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    refuser_acces(405, "Méthode non autorisée.");
+}
+
+$id = (int) ($_POST['id'] ?? 0);
 
 $stmt = $pdo->prepare("SELECT * FROM fichiers_demandes WHERE id = ?");
 $stmt->execute([$id]);
@@ -12,7 +20,10 @@ if (!$file) {
     exit;
 }
 
-unlink("../uploads/demandes/" . $file["chemin"]);
+$chemin = __DIR__ . "/../uploads/demandes/" . basename($file["chemin"]);
+if (is_file($chemin)) {
+    unlink($chemin);
+}
 
 $stmt = $pdo->prepare("DELETE FROM fichiers_demandes WHERE id = ?");
 $stmt->execute([$id]);

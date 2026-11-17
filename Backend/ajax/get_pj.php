@@ -1,6 +1,7 @@
 <?php
-/*vérification de la session pour éviter qu'un bandit ne télécharge n'importe quel dossier*/
 require_once __DIR__ . '/../Config/session_init.php';
+require_once __DIR__ . '/../Middleware/auth.php';
+$agent_id = exiger_agent(); // endpoint réservé aux agents connectés
 
 require_once __DIR__ . '/../Config/db.php';
 
@@ -40,7 +41,7 @@ foreach ($files as $f) {
     $grouped[$date][] = [
         "id" => $f["id"],
         "nom" => $f["nom_fichier"],
-        "url" => "../Backend/ajax/download_pj.php?id" . $f["id"],
+        "url" => "../Backend/ajax/download_pj.php?id=" . (int) $f["id"],
         "type" => $f["type"]
     ];
 }

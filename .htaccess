@@ -1,0 +1,24 @@
+# =========================================================
+# Sécurité : fichiers et dossiers jamais servis au navigateur
+# =========================================================
+
+# Pas de listing des dossiers
+Options -Indexes
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Fichiers et dossiers cachés (.env, .git/, .gitignore, .htaccess...)
+    RewriteRule "(^|/)\.(?!well-known/)" - [F,L]
+
+    # Dossiers internes (dépendances, dumps SQL, scripts, sources front)
+    RewriteRule "^(vendor|sql|node_modules|scripts)(/|$)" - [F,L]
+</IfModule>
+
+# Journaux, dumps, configuration et documentation interne
+<FilesMatch "\.(log|sql|lock|ini|bak|ps1|sh)$">
+    Require all denied
+</FilesMatch>
+<FilesMatch "^(composer|package|package-lock)\.json$">
+    Require all denied
+</FilesMatch>

@@ -1,22 +1,16 @@
 <?php
+require_once __DIR__ . '/../Config/session_init.php';
+require_once __DIR__ . '/../Middleware/auth.php';
+$agent_id = exiger_agent(); // endpoint réservé aux agents connectés
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
-session_start();
 header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/../Config/db.php';
 
-// Vérification session agent
-if (!isset($_SESSION['agent_id'])) {
-    echo json_encode([
-        "success" => false,
-        "message" => "Session expirée."
-    ]);
-    exit;
-}
 
-$agent_action_id = $_SESSION['agent_id']; // agent qui effectue l'action
+$agent_action_id = $agent_id; // agent qui effectue l'action
 
 // Vérification ID demande
 if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {

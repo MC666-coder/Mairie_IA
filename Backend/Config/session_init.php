@@ -23,7 +23,15 @@ if (isset($_SESSION['LAST_ACTIVITY'])) {
     if (time() - $_SESSION['LAST_ACTIVITY'] > $inactivity_limit) {
         session_unset();
         session_destroy();
-        header("Location: /Site_officiel/Agent-premium/connexion_agent.php");
+        // Appel AJAX : réponse JSON (une redirection HTML casserait le JavaScript)
+        if (($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'XMLHttpRequest'
+            || str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json')) {
+            http_response_code(401);
+            header('Content-Type: application/json; charset=utf-8');
+            echo json_encode(['success' => false, 'message' => 'Session expirée, veuillez vous reconnecter.']);
+            exit;
+        }
+        header("Location: /Site_officiel/Agent-prenium/connexion_agent.php");
         exit;
     }
 }

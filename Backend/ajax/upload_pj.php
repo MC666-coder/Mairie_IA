@@ -1,5 +1,7 @@
 <?php
-require_once __DIR__ . '/../Config/session_init.php'; // Initialise la session et les variables de session
+require_once __DIR__ . '/../Config/session_init.php';
+require_once __DIR__ . '/../Middleware/auth.php';
+$agent_id = exiger_agent(); // endpoint réservé aux agents connectés
 header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/../Config/db.php';
@@ -8,7 +10,6 @@ require_once __DIR__ . '/../Fonctions/pushnotification.php';
 require_once __DIR__ . '/../Fonctions/getCitoyenIdFromDemande.php';*/
 
 $demande_id = $_POST['demande_id'] ?? null;
-$agent_id = $_SESSION['agent_id'] ?? null;
 
 if (!$demande_id) {
     echo json_encode(["success" => false, "message" => "ID de demande manquant."]);
@@ -30,7 +31,7 @@ if (!in_array($extension, $allowed)) {
     exit;
 }
 
-$uploadDir = "../uploads/demandes/";
+$uploadDir = __DIR__ . "/../uploads/demandes/";
 $nom_unique = uniqid() . "_" . $nom;
 $chemin = $uploadDir . $nom_unique;
 
