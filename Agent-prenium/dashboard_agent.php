@@ -105,7 +105,7 @@ $demandes = $lastRequests->fetchAll(PDO::FETCH_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tableau de bord Agent</title>
-    <link rel="stylesheet" href="../Frontend/assets/css/dashboard.css"/>
+    <link rel="stylesheet" href="../Frontend/assets/css/dashboard.css?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/css/dashboard.css') ?>"/>
 
     <meta http-equiv="Content-Security-Policy"
           content="default-src 'self';

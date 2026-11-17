@@ -62,7 +62,7 @@ $tableau = donneesTableauCitoyen($pdo, $citoyenId);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portail Citoyen - Commune de L’Aiguillon-sur-Vie</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=<?= @filemtime(__DIR__ . '/assets/css/style.css') ?>">
     <!-- Jeton anti-CSRF lu par chatbot.js (en-tête X-CSRF-Token) -->
     <meta name="csrf-token" content="<?= htmlspecialchars(jeton_csrf(), ENT_QUOTES, 'UTF-8') ?>">
     <!-- Content Security Policy stricte -->
@@ -94,7 +94,7 @@ $tableau = donneesTableauCitoyen($pdo, $citoyenId);
         </div>
 
         <!-- SCRIPT QUI FONCTIONNE À TOUS LES COUPS -->
-        <script src="assets/js/inscription_popup_citoyen.js"></script>
+        <script src="assets/js/inscription_popup_citoyen.js?v=<?= @filemtime(__DIR__ . '/assets/js/inscription_popup_citoyen.js') ?>"></script>
 
     <?php unset($_SESSION['inscription_success']); ?>
     <?php endif; ?>
@@ -197,8 +197,8 @@ $tableau = donneesTableauCitoyen($pdo, $citoyenId);
 
 </div>
 
-<script src="assets/js/chatbot.js"></script>
-<script src="assets/js/tableau_citoyen.js"></script>
+<script src="assets/js/chatbot.js?v=<?= @filemtime(__DIR__ . '/assets/js/chatbot.js') ?>"></script>
+<script src="assets/js/tableau_citoyen.js?v=<?= @filemtime(__DIR__ . '/assets/js/tableau_citoyen.js') ?>"></script>
 
 <!-- BOUTON FLOTTANT IA -->
 <button id="ia-toggle-btn" class="ia-floating-btn">
@@ -209,7 +209,7 @@ $tableau = donneesTableauCitoyen($pdo, $citoyenId);
     </svg>
 </button>
 
-<script src="assets/js/click_chatbot.js"></script>
+<script src="assets/js/click_chatbot.js?v=<?= @filemtime(__DIR__ . '/assets/js/click_chatbot.js') ?>"></script>
 
 
 <!-- FOOTER PREMIUM -->

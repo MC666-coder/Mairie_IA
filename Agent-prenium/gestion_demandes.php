@@ -206,7 +206,7 @@ function badgePriorite($priorite) {
 <head>
     <meta charset="UTF-8">
     <title>Gestion des demandes</title>
-    <link rel="stylesheet" href="../Frontend/assets/css/gestion_demandes.css">
+    <link rel="stylesheet" href="../Frontend/assets/css/gestion_demandes.css?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/css/gestion_demandes.css') ?>">
 </head>
 <body>
 

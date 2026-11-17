@@ -37,7 +37,7 @@ $memeJour = $evenement && date('Y-m-d', strtotime($evenement['date_debut'])) ===
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $evenement ? htmlspecialchars($evenement['titre']) . ' - ' : 'Événement introuvable - ' ?>Agenda municipal</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=<?= @filemtime(__DIR__ . '/assets/css/style.css') ?>">
     <meta http-equiv="Content-Security-Policy"
           content="default-src 'self';
                    img-src 'self' data:;

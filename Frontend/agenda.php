@@ -27,7 +27,7 @@ try {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Agenda municipal - Commune de L’Aiguillon-sur-Vie</title>
 
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=<?= @filemtime(__DIR__ . '/assets/css/style.css') ?>">
     <!-- FullCalendar 6 injecte lui-même ses styles : pas de fichier CSS à charger -->
 
     <!-- Content Security Policy stricte -->
@@ -222,11 +222,11 @@ try {
 
 <!-- FULLCALENDAR JS -->
 
-<script src="assets/fullcalendar/index.global.min.js"></script>
+<script src="assets/fullcalendar/index.global.min.js?v=<?= @filemtime(__DIR__ . '/assets/fullcalendar/index.global.min.js') ?>"></script>
 
 
 <!-- SCRIPT D'INITIALISATION (AJAX) -->
-<script src="assets/js/fullcalendar.js"></script>
+<script src="assets/js/fullcalendar.js?v=<?= @filemtime(__DIR__ . '/assets/js/fullcalendar.js') ?>"></script>
 
 </body>
 </html>

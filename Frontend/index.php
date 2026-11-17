@@ -78,7 +78,7 @@ $weatherIcon = $weatherIcons[$weatherCode] ?? "🌡️";
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Page d'accueil - Commune de L’Aiguillon-sur-Vie</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=<?= @filemtime(__DIR__ . '/assets/css/style.css') ?>">
 
     <!-- Content Security Policy stricte pour page publique -->
     <meta http-equiv="Content-Security-Policy"
@@ -120,7 +120,7 @@ $weatherIcon = $weatherIcons[$weatherCode] ?? "🌡️";
         </div>
 
         <!-- JS EXTERNE -->
-        <script src="assets/js/newsletter.js"></script>
+        <script src="assets/js/newsletter.js?v=<?= @filemtime(__DIR__ . '/assets/js/newsletter.js') ?>"></script>
 
 
     <?php endif; ?>
