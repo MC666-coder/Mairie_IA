@@ -1,107 +1,131 @@
 <?php
+/* =========================================================
+   Chatbot citoyen : envoi d'un message à l'IA d'accueil
+   ---------------------------------------------------------
+   - Aucune donnée n'est écrite en base : le fil de discussion vit
+     dans la session (supprimé à la déconnexion ou après inactivité).
+   - Si l'IA prépare une demande, le brouillon est vérifié puis gardé
+     en session ; seule la confirmation du citoyen la crée
+     (confirmer_demande.php).
+   ========================================================= */
 session_start();
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 
-// Charger les configs dans le bon ordre
-require_once __DIR__ . '/../Config/env.php';
 require_once __DIR__ . '/../Config/api_mairie.php';
 require_once __DIR__ . '/../Config/db.php';
-require_once __DIR__ . '/save_conversation.php';
-require_once __DIR__ . '/save_requete.php';
+require_once __DIR__ . '/../Config/connaissances_commune.php';
+require_once __DIR__ . '/../Middleware/auth.php';
 
-/* ---------------------------------------
-   1. Vérification session citoyen
----------------------------------------- */
+const HISTORIQUE_MAX = 6;              // échanges gardés pour le contexte
+const MESSAGES_PAR_HEURE_MAX = 60;     // protection contre les abus (coût API)
 
+function repondre(array $donnees, int $code = 200): never
+{
+    http_response_code($code);
+    echo json_encode($donnees, JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+/* 1. Citoyen connecté + POST + jeton CSRF */
 if (!isset($_SESSION['citoyen_id'])) {
-    echo json_encode([
-        "response" => "Vous devez être connecté pour utiliser l’assistant."
-    ]);
-    exit;
+    repondre(['response' => "Vous devez être connecté pour utiliser l'assistant."], 401);
 }
-
-$citoyenId = (int) $_SESSION['citoyen_id'];
-
-/* ---------------------------------------
-   2. Vérification méthode + JSON
----------------------------------------- */
-
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode([
-        "response" => "Méthode non autorisée."
-    ]);
-    exit;
+    repondre(['response' => 'Méthode non autorisée.'], 405);
 }
+verifier_csrf();
 
-$raw = file_get_contents('php://input');
-$data = json_decode($raw, true);
-
-if (!is_array($data)) {
-    echo json_encode([
-        "response" => "Requête invalide (JSON incorrect)."
-    ]);
-    exit;
+/* 2. Anti-abus : 1 message toutes les 2 secondes, 60 par heure */
+$maintenant = time();
+$_SESSION['chat_ia_horodatages'] = array_values(array_filter(
+    $_SESSION['chat_ia_horodatages'] ?? [],
+    fn($t) => $t > $maintenant - 3600
+));
+$dernier = end($_SESSION['chat_ia_horodatages']) ?: 0;
+if ($maintenant - $dernier < 2) {
+    repondre(['response' => "Merci de patienter un instant avant d'envoyer un nouveau message."], 429);
 }
+if (count($_SESSION['chat_ia_horodatages']) >= MESSAGES_PAR_HEURE_MAX) {
+    repondre(['response' => "Vous avez envoyé beaucoup de messages. Merci de réessayer un peu plus tard ou de contacter l'accueil de la mairie."], 429);
+}
+$_SESSION['chat_ia_horodatages'][] = $maintenant;
 
-/* ---------------------------------------
-   3. Validation du message
----------------------------------------- */
-
-$message = trim($data['message'] ?? '');
-
+/* 3. Message */
+$data = json_decode(file_get_contents('php://input'), true);
+$message = trim(is_array($data) ? (string) ($data['message'] ?? '') : '');
 if ($message === '') {
-    echo json_encode([
-        "response" => "Votre message est vide."
-    ]);
-    exit;
+    repondre(['response' => 'Votre message est vide.'], 400);
+}
+$message = mb_substr($message, 0, 1000);
+
+/* 4. Appel de l'IA avec le fil de discussion et les connaissances de la commune */
+$historique = $_SESSION['chat_ia_historique'] ?? [];
+$IA = callMairieAPI($message, $historique, connaissancesCommune($pdo));
+
+if ($IA === null) {
+    repondre(['response' => "L'assistant est momentanément indisponible. Vous pouvez contacter l'accueil de la mairie ou réessayer dans quelques minutes."]);
 }
 
-if (strlen($message) > 5000) {
-    $message = substr($message, 0, 5000);
-}
+// Le fil garde la version pseudonymisée du message (jamais en base)
+$historique[] = ['citoyen' => sanitizeAgentMessage($message, true), 'assistant' => $IA['reponse']];
+$_SESSION['chat_ia_historique'] = array_slice($historique, -HISTORIQUE_MAX);
 
-/* ---------------------------------------
-   4. Appel IA mairie
----------------------------------------- */
+/* 5. Brouillon de demande : vérifié côté serveur, jamais créé ici */
+$brouillon = null;
+if ($IA['brouillon'] !== null) {
+    $b = $IA['brouillon'];
+    $serviceId = null;
+    $serviceNom = trim((string) ($b['service'] ?? ''));
+    if ($serviceNom !== '') {
+        $stmt = $pdo->prepare("SELECT id, nom_service FROM services WHERE actif = 1 AND nom_service = ?");
+        $stmt->execute([$serviceNom]);
+        if ($ligne = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $serviceId = (int) $ligne['id'];
+        }
+    }
+    $description = trim((string) ($b['description'] ?? ''));
 
-$IA = callMairieAPI($message, $citoyenId);
+    // Libellés de la carte traduits par l'IA : clés attendues, texte court
+    $interface = [];
+    foreach (['entete', 'service', 'priorite', 'aide', 'confirmer', 'annuler', 'envoyee', 'annulee'] as $cle) {
+        $valeur = $b['interface'][$cle] ?? null;
+        if (is_string($valeur) && trim($valeur) !== '' && mb_strlen($valeur) <= 300) {
+            $interface[$cle] = trim($valeur);
+        }
+    }
+    if (isset($interface['envoyee']) && !str_contains($interface['envoyee'], '{numero}')) {
+        unset($interface['envoyee']);   // sans le numéro, on garde le message français
+    }
 
-// Sécurisation minimale de la réponse IA
-if (!is_array($IA)) {
-    $IA = [];
-}
-
-$IA['response']   = trim($IA['response'] ?? "Le service est momentanément indisponible.");
-$IA['intent']     = $IA['intent']     ?? 'unknown';
-$IA['confidence'] = $IA['confidence'] ?? 0;
-
-/* ---------------------------------------
-   5. Sauvegarde de la conversation
----------------------------------------- */
-
-saveConversation($pdo, $citoyenId, $message, $IA);
-
-/* ---------------------------------------
-   6. Création automatique de requête si demandé
----------------------------------------- */
-
-if (($IA['intent'] ?? '') === 'creation_requete') {
-
-    $requeteId = saveRequete($pdo, $citoyenId, $IA, $message);
-
-    if ($requeteId) {
-        // On enrichit simplement la réponse, sans casser la structure
-        $IA['response'] .= " Votre demande a bien été transmise au service concerné.";
-        $IA['requete_id'] = $requeteId;
-    } else {
-        $IA['response'] .= " ⚠️ Une erreur est survenue lors de la création de votre demande.";
+    if ($description !== '') {
+        $brouillon = [
+            'langue'      => $IA['langue'],
+            'interface'   => $interface,
+            'type'        => in_array($b['type'] ?? '', TYPES_DEMANDE_CITOYEN, true) ? $b['type'] : 'autre',
+            'priorite'    => in_array($b['priorite'] ?? '', PRIORITES_CITOYEN, true) ? $b['priorite'] : 'normale',
+            'service_id'  => $serviceId,            // null : un agent l'orientera
+            'service'     => $serviceId ? $serviceNom : "À déterminer par la mairie",
+            'titre'       => mb_substr(trim((string) ($b['titre'] ?? 'Demande')), 0, 120),
+            'description' => mb_substr($description, 0, 2000),
+        ];
+        $_SESSION['brouillon_demande'] = $brouillon;
     }
 }
 
-/* ---------------------------------------
-   7. Réponse finale JSON
----------------------------------------- */
+/* Garde-fou langue : si le citoyen n'écrit pas en français mais que la
+   réponse accompagnant un brouillon est revenue en français, on affiche
+   plutôt les libellés de la carte, déjà traduits dans sa langue. */
+if ($brouillon !== null && $IA['langue'] !== 'fr'
+    // mots propres au français (pas « la » ni « le », qui existent en espagnol ou en italien)
+    && preg_match_all('/(?<!\p{L})(vous|votre|vos|pour|puis|cliquez|cliquer|vérifiez|vérifier|texte|cette|avec|transmettre|signalement|demande|envoi)(?!\p{L})/iu', $IA['reponse']) >= 3
+    && isset($brouillon['interface']['entete'], $brouillon['interface']['aide'])) {
+    $IA['reponse'] = $brouillon['interface']['entete'] . "\n" . $brouillon['interface']['aide'];
+}
 
-echo json_encode($IA);
-exit;
-?>
+/* 6. Réponse (le navigateur reçoit le brouillon pour l'afficher et le modifier) */
+$reponse = ['response' => $IA['reponse'], 'intention' => $IA['intention'], 'langue' => $IA['langue']];
+if ($brouillon !== null) {
+    unset($brouillon['service_id']);
+    $reponse['brouillon'] = $brouillon;
+}
+repondre($reponse);

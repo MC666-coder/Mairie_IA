@@ -10,7 +10,7 @@ session_set_cookie_params([
 ]);
 session_start();
 require_once __DIR__ . '/../Backend/Config/db.php';
-require_once __DIR__ . '/../Backend/Config/api_mairie.php';
+require_once __DIR__ . '/../Backend/Middleware/auth.php'; // jeton CSRF du chatbot
 
 
 
@@ -68,6 +68,8 @@ $stats = array_map(fn($v) => $v ?? 0, $stats);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portail Citoyen - Commune de L’Aiguillon-sur-Vie</title>
     <link rel="stylesheet" href="assets/css/style.css">
+    <!-- Jeton anti-CSRF lu par chatbot.js (en-tête X-CSRF-Token) -->
+    <meta name="csrf-token" content="<?= htmlspecialchars(jeton_csrf(), ENT_QUOTES, 'UTF-8') ?>">
     <!-- Content Security Policy stricte -->
     <meta http-equiv="Content-Security-Policy"
           content="default-src 'self';
@@ -215,7 +217,7 @@ $stats = array_map(fn($v) => $v ?? 0, $stats);
             </div>
 
             <div id="chat-input">
-                <input type="text" id="message" maxlength="500" placeholder="Écrivez votre message...">
+                <input type="text" id="message" maxlength="500" placeholder="Écrivez dans votre langue… / Write in any language…" dir="auto">
                 <button id="send" type="button">Envoyer</button>
             </div>
         </div>

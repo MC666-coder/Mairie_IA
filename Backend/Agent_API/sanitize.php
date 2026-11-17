@@ -16,7 +16,12 @@
    invité à ne pas en saisir.
    ========================================================= */
 
-function sanitizeAgentMessage(string $message): string
+/**
+ * @param bool $garderAdresses true pour l'IA citoyen : le citoyen indique
+ *        volontairement le lieu d'un problème (« lampadaire au 12 rue X »),
+ *        utile à sa demande. Son identité, elle, reste masquée.
+ */
+function sanitizeAgentMessage(string $message, bool $garderAdresses = false): string
 {
     $remplacements = [
         // Adresses email
@@ -66,6 +71,9 @@ function sanitizeAgentMessage(string $message): string
     ];
 
     foreach ($remplacements as $motif => $remplacement) {
+        if ($garderAdresses && $remplacement === '[n°] ') {
+            continue;
+        }
         $message = preg_replace($motif, $remplacement, $message) ?? $message;
     }
 

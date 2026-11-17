@@ -2952,3 +2952,37 @@ p {
     border-color: #1b3a61;
     box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
 }
+
+/* --- Chatbot : carte de confirmation d'une demande préparée par l'IA --- */
+.brouillon-demande {
+    margin: 8px 0;
+    padding: 12px;
+    border: 2px solid #000091;
+    border-radius: 8px;
+    background: #f5f5fe;
+    color: #161616;
+    font-size: 0.95rem;
+}
+.brouillon-demande .brouillon-infos { margin: 6px 0; color: #3a3a3a; }
+.brouillon-demande textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px;
+    font: inherit;
+    border: 1px solid #929292;
+    border-radius: 4px;
+    resize: vertical;
+}
+.brouillon-demande .brouillon-aide { margin: 6px 0; font-size: 0.85rem; color: #666; }
+.brouillon-demande .brouillon-boutons { display: flex; gap: 8px; flex-wrap: wrap; }
+.brouillon-demande button {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 4px;
+    background: #000091;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+}
+.brouillon-demande button.secondaire { background: #fff; color: #000091; border: 1px solid #000091; }
+.brouillon-demande button:disabled { opacity: 0.6; cursor: wait; }
