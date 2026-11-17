@@ -1,72 +1,58 @@
 <?php
-require_once __DIR__ . '/../Backend/Config/db.php';
-
+/* =========================================================
+   Agenda : événements publics au format FullCalendar (JSON)
+   ---------------------------------------------------------
+   GET, lecture seule, accessible sans connexion (agenda public).
+   FullCalendar envoie la période affichée (start / end) : on ne charge
+   que les événements qui la chevauchent.
+   ========================================================= */
 header('Content-Type: application/json; charset=utf-8');
+header('X-Content-Type-Options: nosniff');
 
-// Récupération des filtres
-$categorie = $_GET['categorie'] ?? '';
-$lieu = $_GET['lieu'] ?? '';
-$public = $_GET['public'] ?? '';
+require_once __DIR__ . '/../Backend/Config/db.php';
+require_once __DIR__ . '/../Backend/Fonctions/evenements_publics.php';
 
-$query = "SELECT * FROM agenda WHERE statut = 'publié'";
-$params = [];
-
-// Filtre catégorie
-if (!empty($categorie)) {
-    $query .= " AND categorie = ?";
-    $params[] = $categorie;
-}
-
-// Filtre lieu
-if (!empty($lieu)) {
-    $query .= " AND lieu = ?";
-    $params[] = $lieu;
-}
-
-// Filtre public
-if (!empty($public)) {
-    $query .= " AND public_cible = ?";
-    $params[] = $public;
-}
-
-$stmt = $pdo->prepare($query);
-$stmt->execute($params);
-
-$events = [];
-
-while ($event = $stmt->fetch()) {
-
-    // Couleur selon catégorie
-    $color = match($event['categorie']) {
-        'culture' => '#1b3a61',
-        'sport' => '#2e7d32',
-        'jeunesse' => '#ef6c00',
-        'environnement' => '#1b5e20',
-        'ccas' => '#6a1b9a',
-        'urbanisme' => '#455a64',
-        default => '#1b3a61'
-    };
-
-    // Construction de l'événement
-    $item = [
-        'title' => $event['titre'],
-        'url'   => 'evenement.php?slug=' . $event['slug'],
-        'color' => $color
-    ];
-
-    // Si événement récurrent
-    if (!empty($event['recurrence'])) {
-        $item['rrule'] = $event['recurrence'];
-        $item['duration'] = [
-            'hours' => (strtotime($event['date_fin']) - strtotime($event['date_debut'])) / 3600
-        ];
-    } else {
-        // Événement normal
-        $item['start'] = $event['date_debut'];
-        $item['end']   = $event['date_fin'];
+/** Date ISO envoyée par FullCalendar -> « AAAA-MM-JJ HH:MM:SS », sinon null. */
+function dateValide(?string $valeur): ?string
+{
+    if (!$valeur) {
+        return null;
     }
-
-    $events[] = $item;
+    $t = strtotime($valeur);
+    return $t ? date('Y-m-d H:i:s', $t) : null;
 }
 
-echo json_encode($events);
+$filtres = [
+    'service' => filter_input(INPUT_GET, 'service', FILTER_VALIDATE_INT) ?: null,
+    'lieu'    => mb_substr(trim((string) ($_GET['lieu'] ?? '')), 0, 255),
+    'debut'   => dateValide($_GET['start'] ?? null),
+    'fin'     => dateValide($_GET['end'] ?? null),
+];
+
+try {
+    $evenements = evenementsPublics($pdo, $filtres);
+} catch (PDOException $e) {
+    error_log("load_events : lecture des événements impossible");
+    http_response_code(500);
+    echo json_encode([]);
+    exit;
+}
+
+$resultat = [];
+foreach ($evenements as $e) {
+    $couleur = couleurService($e['service_id'] !== null ? (int) $e['service_id'] : null);
+    $resultat[] = [
+        'id'              => (int) $e['id'],
+        'title'           => $e['titre'],                 // affiché en texte par FullCalendar
+        // Heure locale de la mairie, SANS fuseau : FullCalendar l'affiche
+        // telle quelle (14h00 reste 14h00, quel que soit le fuseau du serveur)
+        'start'           => date('Y-m-d\TH:i:s', strtotime($e['date_debut'])),
+        'end'             => date('Y-m-d\TH:i:s', strtotime($e['date_fin'])),
+        'url'             => 'evenement.php?id=' . (int) $e['id'],
+        'backgroundColor' => $couleur,
+        'borderColor'     => $couleur,
+        'extendedProps'   => ['lieu' => $e['lieu'], 'service' => $e['nom_service']],
+    ];
+}
+
+echo json_encode($resultat, JSON_UNESCAPED_UNICODE);

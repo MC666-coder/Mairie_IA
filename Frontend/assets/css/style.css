@@ -3032,3 +3032,14 @@ p {
 .choix-demande button:focus-visible,
 .brouillon-demande button:focus-visible { outline: 3px solid #0a76f6; outline-offset: 2px; }
 .bot-message a.lien-creer-demande { color: #000091; font-weight: bold; text-decoration: underline; }
+
+/* --- Agenda : page de détail d'un événement --- */
+.evenement-detail { max-width: 800px; margin: 0 auto; padding: 16px; }
+.evenement-infos { display: grid; grid-template-columns: max-content 1fr; gap: 8px 16px; margin: 16px 0; }
+.evenement-infos dt { font-weight: bold; color: #000091; }
+.evenement-infos dd { margin: 0; }
+.evenement-texte { line-height: 1.6; }
+@media (max-width: 600px) {
+    .evenement-infos { grid-template-columns: 1fr; }
+    .evenement-infos dd { margin-bottom: 8px; }
+}

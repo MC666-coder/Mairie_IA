@@ -8,6 +8,17 @@ session_set_cookie_params([
 session_start();
 
 require_once __DIR__ . '/../Backend/Config/db.php';
+require_once __DIR__ . '/../Backend/Fonctions/evenements_publics.php';
+
+// Événements publiés et visibles des citoyens (table `evenements`)
+try {
+    $filtres   = filtresAgenda($pdo);
+    $aVenir    = evenementsPublics($pdo, ['a_venir' => true], 20);
+} catch (PDOException $e) {
+    error_log("agenda : lecture des événements impossible");
+    $filtres = ['services' => [], 'lieux' => []];
+    $aVenir  = [];
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -17,12 +28,13 @@ require_once __DIR__ . '/../Backend/Config/db.php';
     <title>Agenda municipal - Commune de L’Aiguillon-sur-Vie</title>
 
     <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="stylesheet" href="assets/fullcalendar/index.global.min.css">
+    <!-- FullCalendar 6 injecte lui-même ses styles : pas de fichier CSS à charger -->
 
     <!-- Content Security Policy stricte -->
     <meta http-equiv="Content-Security-Policy"
           content="default-src 'self';
                    img-src 'self' data:;
+                   font-src 'self' data:;
                    style-src 'self' 'unsafe-inline';
                    script-src 'self';
                    object-src 'none';
@@ -99,81 +111,60 @@ require_once __DIR__ . '/../Backend/Config/db.php';
 
             <!-- FILTRES AVANCÉS -->
             <div class="agenda-filtres">
-                <select id="filtre-categorie">
-                    <option value="">Toutes les catégories</option>
-                    <option value="culture">Culture</option>
-                    <option value="sport">Sport</option>
-                    <option value="jeunesse">Jeunesse</option>
-                    <option value="environnement">Environnement</option>
-                    <option value="ccas">CCAS</option>
-                    <option value="urbanisme">Urbanisme</option>
+                <label class="visually-hidden" for="filtre-service">Filtrer par service</label>
+                <select id="filtre-service">
+                    <option value="">Tous les services</option>
+                    <?php foreach ($filtres['services'] as $s): ?>
+                        <option value="<?= (int) $s['id'] ?>"><?= htmlspecialchars($s['nom_service']) ?></option>
+                    <?php endforeach; ?>
                 </select>
 
+                <label class="visually-hidden" for="filtre-lieu">Filtrer par lieu</label>
                 <select id="filtre-lieu">
                     <option value="">Tous les lieux</option>
-                    <?php
-                    $lieux = $pdo->query("SELECT DISTINCT lieu FROM agenda WHERE lieu IS NOT NULL AND lieu != ''");
-                    while ($l = $lieux->fetch()):
-                    ?>
-                        <option value="<?= htmlspecialchars($l['lieu']) ?>"><?= htmlspecialchars($l['lieu']) ?></option>
-                    <?php endwhile; ?>
-                </select>
-
-                <select id="filtre-public">
-                    <option value="">Tous les publics</option>
-                    <option value="tout-public">Tout public</option>
-                    <option value="jeunesse">Jeunesse</option>
-                    <option value="seniors">Seniors</option>
-                    <option value="familles">Familles</option>
+                    <?php foreach ($filtres['lieux'] as $lieu): ?>
+                        <option value="<?= htmlspecialchars($lieu) ?>"><?= htmlspecialchars($lieu) ?></option>
+                    <?php endforeach; ?>
                 </select>
             </div>
 
             <div class="agenda-grid">
 
-                <!-- CALENDRIER -->
+                <!-- CALENDRIER (rempli par assets/js/fullcalendar.js via load_events.php) -->
                 <div class="agenda-calendar">
                     <div id="calendar"></div>
 
-                    <!-- LÉGENDE -->
-                    <div class="agenda-legende">
-                        <span><span class="legende-couleur" style="background:#1b3a61;"></span> Culture</span>
-                        <span><span class="legende-couleur" style="background:#2e7d32;"></span> Sport</span>
-                        <span><span class="legende-couleur" style="background:#ef6c00;"></span> Jeunesse</span>
-                        <span><span class="legende-couleur" style="background:#1b5e20;"></span> Environnement</span>
-                        <span><span class="legende-couleur" style="background:#6a1b9a;"></span> CCAS</span>
-                        <span><span class="legende-couleur" style="background:#455a64;"></span> Urbanisme</span>
-                    </div>
+                    <!-- LÉGENDE : une couleur par service, la même que dans le calendrier -->
+                    <?php if ($filtres['services']): ?>
+                        <div class="agenda-legende">
+                            <?php foreach ($filtres['services'] as $s): ?>
+                                <span><span class="legende-couleur" style="background:<?= couleurService((int) $s['id']) ?>;"></span>
+                                    <?= htmlspecialchars($s['nom_service']) ?></span>
+                            <?php endforeach; ?>
+                        </div>
+                    <?php endif; ?>
                 </div>
 
                 <!-- LISTE D'ÉVÉNEMENTS -->
                 <div class="agenda-list">
                     <h3 class="list-title">Événements à venir</h3>
 
-                    <?php
-                    $stmt = $pdo->query("SELECT * FROM agenda WHERE statut = 'publié' ORDER BY date_debut ASC");
+                    <?php if (!$aVenir): ?>
+                        <p class="no-data">Aucun événement à venir pour le moment.</p>
+                    <?php endif; ?>
 
-                    while ($event = $stmt->fetch()):
-                    ?>
+                    <?php foreach ($aVenir as $event): ?>
                         <div class="event-card">
-                            <?php if (!empty($event['image'])): ?>
-                                <img src="uploads/agenda/<?= htmlspecialchars($event['image']) ?>" alt="">
-                            <?php endif; ?>
-
                             <div class="event-info">
                                 <h4><?= htmlspecialchars($event['titre']) ?></h4>
-
-                                <p class="event-date">
-                                    <?= date("d/m/Y H:i", strtotime($event['date_debut'])) ?>
-                                </p>
-
-                                <p class="event-lieu"><?= htmlspecialchars($event['lieu']) ?></p>
-
-                                <a href="evenement.php?slug=<?= htmlspecialchars($event['slug']) ?>" class="btn">
-                                    Voir l’événement
-                                </a>
+                                <p class="event-date"><?= htmlspecialchars(dateEvenement($event['date_debut'])) ?></p>
+                                <?php if (!empty($event['lieu'])): ?>
+                                    <p class="event-lieu"><?= htmlspecialchars($event['lieu']) ?></p>
+                                <?php endif; ?>
+                                <a href="evenement.php?id=<?= (int) $event['id'] ?>" class="btn">Voir l’événement</a>
                             </div>
                         </div>
-                    <?php endwhile; ?>
+                    <?php endforeach; ?>
 
                 </div>
 
