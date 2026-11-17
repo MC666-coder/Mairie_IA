@@ -7,14 +7,10 @@ session_set_cookie_params([
 ]);
 /* session_init.php : initialisation de la session pour les agents */
 require_once __DIR__ . '/../Backend/Config/session_init.php';
+require_once __DIR__ . '/../Backend/Middleware/auth.php';
 
-
-
-// Vérification : seul un responsable ou admin peut créer un agent (Tu dois adapter selon ta logique de rôles et enlever ce commentaire)
-/*if (!isset($_SESSION['niveau_acces']) || !in_array($_SESSION['niveau_acces'], ['manager', 'admin'])) {
-    header("Location: inscription_agent.php");
-    exit;
-}*/
+// Seul un manager ou un admin connecté peut créer un compte agent
+$niveau_createur = exiger_niveau(['manager', 'admin']);
 
 // Génération du token CSRF
 if (empty($_SESSION['csrf_token'])) {
@@ -101,10 +97,11 @@ if (empty($_SESSION['csrf_token'])) {
                     <label for="service_id">Service</label>
                     <select name="service_id" id="service_id" required>
                         <?php
-                        require_once "../Backend/config/db.php";
+                        require_once __DIR__ . '/../Backend/Config/db.php';
                         $services = $pdo->query("SELECT id, nom_service FROM services ORDER BY nom_service")->fetchAll();
                         foreach ($services as $service) {
-                            echo "<option value='{$service['id']}'>{$service['nom_service']}</option>";
+                            echo '<option value="' . (int) $service['id'] . '">'
+                                . htmlspecialchars($service['nom_service'], ENT_QUOTES, 'UTF-8') . '</option>';
                         }
                         ?>
                     </select>
@@ -119,7 +116,9 @@ if (empty($_SESSION['csrf_token'])) {
                     <select name="niveau_acces" id="niveau_acces" required>
                         <option value="agent">Agent</option>
                         <option value="manager">Manager</option>
+                        <?php if ($niveau_createur === 'admin'): ?>
                         <option value="admin">Administrateur</option>
+                        <?php endif; ?>
                     </select>
 
                     <button type="submit" class="btn-submit">Créer l’agent</button>

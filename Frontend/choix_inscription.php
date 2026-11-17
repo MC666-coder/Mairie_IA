@@ -114,8 +114,8 @@ session_start();
                         <span class="btn-connexion-label">Inscription Citoyen</span>
                     </a>
 
-                    <!-- Inscription Agent -->
-                    <a href="inscriptions_agent.php" class="btn-connexion">
+                    <!-- Espace Agent : les comptes agents sont créés par un manager/admin, pas d'inscription publique -->
+                    <a href="../Agent-prenium/connexion_agent.php" class="btn-connexion">
                         <span class="nav-icon">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
                                  stroke="#0a7c2f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -124,7 +124,7 @@ session_start();
                                 <path d="M9 21V12h6v9"/>
                             </svg>
                         </span>
-                        <span class="btn-connexion-label">Inscription Agent</span>
+                        <span class="btn-connexion-label">Espace Agent (connexion)</span>
                     </a>
 
                 </div>

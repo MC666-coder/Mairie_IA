@@ -1,7 +1,7 @@
 <?php
 /* session_init.php : initialisation de la session pour les agents */
 require_once __DIR__ . '/../Backend/Config/session_init.php';
-require_once __DIR__ . '/../Backend/Config/db.php'; // Connexion PDO
+require_once __DIR__ . '/../Backend/Middleware/auth.php';
 
 /* ---------------------------------------------------------
    0) Sécurité HTTP renforcée
@@ -12,20 +12,26 @@ header("X-XSS-Protection: 1; mode=block");
 header("Referrer-Policy: strict-origin-when-cross-origin");
 
 /* ---------------------------------------------------------
-   1) Vérification CSRF
+   1) Vérification des permissions (avant tout traitement)
+   - seul un manager ou un admin connecté peut créer un agent
+--------------------------------------------------------- */
+$createur_id     = exiger_agent();
+$niveau_createur = exiger_niveau(['manager', 'admin']);
+
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    refuser_acces(405, "Méthode non autorisée.");
+}
+
+require_once __DIR__ . '/../Backend/Config/db.php'; // Connexion PDO (après le contrôle d'accès)
+
+/* ---------------------------------------------------------
+   2) Vérification CSRF
 --------------------------------------------------------- */
 if (!isset($_POST['csrf_token']) ||
     !isset($_SESSION['csrf_token']) || 
     !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
     die("Requête non autorisée.");
 }
-
-/* ---------------------------------------------------------
-   2) Vérification des permissions
---------------------------------------------------------- */
-/*if (!isset($_SESSION['niveau_acces']) || !in_array($_SESSION['niveau_acces'], ['manager', 'admin'])) {
-    die("Accès refusé.");
-}*/
 
 /* ---------------------------------------------------------
    3) Protection anti-bruteforce
@@ -67,8 +73,13 @@ if (!in_array($role, $roles_valides)) {
 }
 
 $acces_valides = ['agent', 'manager', 'admin'];
-if (!in_array($niveau_acces, $acces_valides)) {
+if (!in_array($niveau_acces, $acces_valides, true)) {
     die("Niveau d'accès invalide.");
+}
+
+// Un manager ne peut pas créer d'administrateur (anti-élévation de privilèges)
+if ($niveau_acces === 'admin' && $niveau_createur !== 'admin') {
+    refuser_acces(403, "Seul un administrateur peut créer un compte administrateur.");
 }
 
 /* ---------------------------------------------------------
@@ -164,12 +175,19 @@ $headers = "From: mairie@localhost\r\n";
 $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
 $headers .= "X-Mailer: PHP/" . phpversion();
 
-mail($email, $subject, $message, $headers);
+// En local (sans serveur SMTP), l'envoi échoue : on journalise au lieu d'afficher un warning
+if (!@mail($email, $subject, $message, $headers)) {
+    error_log("Email d'activation non envoyé à $email (SMTP indisponible)");
+}
 
 /* ---------------------------------------------------------
    10) Log de sécurité
 --------------------------------------------------------- */
-file_put_contents("logs/creation_agents.log", date("Y-m-d H:i:s") . " - Agent créé : $email par ID " . $_SESSION['id'] . "\n", FILE_APPEND);
+$dossier_logs = __DIR__ . '/logs';
+if (!is_dir($dossier_logs)) {
+    mkdir($dossier_logs, 0750, true);
+}
+file_put_contents($dossier_logs . '/creation_agents.log',date("Y-m-d H:i:s") . " - Agent créé : $email (niveau $niveau_acces) par agent ID " . $createur_id . "\n", FILE_APPEND);
 
 /* ---------------------------------------------------------
    11) Redirection
