@@ -1,23 +1,17 @@
 <?php
 /* session_init.php : initialisation de la session pour les agents */
 require_once __DIR__ . '/../Backend/Config/session_init.php';
-
-require_once __DIR__ . '/../Backend/Config/db.php';
-
-
-
-$erreur = null;
-$success = null;
+require_once __DIR__ . '/../Backend/Middleware/auth.php';
 
 /* ---------------------------------------------------------
    1) Sécurité session
 --------------------------------------------------------- */
-if (!isset($_SESSION['agent_id'])) {
-    header("Location: connexion_agent.php");
-    exit;
-}
+$agent_id = exiger_agent();
 
-$agent_id = $_SESSION['agent_id'];
+require_once __DIR__ . '/../Backend/Config/db.php';
+
+$erreur = null;
+$success = null;
 
 /* ---------------------------------------------------------
    2) Récupération des infos agent
@@ -209,6 +203,8 @@ function detectType($action) {
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <!-- Jeton CSRF lu par demande.js et envoyé avec chaque action (en-tête X-CSRF-Token) -->
+    <meta name="csrf-token" content="<?= htmlspecialchars(jeton_csrf(), ENT_QUOTES, 'UTF-8') ?>">
     <title>Détail de la demande</title>
     <link rel="stylesheet" href="../Frontend/assets/css/gestion_demande.css">
 </head>

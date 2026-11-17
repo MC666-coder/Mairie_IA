@@ -51,6 +51,34 @@ function exiger_agent(): int
 }
 
 /**
+ * Jeton CSRF des actions agent (créé une fois par session).
+ * À placer dans la page : <meta name="csrf-token" content="...">
+ */
+function jeton_csrf(): string
+{
+    if (empty($_SESSION['csrf_agent'])) {
+        $_SESSION['csrf_agent'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_agent'];
+}
+
+/**
+ * Vérifie le jeton CSRF sur toute requête qui modifie des données (POST).
+ * Le JavaScript l'envoie dans l'en-tête X-CSRF-Token.
+ */
+function verifier_csrf(): void
+{
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        return;
+    }
+    $recu = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? ($_POST['csrf_token'] ?? '');
+    if (empty($_SESSION['csrf_agent']) || !is_string($recu)
+        || !hash_equals($_SESSION['csrf_agent'], $recu)) {
+        refuser_acces(403, 'Requête refusée (jeton de sécurité invalide). Rechargez la page.');
+    }
+}
+
+/**
  * Exige un agent connecté ayant l'un des niveaux d'accès donnés.
  *
  * @param string[] $niveaux ex. ['manager', 'admin']

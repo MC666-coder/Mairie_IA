@@ -5,13 +5,36 @@
 let conversationDejaOuverte = false;
 /* Fin de la gestion du badge "Nouveaux messages" */
 
+/* ============================================================
+   SÉCURITÉ
+============================================================ */
+
+/* Échappe une valeur avant de l'insérer dans du HTML (anti-XSS).
+   À utiliser pour TOUTE donnée venant du serveur ou d'un utilisateur. */
+function escapeHTML(valeur) {
+    return String(valeur ?? "").replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[c]));
+}
+
+/* En-têtes à joindre à chaque requête POST vers Backend/ajax :
+   - X-CSRF-Token : jeton anti-CSRF fourni par la page (<meta name="csrf-token">)
+   - X-Requested-With : le serveur répond en JSON si la session a expiré */
+function enTetesSecurite() {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    return {
+        "X-CSRF-Token": meta ? meta.content : "",
+        "X-Requested-With": "XMLHttpRequest"
+    };
+}
+
 function showAlert(type, message) {
     const container = document.getElementById("alert-container");
 
     container.innerHTML = `
         <div class="alert ${type}">
             <i class="fa-solid ${type === "success" ? "fa-circle-check" : "fa-circle-exclamation"}"></i>
-            ${message}
+            ${escapeHTML(message)}
         </div>
     `;
 
@@ -29,6 +52,7 @@ function showError(msg) { showAlert("error", msg); }
 function ajaxAction(url, formData, onSuccess = null) {
     fetch(url, {
         method: "POST",
+        headers: enTetesSecurite(),
         body: formData
     })
     .then(res => res.json())
@@ -112,7 +136,7 @@ function ensureDateGroup(dateStr) {
    Fonction principale : charger les messages
 ------------------------------------------------------------ */
 function chargerMessages(demandeId) {
-    fetch(`../Backend/ajax/get_messages.php?demande_id=${demandeId}`)
+    fetch(`../Backend/ajax/get_messages.php?demande_id=${encodeURIComponent(demandeId)}`, { headers: enTetesSecurite() })
         .then(res => res.json())
         .then(data => {
 
@@ -135,7 +159,7 @@ function chargerMessages(demandeId) {
                 const isAgent = m.auteur_type === "agent";
 
                 const initials = isAgent
-                    ? (m.prenom[0] + m.nom[0]).toUpperCase()
+                    ? ((m.prenom || "?")[0] + (m.nom || "?")[0]).toUpperCase()
                     : "C";
 
                 const author = isAgent
@@ -145,23 +169,24 @@ function chargerMessages(demandeId) {
                 // Ajout du séparateur de date
                 ensureDateGroup(m.created_at);
 
-                // Construction du message
+                // Construction du message — toutes les valeurs sont échappées (anti-XSS) :
+                // le texte d'un message citoyen ne doit JAMAIS être interprété comme du HTML
                 const html = `
                     <div class="message-item ${isAgent ? "agent" : "citoyen"}"
-                         data-message-id="${m.id}"
-                         data-created-at="${m.created_at}"
-                         data-parent-id="${m.parent_id ?? ""}">
+                         data-message-id="${escapeHTML(m.id)}"
+                         data-created-at="${escapeHTML(m.created_at)}"
+                         data-parent-id="${escapeHTML(m.parent_id ?? "")}">
 
-                        <div class="message-avatar">${initials}</div>
+                        <div class="message-avatar">${escapeHTML(initials)}</div>
 
                         <div class="message-content">
                             <div class="message-header">
-                                <span class="message-author">${author}</span>
-                                <span class="message-date">${m.created_at}</span>
+                                <span class="message-author">${escapeHTML(author)}</span>
+                                <span class="message-date">${escapeHTML(m.created_at)}</span>
                             </div>
 
                             <div class="message-body">
-                                ${m.message}
+                                ${escapeHTML(m.message).replace(/\n/g, "<br>")}
                             </div>
                         </div>
                     </div>
@@ -212,6 +237,7 @@ function ajouterHistorique(demandeId, action, details = "") {
 
     fetch("../Backend/ajax/Ajouter_historique.php", {
         method: "POST",
+        headers: enTetesSecurite(),
         body: formData
     })
     .then(res => res.json())
@@ -233,7 +259,7 @@ function ajouterHistorique(demandeId, action, details = "") {
 
 /* Mettre à jour le badge de nouveaux messages sur la liste des demandes */
 function mettreAJourBadgeNouveauxMessages(demandeId) {
-    fetch(`../Backend/ajax/get_messages.php?demande_id=${demandeId}`)
+    fetch(`../Backend/ajax/get_messages.php?demande_id=${encodeURIComponent(demandeId)}`, { headers: enTetesSecurite() })
         .then(res => res.json())
         .then(data => {
 
@@ -496,7 +522,7 @@ if (notesSearchInput) {
     const formUploadPJ = document.querySelector(".pieces-jointes .form-upload");
 
     function chargerPiecesJointes(demandeId) {
-        fetch(`../Backend/ajax/get_pj.php?demande_id=${demandeId}`)
+        fetch(`../Backend/ajax/get_pj.php?demande_id=${encodeURIComponent(demandeId)}`, { headers: enTetesSecurite() })
             .then(res => res.json())
             .then(data => {
 
@@ -529,16 +555,22 @@ if (notesSearchInput) {
                         const isImage = f.type && f.type.startsWith("image/");
                         const isPDF = f.type === "application/pdf";
 
+                        // Le nom du fichier est choisi par celui qui l'envoie : on l'échappe (anti-XSS)
+                        const url = escapeHTML(f.url);
+                        const nom = escapeHTML(f.nom);
+                        const idPJ = parseInt(f.id, 10);
+                        const idDemande = parseInt(demandeId, 10);
+
                         html += `
                             <div class="pj-item">
                                 <div class="pj-left">
-                                    ${isImage ? `<img src="${f.url}" class="pj-thumb">` : ""}
+                                    ${isImage ? `<img src="${url}" class="pj-thumb" alt="">` : ""}
                                     ${isPDF ? `<i class="fa-solid fa-file-pdf pj-pdf"></i>` : ""}
-                                    <a href="${f.url}" target="_blank" download="${f.nom}">
-                                        📎 ${f.nom}
+                                    <a href="${url}" target="_blank" rel="noopener" download="${nom}">
+                                        📎 ${nom}
                                     </a>
                                 </div>
-                                <button class="btn-delete" onclick="supprimerPJ(${f.id}, ${demandeId})">
+                                <button class="btn-delete" onclick="supprimerPJ(${idPJ}, ${idDemande})">
                                     Supprimer
                                 </button>
                             </div>
@@ -854,6 +886,7 @@ function ensureDateGroup(dateStr) {
 
         fetch("../Backend/ajax/Marquer_messages_lus.php", {
             method: "POST",
+            headers: enTetesSecurite(),
             body: formData
         });
     });

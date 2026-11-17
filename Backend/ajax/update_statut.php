@@ -2,6 +2,7 @@
 require_once __DIR__ . '/../Config/session_init.php';
 require_once __DIR__ . '/../Middleware/auth.php';
 $agent_id = exiger_agent(); // endpoint réservé aux agents connectés
+verifier_csrf();            // POST : jeton CSRF obligatoire
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
@@ -27,6 +28,22 @@ $nouveau_statut = $_POST['statut'] ?? null;
 
 if (!$nouveau_statut) {
     echo json_encode(["success" => false, "message" => "Statut manquant."]);
+    exit;
+}
+
+// Liste blanche : seules les valeurs de l'ENUM `demandes.statut` sont acceptées
+// (empêche l'injection de HTML/JavaScript dans l'historique — faille XSS)
+$statuts_autorises = [
+    'nouvelle'   => 'Nouvelle',
+    'analyse_ia' => 'Analyse IA',
+    'en_cours'   => 'En cours',
+    'en_attente' => 'En attente',
+    'resolue'    => 'Résolue',
+    'cloturee'   => 'Clôturée',
+];
+if (!is_string($nouveau_statut) || !isset($statuts_autorises[$nouveau_statut])) {
+    http_response_code(400);
+    echo json_encode(["success" => false, "message" => "Statut invalide."]);
     exit;
 }
 
