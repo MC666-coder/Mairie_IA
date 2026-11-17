@@ -115,8 +115,8 @@ session_start();
                         <span class="btn-connexion-label">Connexion Citoyen</span>
                     </a>
 
-                    <!-- Connexion Agent -->
-                    <a href="connexion_agent.php" class="btn-connexion">
+                    <!-- Connexion Agent : portail agent officiel (Agent-prenium) -->
+                    <a href="../Agent-prenium/connexion_agent.php" class="btn-connexion">
                         <span class="nav-icon">
                             <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
                                  stroke="#0a7c2f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
