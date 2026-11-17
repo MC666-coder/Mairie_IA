@@ -57,6 +57,9 @@ try {
         mb_substr($info['prenom'], 0, 1) .
         mb_substr($info['nom'], 0, 1)
     );
+    // Échappement à l'affichage (les noms sont stockés bruts en base)
+    $initiales = htmlspecialchars($initiales, ENT_QUOTES, 'UTF-8');
+    $auteur    = htmlspecialchars($info['prenom'] . ' ' . $info['nom'], ENT_QUOTES, 'UTF-8');
 
     // AJOUT DANS L'HISTORIQUE
     $log = $pdo->prepare("
@@ -85,7 +88,7 @@ try {
                     <div class='note-header'>
                         <div class='note-avatar'>{$initiales}</div>
                         <div class='note-meta-main'>
-                            <span class='note-author'>{$info['prenom']} {$info['nom']}</span>
+                            <span class='note-author'>{$auteur}</span>
                             <span class='note-date'>" . date('Y-m-d H:i:s') . "</span>
                         </div>
                         <div class='note-tags'>
@@ -106,7 +109,7 @@ try {
                 <div class='history-header'>
                     <div class='history-avatar'>{$initiales}</div>
                     <div class='history-meta'>
-                        <span class='history-author'>{$info['prenom']} {$info['nom']}</span>
+                        <span class='history-author'>{$auteur}</span>
                         <span class='history-time'>" . date('Y-m-d H:i:s') . "</span>
                     </div>
                     <span class='history-tag history-tag-notes'>Note</span>

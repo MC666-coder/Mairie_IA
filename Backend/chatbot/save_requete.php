@@ -60,31 +60,34 @@ function saveRequete(PDO $pdo, int $citoyenId, array $IA, string $messageOrigina
         }
 
         /* ---------------------------------------
-           3. Insertion de la requête
+           3. Insertion de la demande
+              (table `demandes`, commune aux portails citoyen et agent)
         ---------------------------------------- */
 
         $stmt = $pdo->prepare("
-            INSERT INTO requette 
-            (type, services_id, message, priorite, statut, citoyens_id, created_at)
-            VALUES (:type, :service, :message, :priorite, 'analyse_ia', :citoyen, NOW())
+            INSERT INTO demandes
+            (citoyen_id, service_id, type_id, message, priorite, statut, canal, created_at)
+            VALUES (:citoyen, :service, (SELECT id FROM types_demandes WHERE code = :type),
+                    :message, :priorite, 'analyse_ia', 'ia', NOW())
         ");
 
         $stmt->execute([
-            ':type'     => $type,
+            ':citoyen'  => $citoyenId,
             ':service'  => $serviceId,
+            ':type'     => $type,
             ':message'  => $messageRequete,
-            ':priorite' => $priorite,
-            ':citoyen'  => $citoyenId
+            ':priorite' => $priorite
         ]);
 
         $requeteId = (int)$pdo->lastInsertId();
 
         /* ---------------------------------------
            4. Enregistrement de la décision IA
+              (demande_id : ajouté par sql/migrations/001_requette_vers_demandes.sql)
         ---------------------------------------- */
 
         $stmt = $pdo->prepare("
-            INSERT INTO ai_decisions (requette_id, decision, justification, created_at)
+            INSERT INTO ai_decisions (demande_id, decision, justification, created_at)
             VALUES (:req, :decision, :justif, NOW())
         ");
 

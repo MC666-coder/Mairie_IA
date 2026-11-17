@@ -14,12 +14,12 @@ require_once __DIR__ . '/../Backend/Config/db.php';
 
 
 // Vérification connexion citoyen
-if (!isset($_SESSION['id']) || !isset($_SESSION['email_citoyen'])) {
+if (!isset($_SESSION['citoyen_id']) || !isset($_SESSION['email_citoyen'])) {
     http_response_code(403);
     die("Accès refusé.");
 }
 
-$citoyenId = (int) $_SESSION['id'];
+$citoyenId = (int) $_SESSION['citoyen_id'];
 
 /* ---------------------------------------
    Vérification méthode POST
@@ -66,7 +66,8 @@ $priorite = trim($_POST['priorite'] ?? '');
 ---------------------------------------- */
 
 $types_valides = ['plainte', 'question', 'suggestion'];
-$priorites_valides = ['basse', 'moyenne', 'haute'];
+// Valeurs de l'ENUM demandes.priorite ('urgente' est réservée aux agents)
+$priorites_valides = ['basse', 'normale', 'haute'];
 
 if (!in_array($type_demande, $types_valides, true)) {
     die("Type de demande invalide.");
@@ -96,26 +97,28 @@ if ($checkService->rowCount() === 0) {
 }
 
 /* ---------------------------------------
-   Insertion sécurisée
+   Insertion sécurisée dans `demandes`
+   (table commune aux portails citoyen ET agent :
+    la demande apparaît immédiatement chez les agents)
 ---------------------------------------- */
 
 $insert = $pdo->prepare("
-    INSERT INTO requette (type, services_id, message, priorite, statut, citoyens_id, created_at)
-    VALUES (?, ?, ?, ?, 'nouvelle', ?, NOW())
+    INSERT INTO demandes (citoyen_id, service_id, type_id, message, priorite, statut, canal, created_at)
+    VALUES (?, ?, (SELECT id FROM types_demandes WHERE code = ?), ?, ?, 'nouvelle', 'formulaire', NOW())
 ");
 
 $insert->execute([
+    $citoyenId,
+    (int) $service_id,
     $type_demande,
-    $service_id,
     $message,
-    $priorite,
-    $citoyenId
+    $priorite
 ]);
 
 /* ---------------------------------------
    Redirection propre
 ---------------------------------------- */
 
-header("Location: portail_citoyen.php?demande=success");
+header("Location: Portail_citoyen.php?demande=success");
 exit();
 ?>

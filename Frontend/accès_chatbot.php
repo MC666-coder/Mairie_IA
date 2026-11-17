@@ -2,7 +2,7 @@
 session_start();
 
 // Si l'utilisateur est déjà connecté → accès direct au chatbot
-if (isset($_SESSION['user_id'])) {
+if (isset($_SESSION['citoyen_id'])) {
     header('Location: assistant_intelligent.php');
     exit();
 }

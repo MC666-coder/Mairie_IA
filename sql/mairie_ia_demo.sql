@@ -145,11 +145,13 @@ DROP TABLE IF EXISTS `ai_decisions`;
 CREATE TABLE IF NOT EXISTS `ai_decisions` (
   `id` int NOT NULL AUTO_INCREMENT,
   `requette_id` int DEFAULT NULL,
+  `demande_id` int DEFAULT NULL,
   `decision` text,
   `justification` text,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `requette_id` (`requette_id`)
+  KEY `requette_id` (`requette_id`),
+  KEY `demande_id` (`demande_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --

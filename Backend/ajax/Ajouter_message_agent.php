@@ -72,6 +72,9 @@ try {
         mb_substr($info['prenom'], 0, 1) .
         mb_substr($info['nom'], 0, 1)
     );
+    // Échappement à l'affichage (les noms sont stockés bruts en base)
+    $initiales = htmlspecialchars($initiales, ENT_QUOTES, 'UTF-8');
+    $auteur    = htmlspecialchars($info['prenom'] . ' ' . $info['nom'], ENT_QUOTES, 'UTF-8');
 
     // Date exacte pour le JSON + HTML
     $created_at = date('Y-m-d H:i:s');
@@ -87,7 +90,7 @@ try {
 
             <div class='message-content'>
                 <div class='message-header'>
-                    <span class='message-author'>{$info['prenom']} {$info['nom']}</span>
+                    <span class='message-author'>{$auteur}</span>
                     <span class='message-date'>{$created_at}</span>
                 </div>
                 <div class='message-body'>" . nl2br(htmlspecialchars($message)) . "</div>

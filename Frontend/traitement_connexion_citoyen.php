@@ -67,7 +67,7 @@ if ($citoyen && password_verify($password, $citoyen['password'])) {
     session_regenerate_id(true);
 
     // Stockage des infos citoyen
-    $_SESSION['id'] = $citoyen['id'];
+    $_SESSION['citoyen_id'] = $citoyen['id'];
     $_SESSION['nom_citoyen'] = $citoyen['nom_citoyen'];
     $_SESSION['prenom_citoyen'] = $citoyen['prenom_citoyen'];
     $_SESSION['email_citoyen'] = $citoyen['email_citoyen'];

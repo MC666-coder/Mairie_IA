@@ -13,13 +13,13 @@ require_once __DIR__ . '/../Backend/Config/db.php';
 
 
 // Vérifier que l'utilisateur est connecté ET bien un citoyen (et pas un agent)
-if (!isset($_SESSION['id']) || !isset($_SESSION['email_citoyen'])) {
+if (!isset($_SESSION['citoyen_id']) || !isset($_SESSION['email_citoyen'])) {
     http_response_code(403);
     echo "Vous devez être connecté en tant que citoyen pour accéder à cette page.";
     exit();
 }
 
-$citoyenId = (int) $_SESSION['id'];
+$citoyenId = (int) $_SESSION['citoyen_id'];
 
 /**
  * Récupération sécurisée du citoyen
@@ -54,19 +54,20 @@ $id = (int) $id;
  * Récupération sécurisée de la demande appartenant à ce citoyen
  */
 $req = $pdo->prepare("
-    SELECT 
-        requette.type, 
-        requette.message, 
-        requette.priorite, 
-        requette.statut, 
-        requette.created_at,
-        services.nom_service, 
-        services.description_service, 
-        services.mots_cles 
-    FROM requette 
-    LEFT JOIN services ON requette.services_id = services.id 
-    WHERE requette.id = ? 
-      AND requette.citoyens_id = ?
+    SELECT
+        t.libelle AS type,
+        d.message,
+        d.priorite,
+        d.statut,
+        d.created_at,
+        services.nom_service,
+        services.description_service,
+        services.mots_cles
+    FROM demandes d
+    LEFT JOIN services ON d.service_id = services.id
+    LEFT JOIN types_demandes t ON d.type_id = t.id
+    WHERE d.id = ?
+      AND d.citoyen_id = ?   -- le citoyen ne voit QUE ses propres demandes (anti-IDOR)
     LIMIT 1
 ");
 $req->execute([$id, $citoyenId]);

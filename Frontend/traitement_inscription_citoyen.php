@@ -71,7 +71,7 @@ $insert = $pdo->prepare("
 $insert->execute([$nom, $prenom, $email, $telephone, $passwordHash]);
 
 // Création session citoyen
-$_SESSION['id'] = $pdo->lastInsertId();
+$_SESSION['citoyen_id'] = $pdo->lastInsertId();
 $_SESSION['nom_citoyen'] = $nom;
 $_SESSION['prenom_citoyen'] = $prenom;
 $_SESSION['email_citoyen'] = $email;

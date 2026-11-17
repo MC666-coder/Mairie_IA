@@ -13,14 +13,14 @@ require_once __DIR__ . '/save_requete.php';
    1. Vérification session citoyen
 ---------------------------------------- */
 
-if (!isset($_SESSION['id'])) {
+if (!isset($_SESSION['citoyen_id'])) {
     echo json_encode([
         "response" => "Vous devez être connecté pour utiliser l’assistant."
     ]);
     exit;
 }
 
-$citoyenId = (int) $_SESSION['id'];
+$citoyenId = (int) $_SESSION['citoyen_id'];
 
 /* ---------------------------------------
    2. Vérification méthode + JSON

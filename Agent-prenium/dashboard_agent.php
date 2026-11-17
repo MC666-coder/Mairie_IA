@@ -136,6 +136,10 @@ $demandes = $lastRequests->fetchAll(PDO::FETCH_ASSOC);
             <nav id="nav-agent">
                 <a href="dashboard_agent.php" class="active">Tableau de Bord</a>
                 <a href="gestion_demandes.php">Gestion des demandes</a>
+                <?php if (in_array($_SESSION['niveau_acces'] ?? '', ['manager', 'admin'], true)): ?>
+                <!-- Visible uniquement par les managers et admins (contrôle aussi fait côté serveur) -->
+                <a href="inscription_agent.php">Créer un agent</a>
+                <?php endif; ?>
 
                 <a href="logout.php" class="nav-btn">
                     <span class="nav-icon">

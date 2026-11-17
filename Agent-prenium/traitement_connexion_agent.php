@@ -36,7 +36,9 @@ if ($_SESSION['login_attempts'] > 10) {
    3) Récupération + sanitation des données
 --------------------------------------------------------- */
 function sanitize($str) {
-    return htmlspecialchars(trim($str), ENT_QUOTES, 'UTF-8');
+    // Nettoyage uniquement : on stocke/compare la valeur BRUTE.
+    // L'échappement HTML se fait à l'affichage (htmlspecialchars), jamais avant la base.
+    return trim((string) $str);
 }
 
 $email = sanitize($_POST['email'] ?? "");

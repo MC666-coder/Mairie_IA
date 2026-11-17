@@ -15,13 +15,13 @@ require_once __DIR__ . '/../Backend/Config/api_mairie.php';
 
 
 // Vérification stricte du rôle citoyen
-if (!isset($_SESSION['id'])) {
+if (!isset($_SESSION['citoyen_id'])) {
     http_response_code(403);
     die("Accès refusé.");
 }
 
 
-$citoyenId = (int) $_SESSION['id'];
+$citoyenId = (int) $_SESSION['citoyen_id'];
 
 /* ---------------------------------------
    Récupération sécurisée du citoyen
@@ -51,8 +51,8 @@ $demandecount = $pdo->prepare("
         SUM(statut='analyse_ia') AS analyse_IA,
         SUM(statut='en_cours') AS en_cours,
         SUM(statut='resolue') AS Resolue
-    FROM requette
-    WHERE citoyens_id = ?
+    FROM demandes
+    WHERE citoyen_id = ?
 ");
 $demandecount->execute([$citoyenId]);
 
@@ -170,12 +170,13 @@ $stats = array_map(fn($v) => $v ?? 0, $stats);
             <div class="last-requests-container">
                 <?php
                 $allrequets = $pdo->prepare("
-                    SELECT requette.id, requette.type, requette.message, requette.priorite, requette.statut, requette.created_at,
-                           services.nom_service, services.description_service  
-                    FROM requette 
-                    LEFT JOIN services ON requette.services_id = services.id 
-                    WHERE requette.citoyens_id = ? 
-                    ORDER BY requette.created_at DESC
+                    SELECT d.id, t.libelle AS type, d.message, d.priorite, d.statut, d.created_at,
+                           services.nom_service, services.description_service
+                    FROM demandes d
+                    LEFT JOIN services ON d.service_id = services.id
+                    LEFT JOIN types_demandes t ON d.type_id = t.id
+                    WHERE d.citoyen_id = ?
+                    ORDER BY d.created_at DESC
                 ");
                 $allrequets->execute([$citoyenId]);
 

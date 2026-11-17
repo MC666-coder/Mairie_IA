@@ -14,12 +14,12 @@ require_once __DIR__ . '/../Backend/Config/db.php';
 
 
 // Vérification connexion citoyen
-if (!isset($_SESSION['id']) || !isset($_SESSION['email_citoyen'])) {
+if (!isset($_SESSION['citoyen_id']) || !isset($_SESSION['email_citoyen'])) {
     http_response_code(403);
     die("Vous devez être connecté pour accéder à cette page.");
 }
 
-$citoyenId = (int) $_SESSION['id'];
+$citoyenId = (int) $_SESSION['citoyen_id'];
 
 /* ---------------------------------------
    Récupération sécurisée du citoyen
@@ -158,7 +158,7 @@ if (empty($_SESSION['csrf_token'])) {
                     <label for="priorite">Priorité</label>
                     <select id="priorite" name="priorite" required>
                         <option value="basse">Basse</option>
-                        <option value="moyenne">Moyenne</option>
+                        <option value="normale" selected>Normale</option>
                         <option value="haute">Haute</option>
                     </select>
 
