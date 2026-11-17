@@ -1,6 +1,6 @@
-# Seul tableau_de_bord.php est un endpoint ; tout autre fichier ajouté ici
+# Points d'entrée du portail citoyen ; tout autre fichier ajouté ici
 # reste interdit au navigateur (liste blanche)
 Require all denied
-<Files "tableau_de_bord.php">
+<FilesMatch "^(tableau_de_bord|messagerie|document)\.php$">
     Require all granted
-</Files>
+</FilesMatch>

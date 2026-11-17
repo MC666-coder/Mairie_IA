@@ -21,6 +21,14 @@ if (!$file) {
     exit;
 }
 
+// Seuls les documents INTERNES peuvent être supprimés : un document reçu du
+// citoyen ou envoyé au citoyen fait partie de l'échange (traçabilité)
+if ($file['agent_id'] === null || (int) ($file['visible_citoyen'] ?? 0) === 1) {
+    http_response_code(403);
+    echo json_encode(["success" => false, "message" => "Ce document fait partie de l'échange avec le citoyen : il ne peut pas être supprimé."]);
+    exit;
+}
+
 $chemin = __DIR__ . "/../uploads/demandes/" . basename($file["chemin"]);
 if (is_file($chemin)) {
     unlink($chemin);

@@ -9,30 +9,70 @@ error_reporting(E_ALL);
 header('Content-Type: application/json; charset=utf-8');
 
 require_once __DIR__ . '/../Config/db.php';
-/*/ ajout : fonction notification 
-require_once __DIR__ . '/../Fonctions/pushnotification.php';
-require_once __DIR__ . '/../Fonctions/getCitoyenIdFromDemande.php';*/
+require_once __DIR__ . '/../Fonctions/historique_demande.php';
+require_once __DIR__ . '/../Fonctions/conversation_demande.php';
 
-
+function refuser(string $message, int $code = 400): never
+{
+    http_response_code($code);
+    echo json_encode(["success" => false, "message" => $message]);
+    exit;
+}
 
 // Vérification demande_id
 $demande_id = intval($_POST['demande_id'] ?? 0);
 if ($demande_id <= 0) {
-    echo json_encode([
-        "success" => false,
-        "message" => "ID de demande invalide."
-    ]);
-    exit;
+    refuser("ID de demande invalide.");
+}
+
+// Règle de la mairie : seul l'agent ASSIGNÉ à la demande écrit au citoyen
+$stmt = $pdo->prepare("SELECT agent_id, statut FROM demandes WHERE id = ?");
+$stmt->execute([$demande_id]);
+$demande = $stmt->fetch(PDO::FETCH_ASSOC);
+if (!$demande) {
+    refuser("Demande introuvable.", 404);
+}
+if ((int) $demande['agent_id'] !== (int) $agent_id) {
+    refuser("Seul l'agent assigné à cette demande peut écrire au citoyen. Assignez-vous la demande d'abord.", 403);
+}
+if ($demande['statut'] === 'cloturee') {
+    refuser("Cette demande est clôturée : la conversation est fermée.", 409);
 }
 
 // Vérification message
 $message = trim($_POST['message'] ?? '');
 if ($message === '') {
-    echo json_encode([
-        "success" => false,
-        "message" => "Le message ne peut pas être vide."
-    ]);
-    exit;
+    refuser("Le message ne peut pas être vide.");
+}
+if (mb_strlen($message) > 5000) {
+    refuser("Le message est trop long (5000 caractères maximum).");
+}
+
+// Document facultatif destiné au citoyen (ex. attestation), au choix :
+// - un nouveau fichier envoyé avec le message ;
+// - un document INTERNE déjà rangé dans le dossier (fichier_id).
+$document = null;
+if (isset($_FILES['fichier']) && $_FILES['fichier']['error'] !== UPLOAD_ERR_NO_FILE) {
+    $document = verifierDocument($_FILES['fichier']);
+    if (!$document['ok']) {
+        refuser($document['message'], $document['code']);
+    }
+}
+
+$documentDossier = null;
+$fichierId = (int) ($_POST['fichier_id'] ?? 0);
+if ($fichierId > 0) {
+    if ($document) {
+        refuser("Joignez soit un nouveau fichier, soit un document du dossier, pas les deux.");
+    }
+    // Il doit appartenir à CETTE demande et être interne (ni reçu, ni déjà envoyé)
+    $stmt = $pdo->prepare("SELECT id, nom_fichier FROM fichiers_demandes
+                           WHERE id = ? AND demande_id = ? AND agent_id IS NOT NULL AND visible_citoyen = 0");
+    $stmt->execute([$fichierId, $demande_id]);
+    $documentDossier = $stmt->fetch(PDO::FETCH_ASSOC);
+    if (!$documentDossier) {
+        refuser("Ce document n'est pas un document interne de cette demande (ou il a déjà été envoyé).", 409);
+    }
 }
 
 // parent_id optionnel (si l’agent répond à un message citoyen précis)
@@ -40,19 +80,40 @@ $parent_id = !empty($_POST['parent_id']) ? intval($_POST['parent_id']) : null;
 
 try {
 
-    // Insertion du message agent
+    // Insertion du message agent : « nouveau » tant que le citoyen ne l'a pas lu
     $insert = $pdo->prepare("
-        INSERT INTO messages_demandes 
+        INSERT INTO messages_demandes
         (demande_id, auteur_type, agent_id, message, parent_id, statut, created_at)
-        VALUES (?, 'agent', ?, ?, ?, 'répondu', NOW())
+        VALUES (?, 'agent', ?, ?, ?, 'nouveau', NOW())
     ");
     $insert->execute([$demande_id, $agent_id, $message, $parent_id]);
 
-    $message_id = $pdo->lastInsertId();
+    $message_id = (int) $pdo->lastInsertId();
+
+    // Document joint, visible par le citoyen dans la conversation
+    if ($document) {
+        if (enregistrerDocument($pdo, $demande_id, (int) $agent_id, $document, true, $message_id) === null) {
+            $pdo->prepare("DELETE FROM messages_demandes WHERE id = ?")->execute([$message_id]);
+            refuser("Le document n'a pas pu être enregistré. Le message n'a pas été envoyé.", 500);
+        }
+        journaliserAction($pdo, $demande_id, (int) $agent_id, "Document envoyé au citoyen", "Nom du fichier : " . $document['nom']);
+    }
+
+    // Document du dossier : il devient visible par le citoyen et rejoint le
+    // message (il passe de « Internes » à « Envoyés au citoyen »)
+    if ($documentDossier) {
+        $pdo->prepare("UPDATE fichiers_demandes SET visible_citoyen = 1, message_id = ?
+                       WHERE id = ? AND visible_citoyen = 0")
+            ->execute([$message_id, $documentDossier['id']]);
+        journaliserAction($pdo, $demande_id, (int) $agent_id, "Document du dossier envoyé au citoyen",
+                          "Nom du fichier : " . $documentDossier['nom_fichier']);
+    }
 
     // Trace dans l'historique, écrite par le serveur au moment de l'action
-    require_once __DIR__ . '/../Fonctions/historique_demande.php';
-    journaliserAction($pdo, $demande_id, (int) $agent_id, "Réponse agent", $message);
+    journaliserAction($pdo, $demande_id, (int) $agent_id, "Message envoyé au citoyen", $message);
+
+    // Email au citoyen (sans le contenu du message, RGPD)
+    notifierCitoyenNouveauMessage($pdo, $demande_id);
 
     // Si l’agent répond à un message citoyen → mettre à jour son statut
     if ($parent_id) {
@@ -104,11 +165,11 @@ try {
 
     echo json_encode([
         "success" => true,
-        "message" => "Réponse envoyée",
+        "message" => ($document || $documentDossier) ? "Message et document envoyés au citoyen" : "Message envoyé au citoyen",
         "html" => $html,
         "message_id" => $message_id,
         "created_at" => $created_at,
-        "statut" => "répondu"
+        "statut" => "nouveau"
     ]);
 
 } catch (Exception $e) {

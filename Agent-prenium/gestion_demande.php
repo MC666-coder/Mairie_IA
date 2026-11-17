@@ -177,7 +177,7 @@ if (!$erreur) {
     <!-- Jeton CSRF lu par demande.js et envoyé avec chaque action (en-tête X-CSRF-Token) -->
     <meta name="csrf-token" content="<?= htmlspecialchars(jeton_csrf(), ENT_QUOTES, 'UTF-8') ?>">
     <title>Détail de la demande</title>
-    <link rel="stylesheet" href="../Frontend/assets/css/gestion_demande.css">
+    <link rel="stylesheet" href="../Frontend/assets/css/gestion_demande.css?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/css/gestion_demande.css') ?>">
 </head>
 
 <body>
@@ -273,7 +273,7 @@ if (!$erreur) {
         </p>
 
         <p><strong>Pièces jointes citoyen :</strong>
-            <span class="pj-count-badge"><?= $nb_pj_citoyen ?></span>
+            <span class="pj-count-badge" id="pj-citoyen-count"><?= (int) $nb_pj_citoyen ?></span>
         </p>
 
         <div class="demande-card" data-demande-id="<?= $demande['id'] ?>">
@@ -351,14 +351,36 @@ if (!$erreur) {
 
                         </div>
 
+                        <?php $estAssigne = (int) $demande['agent_id'] === (int) $agent_id; ?>
+                        <?php if (!$estAssigne): ?>
+                            <!-- Règle de la mairie : seul l'agent assigné écrit au citoyen -->
+                            <p class="conversation-verrou">
+                                Seul l’agent assigné à cette demande peut écrire au citoyen.
+                                Assignez-vous la demande pour lui envoyer un message ou un document.
+                            </p>
+                        <?php else: ?>
                         <textarea id="message-agent"
                                 name="message"
-                                placeholder="Écrire un message..."
+                                placeholder="Écrire au citoyen (ex. merci de fournir un justificatif de domicile)…"
                                 required></textarea>
+
+                        <!-- Document envoyé au citoyen (attestation...), visible dans sa conversation -->
+                        <label class="joindre-document-citoyen" id="joindre-nouveau-fichier">
+                            📎 Joindre un document pour le citoyen
+                            <input type="file" name="fichier" id="fichier-pour-citoyen" accept=".pdf,.jpg,.jpeg,.png,.docx,.xlsx">
+                        </label>
+
+                        <!-- Document du dossier prêt à partir (bouton « Envoyer au citoyen » d'un document interne) -->
+                        <input type="hidden" name="fichier_id" id="fichier-dossier-id" value="">
+                        <div class="document-dossier-pret" id="document-dossier-pret" hidden>
+                            <span id="document-dossier-nom"></span>
+                            <button type="button" id="annuler-document-dossier" aria-label="Ne pas joindre ce document">✕</button>
+                        </div>
 
                         <button type="submit" class="send-btn">
                             <span>Envoyer</span>
                         </button>
+                        <?php endif; ?>
                     </form>
 
                 </div>
@@ -467,27 +489,40 @@ if (!$erreur) {
         
 
         <!-- Pièces jointes -->
+        <!-- DOCUMENTS DU DOSSIER : trois cases (remplies par demande.js via get_pj.php) -->
         <section class="pieces-jointes">
             <h2>
-                Pièces jointes 
+                Documents du dossier
                 <span id="pj-count" class="pj-count-badge">0</span>
             </h2>
+            <p class="pj-aide">
+                Pour envoyer un document au citoyen (attestation…), utilisez la conversation.
+                Le formulaire ci-dessous ajoute un document <strong>interne</strong>, jamais visible par le citoyen.
+            </p>
 
-            <!-- FORMULAIRE UPLOAD (AJAX) -->
-            <form enctype="multipart/form-data" 
-                class="form-upload" 
-                data-demande-id="<?= $demande['id'] ?>">
-                
-                <label for="fichier">Ajouter une pièce jointe :</label>
-                <input type="file" name="fichier" id="fichier" required>
-                <button type="submit">Téléverser</button>
+            <!-- Ajout d'un document INTERNE (AJAX, upload_pj.php) -->
+            <form enctype="multipart/form-data" class="form-upload" data-demande-id="<?= (int) $demande['id'] ?>">
+                <label for="fichier">🔒 Ajouter un document interne (non visible par le citoyen) :</label>
+                <input type="file" name="fichier" id="fichier" accept=".pdf,.jpg,.jpeg,.png,.docx,.xlsx" required>
+                <button type="submit">Ajouter au dossier</button>
             </form>
 
-            <input type="text" id="pj-search" placeholder="Rechercher une pièce jointe..." class="pj-search">
+            <label for="pj-search" class="visually-hidden">Rechercher un document</label>
+            <input type="text" id="pj-search" placeholder="Rechercher un document..." class="pj-search">
 
-            <!-- LISTE DES PIÈCES JOINTES (chargée en AJAX) -->
-            <div class="liste-pj" id="liste-pj"data-demande-id="<?= $demande['id'] ?>">
-                <p><em>Chargement...</em></p>
+            <div class="liste-pj documents-dossier" id="liste-pj" data-demande-id="<?= (int) $demande['id'] ?>">
+                <div class="case-dossier">
+                    <h3 class="case-dossier-titre">📥 Reçus du citoyen <span class="pj-count-badge" id="pj-count-recus">0</span></h3>
+                    <ul class="liste-dossier" id="pj-recus"><li class="dossier-vide">Chargement…</li></ul>
+                </div>
+                <div class="case-dossier">
+                    <h3 class="case-dossier-titre">📤 Envoyés au citoyen <span class="pj-count-badge" id="pj-count-envoyes">0</span></h3>
+                    <ul class="liste-dossier" id="pj-envoyes"><li class="dossier-vide">Chargement…</li></ul>
+                </div>
+                <div class="case-dossier case-interne">
+                    <h3 class="case-dossier-titre">🔒 Internes à la mairie <span class="pj-count-badge" id="pj-count-internes">0</span></h3>
+                    <ul class="liste-dossier" id="pj-internes"><li class="dossier-vide">Chargement…</li></ul>
+                </div>
             </div>
         </section>
 
@@ -530,9 +565,9 @@ if (!$erreur) {
 <script>
     window.CURRENT_AGENT_ID = <?= (int)$_SESSION['agent_id'] ?>;
 </script>
-<script src="../Frontend/assets/js/historique_notes.js"></script>
-<script src="../Frontend/assets/js/ouvrir_conv.js"></script>
-<script src="../Frontend/assets/js/demande.js"></script>
+<script src="../Frontend/assets/js/historique_notes.js?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/js/historique_notes.js') ?>"></script>
+<script src="../Frontend/assets/js/ouvrir_conv.js?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/js/ouvrir_conv.js') ?>"></script>
+<script src="../Frontend/assets/js/demande.js?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/js/demande.js') ?>"></script>
 
 
 </body>

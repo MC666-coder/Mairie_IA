@@ -6,6 +6,7 @@ session_set_cookie_params([
 ]);
 session_start();
 require_once __DIR__ . '/../Backend/Config/db.php';
+require_once __DIR__ . '/../Backend/Middleware/auth.php'; // jeton CSRF de la messagerie
 
 /**
  * Sécurisation renforcée de la session
@@ -85,7 +86,9 @@ if (!$demande) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Détails d'une demande - Espace Citoyen</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="assets/css/style.css?v=<?= @filemtime(__DIR__ . '/assets/css/style.css') ?>">
+    <!-- Jeton anti-CSRF lu par messagerie_citoyen.js (en-tête X-CSRF-Token) -->
+    <meta name="csrf-token" content="<?= htmlspecialchars(jeton_csrf(), ENT_QUOTES, 'UTF-8') ?>">
 
     <!-- Content Security Policy stricte -->
     <meta http-equiv="Content-Security-Policy"
@@ -163,6 +166,62 @@ if (!$demande) {
             <p><strong>Mots-clés du service:</strong> <?= htmlspecialchars($demande['mots_cles'] ?? 'non renseigné') ?></p>
         </div>
 
+        <!-- ÉCHANGES AVEC LA MAIRIE (messagerie_citoyen.js, Backend/citoyen/messagerie.php) -->
+        <section class="messagerie-citoyen" id="messagerie-citoyen" data-demande-id="<?= (int) $id ?>"
+                 aria-labelledby="titre-messagerie">
+            <h2 id="titre-messagerie">Échanges avec la mairie</h2>
+            <p class="messagerie-aide">
+                L’agent qui traite votre demande vous écrit ici s’il a besoin d’un document
+                ou pour vous envoyer une attestation. Vous pourrez alors lui répondre.
+            </p>
+
+            <!-- Case 1 : la conversation -->
+            <div class="case-messagerie">
+                <h3 class="case-titre">💬 Conversation</h3>
+                <div class="fil-messages" id="fil-messages" role="log" aria-live="polite" aria-label="Conversation avec la mairie">
+                    <p class="fil-vide">Chargement de la conversation…</p>
+                </div>
+            </div>
+
+            <!-- Case 2 : la réponse du citoyen (document et/ou court message, après un message de l'agent) -->
+            <div class="case-messagerie">
+                <h3 class="case-titre">✍️ Votre réponse</h3>
+
+                <!-- Affiché tant que le citoyen ne peut pas répondre -->
+                <p class="reponse-indisponible" id="reponse-indisponible" hidden></p>
+
+                <form class="saisie-message" id="form-reponse-citoyen" hidden>
+                    <label for="fichier-citoyen" class="etiquette-champ">Document à envoyer (facultatif)</label>
+                    <input type="file" id="fichier-citoyen" name="fichier"
+                           accept=".pdf,.jpg,.jpeg,.png,.docx,.xlsx" aria-describedby="aide-fichier">
+                    <p class="aide-champ" id="aide-fichier">PDF, JPG, PNG, DOCX ou XLSX.</p>
+
+                    <label for="texte-message" class="etiquette-champ">Votre message (facultatif)</label>
+                    <textarea id="texte-message" name="message" rows="2" maxlength="500" dir="auto"
+                              placeholder="Ex. : Voici mon justificatif de domicile."></textarea>
+                    <div class="saisie-actions">
+                        <span class="compteur-caracteres" id="compteur-caracteres">0 / 500</span>
+                        <button type="submit" id="envoyer-message">Envoyer à la mairie</button>
+                    </div>
+                    <p class="messagerie-statut" id="messagerie-statut" role="status"></p>
+                </form>
+            </div>
+
+            <!-- Case 3 : les documents, en deux cases côte à côte -->
+            <div class="documents-citoyen">
+                <div class="case-messagerie">
+                    <h3 class="case-titre">📥 Documents de la mairie
+                        <span class="compteur-documents" id="compteur-docs-mairie">0</span></h3>
+                    <ul id="liste-docs-mairie" class="liste-documents"></ul>
+                </div>
+                <div class="case-messagerie">
+                    <h3 class="case-titre">📤 Vos documents
+                        <span class="compteur-documents" id="compteur-docs-citoyen">0</span></h3>
+                    <ul id="liste-docs-citoyen" class="liste-documents"></ul>
+                </div>
+            </div>
+        </section>
+
     </main>
 
     <!-- BANDE TRICOLORE -->
@@ -217,5 +276,6 @@ if (!$demande) {
 
 </div>
 
+<script src="assets/js/messagerie_citoyen.js?v=<?= @filemtime(__DIR__ . '/assets/js/messagerie_citoyen.js') ?>"></script>
 </body>
 </html>

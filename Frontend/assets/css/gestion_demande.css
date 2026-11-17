@@ -1462,3 +1462,145 @@ button:hover {
     font-size: 0.9rem;
     color: #555;
 }
+
+/* Pièce jointe déposée par le citoyen depuis son portail */
+.pj-origine-citoyen {
+    margin-left: 8px;
+    padding: 1px 8px;
+    border-radius: 10px;
+    background: #d9fdd3;
+    color: #1f5f30;
+    font-size: 0.8rem;
+    font-weight: bold;
+}
+
+/* Conversation : document joint à un message, champ « document pour le citoyen » */
+.message-piece-jointe {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(0, 0, 145, 0.08);
+    color: #000091;
+    font-weight: bold;
+    text-decoration: none;
+}
+.message-piece-jointe:hover { text-decoration: underline; }
+.joindre-document-citoyen {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.85rem;
+    color: #333;
+}
+.conversation-verrou {
+    margin: 0;
+    padding: 10px 12px;
+    border-left: 4px solid #b34700;
+    background: #fff4e5;
+    color: #5c2b00;
+    font-size: 0.9rem;
+}
+
+/* =========================================================
+   Documents du dossier : trois cases
+   (reçus du citoyen, envoyés au citoyen, internes à la mairie)
+   ========================================================= */
+.pj-aide { margin: 4px 0 12px; color: #444; font-size: 0.92rem; }
+.documents-dossier {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-top: 12px;
+}
+.case-dossier {
+    background: #fff;
+    border: 1px solid #d0d0d0;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    padding: 12px;
+    min-width: 0;                    /* évite qu'un long nom de fichier élargisse la case */
+}
+.case-dossier.case-interne { border-top: 4px solid #b34700; background: #fffaf5; }
+.case-dossier-titre {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0 0 10px;
+    font-size: 1rem;
+    color: #000091;
+}
+.case-interne .case-dossier-titre { color: #8a3600; }
+.liste-dossier { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.liste-dossier .document-dossier {
+    display: block;
+    padding: 8px 10px;
+    border: 1px solid #e3e3e3;
+    border-radius: 6px;
+    background: #fafafa;
+}
+.liste-dossier .document-dossier[hidden] { display: none; }
+.document-nom { display: block; color: #000091; font-weight: bold; overflow-wrap: anywhere; text-decoration: none; }
+.document-nom:hover { text-decoration: underline; }
+.liste-dossier .document-infos { display: block; color: #555; font-size: 0.82rem; margin-top: 2px; }
+.document-actions { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+.btn-voir-message {
+    padding: 3px 10px;
+    border: 1px solid #000091;
+    border-radius: 5px;
+    background: #fff;
+    color: #000091;
+    font-size: 0.82rem;
+    cursor: pointer;
+}
+.document-actions .btn-delete { padding: 3px 10px; font-size: 0.82rem; }
+.dossier-vide { color: #666; font-size: 0.88rem; padding: 6px 2px; }
+/* Message mis en évidence quand on clique sur « Voir le message » */
+.message-item.message-surligne { outline: 3px solid #000091; outline-offset: 2px; border-radius: 8px; }
+/* Texte réservé aux lecteurs d'écran */
+.visually-hidden {
+    position: absolute !important;
+    width: 1px; height: 1px;
+    margin: -1px; padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+@media (max-width: 1000px) {
+    .documents-dossier { grid-template-columns: 1fr; }
+}
+
+/* Document interne -> envoi au citoyen depuis la conversation */
+.btn-envoyer-citoyen {
+    padding: 3px 10px;
+    border: none;
+    border-radius: 5px;
+    background: #000091;
+    color: #fff;
+    font-size: 0.82rem;
+    cursor: pointer;
+}
+.btn-envoyer-citoyen:hover { background: #1212ff; }
+.document-dossier-pret {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 6px 10px;
+    border: 1px solid #000091;
+    border-radius: 6px;
+    background: #f5f5fe;
+    color: #000091;
+    font-weight: bold;
+    font-size: 0.88rem;
+    overflow-wrap: anywhere;
+}
+.document-dossier-pret[hidden], .joindre-document-citoyen[hidden] { display: none; }
+.document-dossier-pret button {
+    border: none;
+    background: transparent;
+    color: #b30000;
+    font-size: 1rem;
+    cursor: pointer;
+}

@@ -53,7 +53,10 @@ function donneesTableauCitoyen(PDO $pdo, int $citoyenId): array
 
     $stmt = $pdo->prepare("
         SELECT d.id, t.libelle AS type, d.message, d.priorite, d.statut, d.created_at,
-               d.date_mise_a_jour, s.nom_service, s.description_service
+               d.date_mise_a_jour, s.nom_service, s.description_service,
+               -- Messages de la mairie que le citoyen n'a pas encore lus
+               (SELECT COUNT(*) FROM messages_demandes m
+                WHERE m.demande_id = d.id AND m.auteur_type = 'agent' AND m.statut = 'nouveau') AS messages_non_lus
         FROM demandes d
         LEFT JOIN services s       ON d.service_id = s.id
         LEFT JOIN types_demandes t ON d.type_id = t.id
@@ -104,7 +107,14 @@ function htmlDemandesCitoyen(array $demandes): string
             ? echapper($d['nom_service']) . ' - ' . echapper($d['description_service'], '')
             : 'À déterminer par la mairie';
 
-        $html .= '<div class="request-card" data-id="' . (int) $d['id'] . '">'
+        $nonLus = (int) ($d['messages_non_lus'] ?? 0);
+        $badge = $nonLus > 0
+            ? '<a class="badge-message-mairie" href="details_demande.php?id=' . (int) $d['id'] . '#messagerie-citoyen">'
+              . '✉️ ' . ($nonLus > 1 ? $nonLus . ' nouveaux messages' : 'Nouveau message') . ' de la mairie</a>'
+            : '';
+
+        $html .= '<div class="request-card' . ($nonLus > 0 ? ' a-un-message' : '') . '" data-id="' . (int) $d['id'] . '">'
+               . $badge
                . '<p><strong>Type :</strong> ' . echapper($d['type']) . '</p>'
                . '<p><strong>Message :</strong> <span dir="auto">' . nl2br(echapper($d['message'])) . '</span></p>'
                . '<p><strong>Priorité :</strong> ' . echapper($priorite) . '</p>'

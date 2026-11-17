@@ -119,14 +119,17 @@ function htmlHistorique(array $historique): string
         foreach ($actions as $h) {
             $t      = strtotime($h['created_at']);
             $type   = typeAction($h['action']);
-            $auteur = trim(($h['prenom'] ?? '') . ' ' . ($h['nom'] ?? '')) ?: 'Agent supprimé';
+            // agent_id 0 = action faite par le citoyen (ex. document joint)
+            $parCitoyen = (int) $h['agent_id'] === 0;
+            $auteur = $parCitoyen ? 'Citoyen'
+                    : (trim(($h['prenom'] ?? '') . ' ' . ($h['nom'] ?? '')) ?: 'Agent supprimé');
 
             $html .= '<div class="history-item" data-type="' . $type . '"'
                    . ' data-created-at="' . date('Y-m-d\TH:i:s', $t) . '"'
                    . ' data-text="' . htmlspecialchars($h['action'] . ' ' . ($h['details'] ?? '') . ' ' . $auteur) . '">'
                    . '<div class="history-dot history-dot-' . $type . '"></div>'
                    . '<div class="history-content"><div class="history-header">'
-                   . '<div class="history-avatar">' . htmlspecialchars(initialesAgent($h['prenom'], $h['nom'])) . '</div>'
+                   . '<div class="history-avatar">' . ($parCitoyen ? 'C' : htmlspecialchars(initialesAgent($h['prenom'], $h['nom']))) . '</div>'
                    . '<div class="history-meta">'
                    . '<span class="history-author">' . htmlspecialchars($auteur) . '</span>'
                    . '<time class="history-time" datetime="' . date('c', $t) . '">'

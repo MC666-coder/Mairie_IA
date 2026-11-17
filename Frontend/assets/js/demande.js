@@ -147,6 +147,12 @@ function chargerMessages(demandeId) {
 
             const messages = data.messages;
 
+            // Rien de nouveau depuis le dernier affichage : on ne redessine pas
+            // (évite de faire sauter la conversation à chaque rafraîchissement)
+            const signature = messages.map(m => m.id).join(",");
+            if (timeline.dataset.signature === signature) return;
+            timeline.dataset.signature = signature;
+
             if (messages.length === 0) {
                 timeline.innerHTML = "<p><em>Aucun message pour le moment.</em></p>";
                 return;
@@ -188,6 +194,11 @@ function chargerMessages(demandeId) {
                             <div class="message-body">
                                 ${escapeHTML(m.message).replace(/\n/g, "<br>")}
                             </div>
+                            ${m.fichier_id ? `
+                            <a class="message-piece-jointe"
+                               href="../Backend/ajax/download_pj.php?id=${parseInt(m.fichier_id, 10)}">
+                                📎 ${escapeHTML(m.fichier_nom)}
+                            </a>` : ""}
                         </div>
                     </div>
                 `;
@@ -297,6 +308,26 @@ document.addEventListener("DOMContentLoaded", () => {
         chargerPiecesJointes(demandeIdPage);
     }
 
+    /* Mise à jour automatique toutes les 15 s (onglet visible) : messages et
+       documents envoyés par le citoyen depuis son portail, badge « nouveau »,
+       compteur de pièces jointes et historique. */
+    const demandeIdAuto = demandeIdMessages || demandeIdPage;
+    if (demandeIdAuto) {
+        let signatureAuto = "";
+        setInterval(() => {
+            if (document.hidden) return;
+            chargerMessages(demandeIdAuto);
+            mettreAJourBadgeNouveauxMessages(demandeIdAuto);
+            if (demandeIdPage) chargerPiecesJointes(demandeIdPage);
+
+            // Historique : seulement si les messages ou les documents ont changé
+            const signature = (document.getElementById("messages-timeline")?.dataset.signature || "")
+                            + "|" + (document.getElementById("pj-citoyen-count")?.textContent || "");
+            if (signatureAuto && signature !== signatureAuto) rafraichirHistorique();
+            signatureAuto = signature;
+        }, 15000);
+    }
+
     const formStatut = document.getElementById("form-statut");
 
     if (formStatut) {
@@ -404,71 +435,172 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const formUploadPJ = document.querySelector(".pieces-jointes .form-upload");
 
+    /* ------------------------------------------------------------
+       Documents du dossier : trois cases (reçus du citoyen, envoyés
+       au citoyen, internes). Construits avec le DOM (textContent) :
+       un nom de fichier ne peut jamais être interprété comme du HTML.
+    ------------------------------------------------------------ */
     function chargerPiecesJointes(demandeId) {
         fetch(`../Backend/ajax/get_pj.php?demande_id=${encodeURIComponent(demandeId)}`, { headers: enTetesSecurite() })
             .then(res => res.json())
             .then(data => {
+                const conteneur = document.getElementById("liste-pj");
+                if (!conteneur) return;
 
-                const liste = document.getElementById("liste-pj");
-                const badge = document.getElementById("pj-count");
+                const majCompteur = (id, valeur) => {
+                    const el = document.getElementById(id);
+                    if (el) el.textContent = valeur ?? 0;
+                };
+                majCompteur("pj-count", data.count);
+                majCompteur("pj-citoyen-count", data.count_citoyen);   // fiche de la demande
+                majCompteur("pj-count-recus", data.recus?.length);
+                majCompteur("pj-count-envoyes", data.envoyes?.length);
+                majCompteur("pj-count-internes", data.internes?.length);
 
-                if (badge) badge.textContent = data.count ?? 0;
+                // Rien de nouveau : on ne redessine pas (rafraîchissement automatique)
+                const signature = JSON.stringify(data);
+                if (conteneur.dataset.signature === signature) return;
+                conteneur.dataset.signature = signature;
 
-                if (!data.count || data.count === 0) {
-                    liste.innerHTML = `<p><em>Aucune pièce jointe.</em></p>`;
-                    return;
-                }
-
-                let html = "";
-
-                Object.keys(data.grouped).forEach(date => {
-                    const dateFr = new Date(date).toLocaleDateString("fr-FR", {
-                        weekday: "long",
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric"
-                    });
-
-                    html += `
-                        <div class="pj-date-group">
-                            <h4 class="pj-date-title">📅 ${dateFr}</h4>
-                    `;
-
-                    data.grouped[date].forEach(f => {
-                        const isImage = f.type && f.type.startsWith("image/");
-                        const isPDF = f.type === "application/pdf";
-
-                        // Le nom du fichier est choisi par celui qui l'envoie : on l'échappe (anti-XSS)
-                        const url = escapeHTML(f.url);
-                        const nom = escapeHTML(f.nom);
-                        const idPJ = parseInt(f.id, 10);
-                        const idDemande = parseInt(demandeId, 10);
-
-                        html += `
-                            <div class="pj-item">
-                                <div class="pj-left">
-                                    ${isImage ? `<img src="${url}" class="pj-thumb" alt="">` : ""}
-                                    ${isPDF ? `<i class="fa-solid fa-file-pdf pj-pdf"></i>` : ""}
-                                    <a href="${url}" target="_blank" rel="noopener" download="${nom}">
-                                        📎 ${nom}
-                                    </a>
-                                </div>
-                                <button class="btn-delete" onclick="supprimerPJ(${idPJ}, ${idDemande})">
-                                    Supprimer
-                                </button>
-                            </div>
-                        `;
-                    });
-
-                    html += `</div>`;
-                });
-
-                liste.innerHTML = html;
+                remplirCaseDossier("pj-recus", data.recus || [], "Aucun document reçu du citoyen.", demandeId);
+                remplirCaseDossier("pj-envoyes", data.envoyes || [], "Aucun document envoyé au citoyen.", demandeId);
+                remplirCaseDossier("pj-internes", data.internes || [], "Aucun document interne.", demandeId);
+                filtrerDocuments();
             })
             .catch(err => {
-                console.error("Erreur chargement PJ:", err);
-                showError("Impossible de charger les pièces jointes.");
+                console.error("Erreur chargement des documents :", err);
+                showError("Impossible de charger les documents du dossier.");
             });
+    }
+
+    function tailleLisible(octets) {
+        return octets >= 1048576 ? (octets / 1048576).toFixed(1) + " Mo" : Math.max(1, Math.round(octets / 1024)) + " Ko";
+    }
+
+    function remplirCaseDossier(idListe, documents, texteVide, demandeId) {
+        const liste = document.getElementById(idListe);
+        if (!liste) return;
+        liste.replaceChildren();
+
+        if (!documents.length) {
+            const li = document.createElement("li");
+            li.className = "dossier-vide";
+            li.textContent = texteVide;
+            liste.append(li);
+            return;
+        }
+
+        documents.forEach(f => {
+            const li = document.createElement("li");
+            li.className = "pj-item document-dossier";
+
+            const lien = document.createElement("a");
+            lien.href = f.url;
+            lien.textContent = (f.type === "application/pdf" ? "📄 " : f.type?.startsWith("image/") ? "🖼️ " : "📎 ") + f.nom;
+            lien.className = "document-nom";
+
+            const infos = document.createElement("span");
+            infos.className = "document-infos";
+            infos.textContent = `${tailleLisible(f.taille)} · ${f.date}${f.auteur ? " · " + f.auteur : ""}`;
+
+            li.append(lien, infos);
+
+            const actions = document.createElement("div");
+            actions.className = "document-actions";
+
+            // Lien vers le message de la conversation qui accompagne le document
+            if (f.message_id) {
+                const voir = document.createElement("button");
+                voir.type = "button";
+                voir.className = "btn-voir-message";
+                voir.textContent = "Voir le message";
+                voir.addEventListener("click", () => ouvrirMessage(f.message_id));
+                actions.append(voir);
+            }
+            // Document interne -> l'envoyer au citoyen par la conversation
+            // (bouton présent seulement si l'agent peut écrire : agent assigné)
+            if (f.supprimable && document.getElementById("fichier-dossier-id")) {
+                const envoyer = document.createElement("button");
+                envoyer.type = "button";
+                envoyer.className = "btn-envoyer-citoyen";
+                envoyer.textContent = "Envoyer au citoyen";
+                envoyer.addEventListener("click", () => preparerEnvoiDocument(f));
+                actions.append(envoyer);
+            }
+            // Suppression : documents internes uniquement
+            if (f.supprimable) {
+                const supprimer = document.createElement("button");
+                supprimer.type = "button";
+                supprimer.className = "btn-delete";
+                supprimer.textContent = "Supprimer";
+                supprimer.addEventListener("click", () => {
+                    if (confirm(`Supprimer définitivement le document interne « ${f.nom} » ?`)) {
+                        window.supprimerPJ(f.id, demandeId);
+                    }
+                });
+                actions.append(supprimer);
+            }
+            if (actions.children.length) li.append(actions);
+            liste.append(li);
+        });
+    }
+
+    /* ------------------------------------------------------------
+       Envoyer au citoyen un document interne du dossier :
+       la conversation s'ouvre avec le document prêt à partir.
+       L'agent écrit son message et valide : rien ne part sans lui.
+    ------------------------------------------------------------ */
+    const champDossierId = document.getElementById("fichier-dossier-id");
+    const encartDossier = document.getElementById("document-dossier-pret");
+    const champNouveauFichier = document.getElementById("fichier-pour-citoyen");
+
+    function preparerEnvoiDocument(f) {
+        if (!champDossierId || !encartDossier) return;
+        champDossierId.value = f.id;
+        document.getElementById("document-dossier-nom").textContent = `📎 ${f.nom} (document du dossier)`;
+        encartDossier.hidden = false;
+        // Un seul document par message : on retire un éventuel nouveau fichier
+        if (champNouveauFichier) champNouveauFichier.value = "";
+        document.getElementById("joindre-nouveau-fichier")?.setAttribute("hidden", "");
+
+        document.getElementById("open-conversation")?.click();
+        setTimeout(() => {
+            const zone = document.getElementById("message-agent");
+            if (zone) {
+                if (!zone.value.trim()) zone.value = "Bonjour, veuillez trouver ci-joint le document concernant votre demande.";
+                zone.focus();
+            }
+        }, 300);
+    }
+
+    function annulerEnvoiDocument() {
+        if (!champDossierId || !encartDossier) return;
+        champDossierId.value = "";
+        encartDossier.hidden = true;
+        document.getElementById("joindre-nouveau-fichier")?.removeAttribute("hidden");
+    }
+    window.annulerEnvoiDocument = annulerEnvoiDocument;
+
+    document.getElementById("annuler-document-dossier")?.addEventListener("click", annulerEnvoiDocument);
+
+    /** Ouvre la conversation et met en évidence le message lié à un document. */
+    function ouvrirMessage(messageId) {
+        document.getElementById("open-conversation")?.click();
+        setTimeout(() => {
+            const message = document.querySelector(`.message-item[data-message-id="${parseInt(messageId, 10)}"]`);
+            if (!message) return;
+            message.scrollIntoView({ block: "center" });
+            message.classList.add("message-surligne");
+            setTimeout(() => message.classList.remove("message-surligne"), 2500);
+        }, 300);
+    }
+
+    /** Recherche dans les trois cases (nom, date, auteur). */
+    function filtrerDocuments() {
+        const terme = (document.getElementById("pj-search")?.value || "").toLowerCase();
+        document.querySelectorAll(".document-dossier").forEach(item => {
+            item.hidden = terme !== "" && !item.textContent.toLowerCase().includes(terme);
+        });
     }
 
     if (formUploadPJ) {
@@ -515,20 +647,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const pjSearchInput = document.getElementById("pj-search");
 
     if (pjSearchInput) {
-        pjSearchInput.addEventListener("input", function() {
-            const term = this.value.toLowerCase();
-
-            document.querySelectorAll(".pj-item").forEach(item => {
-                const text = item.textContent.toLowerCase();
-                item.style.display = text.includes(term) ? "" : "none";
-            });
-
-            document.querySelectorAll(".pj-date-group").forEach(group => {
-                const hasVisible = Array.from(group.querySelectorAll(".pj-item"))
-                    .some(i => i.style.display !== "none");
-                group.style.display = hasVisible ? "" : "none";
-            });
-        });
+        pjSearchInput.addEventListener("input", filtrerDocuments);
     }
 
 
@@ -632,15 +751,17 @@ function ensureDateGroup(dateStr) {
                 formData,
                 (result) => {
 
-                    // Ajouter séparateur de date si nécessaire
-                    ensureDateGroup(result.created_at);
-
-                    // Insérer le message agent dans la timeline
-                    insertMessageHTML(result.html);
+                    // Réafficher la conversation depuis le serveur (avec le
+                    // document joint éventuel), puis descendre en bas du fil
+                    chargerMessages(demandeId);
+                    setTimeout(() => { timeline.scrollTop = timeline.scrollHeight; }, 300);
+                    chargerPiecesJointes(demandeId);
 
                     // Réinitialiser le formulaire
                     this.reset();
                     this.dataset.parentId = ""; // reset parent_id
+                    // Le document du dossier est parti : on retire l'encart
+                    if (typeof window.annulerEnvoiDocument === "function") window.annulerEnvoiDocument();
 
                     // La réponse est enregistrée dans l'historique par le serveur
                     rafraichirHistorique();

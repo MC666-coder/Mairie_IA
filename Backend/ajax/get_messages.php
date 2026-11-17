@@ -37,9 +37,12 @@ try {
             m.created_at,
             m.updated_at,
             a.prenom,
-            a.nom
+            a.nom,
+            f.id AS fichier_id,
+            f.nom_fichier AS fichier_nom
         FROM messages_demandes m
         LEFT JOIN agents a ON m.agent_id = a.id
+        LEFT JOIN fichiers_demandes f ON f.message_id = m.id
         WHERE m.demande_id = ?
         ORDER BY m.created_at ASC
     ";
