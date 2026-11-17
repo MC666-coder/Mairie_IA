@@ -1,6 +1,7 @@
 <?php
 require_once __DIR__ . '/../Config/env.php';
 require_once __DIR__ . '/sanitize.php';
+require_once __DIR__ . '/fournisseurs_ia.php'; // envoi à Gemini ou Claude (IA_FOURNISSEUR dans .env)
 
 
 /**
@@ -9,7 +10,6 @@ require_once __DIR__ . '/sanitize.php';
  */
 function callAgentAI(string $prompt, array $context = []): ?string {
 
-    global $API_KEY_AGENT;
 
     //on nettoie avant Tout sécurisation RGPD
     $prompt_clean = sanitizeAgentMessage($prompt);
@@ -54,6 +54,7 @@ function callAgentAI(string $prompt, array $context = []): ?string {
             - Tu termines par une synthèse claire pour l'agent.";
             break;
         case 'actions':
+        case 'action': // valeur envoyée par chat_agent.php
             $mode_Instruction = "
             MODE: PROPOSITION D'ACTIONS
             -Tu dois proposer des actions concrètes que l'agent peut réaliser.
@@ -77,11 +78,7 @@ function callAgentAI(string $prompt, array $context = []): ?string {
             break;
     }
 
-    // Vérification clé API
-    if (!$API_KEY_AGENT) {
-        $log("❌ Clé API Agent manquante");
-        return null;
-    }
+    // (la clé API est vérifiée par le fournisseur choisi : voir fournisseurs_ia.php)
 
     $metier_global = "
     Statuts : nouvelle, analyse_ia, en_cours, en_attente, resolue, clos
@@ -372,91 +369,16 @@ CONTEXTE MÉTIER SPÉCIFIQUE AU SERVICE :
 
 
     // ---------------------------------------------------------
-    // 3. PAYLOAD
+    // 3. ENVOI AU FOURNISSEUR D'IA (Gemini ou Claude, selon IA_FOURNISSEUR)
+    //    Le même prompt est envoyé quel que soit le fournisseur.
     // ---------------------------------------------------------
-    $data = [
-        "contents" => [
-            [
-                "role" => "user",
-                "parts" => [
-                    [
-                        "text" =>$systemPrompt
-                    ]
-                ]
-            ]
-        ]
-    ];
-    
+    $text = envoyerPromptIA($systemPrompt, $log, $logContenu);
 
-    $logContenu("Payload envoyé : " . json_encode($data, JSON_UNESCAPED_UNICODE));
-
-    // ---------------------------------------------------------
-    // 4. ENDPOINT GOOGLE
-    // ---------------------------------------------------------
-    $url = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent?key=" . urlencode($API_KEY_AGENT);
-    $log("URL API : generativelanguage.googleapis.com/v1/models/gemini-2.5-pro:generateContent");
-
-    // ---------------------------------------------------------
-    // 5. REQUÊTE CURL
-    // ---------------------------------------------------------
-    $ch = curl_init($url);
-
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_POST => true,
-        CURLOPT_HTTPHEADER => [
-            "Content-Type: application/json"
-        ],
-        CURLOPT_POSTFIELDS => json_encode($data, JSON_UNESCAPED_UNICODE),
-        CURLOPT_TIMEOUT => 60,
-        CURLOPT_SSL_VERIFYPEER => true,
-        CURLOPT_SSL_VERIFYHOST => 2
-    ]);
-
-    $response = curl_exec($ch);
-    
-    if ($response === false) {
-        $log("❌ Erreur cURL : " . curl_error($ch));
-        curl_close($ch);
+    if ($text === null) {
         return null;
     }
 
-    $logContenu("Réponse brute Google : " . $response);
-
-    curl_close($ch);
-
-    // ---------------------------------------------------------
-    // 6. DÉCODAGE JSON
-    // ---------------------------------------------------------
-    $decoded = json_decode($response, true);
-
-    if (!is_array($decoded)) {
-        $log("❌ Réponse non JSON (" . strlen($response) . " octets)");
-        $logContenu("Réponse non JSON : " . $response);
-        return null;
-    }
-
-    if (isset($decoded['error'])) {
-        $log("❌ Erreur API Google : " . json_encode($decoded['error']));
-        return null;
-    }
-
-    // ---------------------------------------------------------
-    // 7. EXTRACTION TEXTE
-    // ---------------------------------------------------------
-    $text = $decoded['candidates'][0]['content']['parts'][0]['text'] ?? null;
-
-    if (!$text) {
-        $log("❌ Réponse IA invalide (aucun texte dans la réponse)");
-        $logContenu("Réponse IA invalide : " . $response);
-        return null;
-    }
-
-    $logContenu("Réponse IA extraite : " . $text);
     $log("=== Fin requête IA Agent === (" . mb_strlen($text) . " caractères)");
-    // Nettoyage du texte
-    
-
-    return trim($text);
+    return $text;
 }
 ?>

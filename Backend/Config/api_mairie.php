@@ -1,15 +1,16 @@
 <?php
-require_once __DIR__ . '/env.php';
+require_once __DIR__ . '/app.php';
+require_once __DIR__ . '/../Agent_API/fournisseurs_ia.php';
 
 function callMairieAPI(string $message, int $citoyenId): ?array {
 
-    global $API_KEY;
+    $commune = NOM_COMMUNE;
 
     // -----------------------------
     // SYSTEM PROMPT PREMIUM ULTIME (TOP 1% MONDIAL)
     // -----------------------------
     $systemPrompt = "
-Tu es l’assistant officiel de la mairie d’Aiguillon-sur-Vie.
+Tu es l’assistant officiel de la mairie de {$commune}.
 
 Tu es une IA institutionnelle de niveau international, conçue pour offrir une qualité de service irréprochable, claire, fiable, multilingue et parfaitement adaptée aux besoins d’un service public moderne.
 
@@ -172,76 +173,25 @@ Ton objectif : être clair, direct, efficace, institutionnel, sans répétition,
 ";
 
     // -----------------------------
-    // FORMAT POUR GEMINI
+    // ENVOI AU FOURNISSEUR D'IA (Gemini ou Claude, selon .env)
     // -----------------------------
-       // -----------------------------
-    // Construction du payload
-    // -----------------------------
-    $data = [
-        "contents" => [
-            [
-                "role" => "user",
-                "parts" => [
-                    [
-                        "text" => $systemPrompt . "\n\nMessage du citoyen : " . $message
-                    ]
-                ]
-            ]
-        ]
-    ];
+    // Journal technique : métadonnées uniquement, jamais le message du citoyen.
+    $log = function (string $ligne): void {
+        error_log("[IA citoyen] " . $ligne);
+    };
+    $logContenu = function (string $ligne): void {
+        // Le contenu des échanges citoyens n'est jamais journalisé.
+    };
 
-    // -----------------------------
-    // ENDPOINT GOOGLE
-    // -----------------------------
-    $url = "https://generativelanguage.googleapis.com/v1/models/gemini-2.5-flash:generateContent?key=" . urlencode($API_KEY);
+    $text = envoyerPromptIA(
+        $systemPrompt . "\n\nMessage du citoyen : " . $message,
+        $log,
+        $logContenu,
+        null,
+        'citoyen'
+    );
 
-    // -----------------------------
-    // REQUÊTE CURL SÉCURISÉE
-    // -----------------------------
-    $ch = curl_init($url);
-
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_POST => true,
-        CURLOPT_HTTPHEADER => [
-            "Content-Type: application/json"
-        ],
-        CURLOPT_POSTFIELDS => json_encode($data, JSON_UNESCAPED_UNICODE),
-        CURLOPT_TIMEOUT => 12,                 // empêche les blocages
-        CURLOPT_SSL_VERIFYPEER => true,        // vérifie certificat SSL
-        CURLOPT_SSL_VERIFYHOST => 2            // vérifie domaine SSL
-    ]);
-
-    $response = curl_exec($ch);
-
-    if ($response === false) {
-        error_log("Erreur cURL : " . curl_error($ch));
-        curl_close($ch);
-        return null;
-    }
-
-    curl_close($ch);
-
-    // -----------------------------
-    // DÉCODAGE JSON GOOGLE
-    // -----------------------------
-    $decoded = json_decode($response, true);
-
-    if (!is_array($decoded)) {
-        error_log("Réponse Google non JSON : " . $response);
-        return null;
-    }
-
-    if (isset($decoded['error'])) {
-        error_log("Erreur API Google : " . ($decoded['error']['message'] ?? 'Erreur inconnue'));
-        return null;
-    }
-
-    // Extraction du texte IA
-    $text = $decoded['candidates'][0]['content']['parts'][0]['text'] ?? null;
-
-    if (!$text) {
-        error_log("Réponse API invalide : " . $response);
+    if ($text === null) {
         return null;
     }
 
@@ -266,7 +216,7 @@ Ton objectif : être clair, direct, efficace, institutionnel, sans répétition,
     $json = json_decode($clean, true);
 
     if (!is_array($json)) {
-        error_log("JSON retourné invalide : " . $clean);
+        $log("JSON retourné invalide (" . mb_strlen($clean) . " caractères)");
         return null;
     }
 

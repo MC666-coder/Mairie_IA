@@ -12,7 +12,7 @@ Options -Indexes
     RewriteRule "(^|/)\.(?!well-known/)" - [F,L]
 
     # Dossiers internes (dépendances, dumps SQL, scripts, sources front)
-    RewriteRule "^(vendor|sql|node_modules|scripts)(/|$)" - [F,L]
+    RewriteRule "^(vendor|sql|node_modules|scripts|tests)(/|$)" - [F,L]
 </IfModule>
 
 # Journaux, dumps, configuration et documentation interne
