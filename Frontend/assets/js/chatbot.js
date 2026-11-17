@@ -24,7 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "X-CSRF-Token": jeton
     };
 
-    sendBtn.addEventListener("click", sendMessage);
+    sendBtn.addEventListener("click", () => sendMessage());
     input.addEventListener("keydown", e => {
         if (e.key === "Enter") {
             e.preventDefault();
@@ -32,14 +32,20 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    function sendMessage() {
-        const text = input.value.trim();
+    /**
+     * Envoie le texte saisi, ou un texte imposé (bouton de choix).
+     */
+    function sendMessage(texteImpose) {
+        const text = (texteImpose ?? input.value).trim();
         if (text.length === 0 || sendBtn.disabled) {
             return;
         }
 
         addMessage(text, "user");
-        input.value = "";
+        if (texteImpose === undefined) {
+            input.value = "";
+        }
+        retirerChoix();
         attente(true);
 
         fetch("../Backend/chatbot/send_message.php", {
@@ -47,18 +53,83 @@ document.addEventListener("DOMContentLoaded", () => {
             headers: entetes,
             body: JSON.stringify({ message: text })
         })
-        .then(res => res.json())
+        .then(lireJson)
         .then(data => {
             attente(false);
             addMessage(data.response ?? data.message ?? "Réponse invalide du serveur.", "bot", data.langue);
             if (data.brouillon) {
                 afficherBrouillon(data.brouillon);
+            } else if (data.choix) {
+                afficherChoix(data.choix, data.langue);
             }
         })
-        .catch(() => {
+        .catch(erreur => {
             attente(false);
-            addMessage("Le service est momentanément indisponible.", "bot");
+            addMessage("Le service est momentanément indisponible." + codeErreur(erreur), "bot");
         });
+    }
+
+    /* ---------------------------------------------------------
+       Choix du citoyen : faire sa demande lui-même ou la faire
+       préparer par l'assistant
+    --------------------------------------------------------- */
+    function afficherChoix(choix, langue) {
+        retirerChoix();
+
+        const bloc = document.createElement("div");
+        bloc.className = "choix-demande";
+        bloc.dir = "auto";
+        if (langue) {
+            bloc.lang = langue;
+        }
+
+        const assistant = document.createElement("button");
+        assistant.type = "button";
+        assistant.textContent = choix.assistant;
+
+        const moiMeme = document.createElement("button");
+        moiMeme.type = "button";
+        moiMeme.className = "secondaire";
+        moiMeme.textContent = choix.moi_meme;
+
+        // L'assistant prépare la demande : le choix lui est envoyé comme un message
+        assistant.addEventListener("click", () => sendMessage(choix.assistant));
+
+        // Le citoyen la fait lui-même : on lui montre où aller
+        moiMeme.addEventListener("click", () => {
+            retirerChoix();
+            addMessage(choix.moi_meme, "user", langue);
+            const bulle = addMessage(choix.ou_aller ||
+                "Vous pouvez faire votre demande vous-même depuis la page « Créer une demande », accessible dans le menu en haut du portail.",
+                "bot", langue);
+            const lien = document.createElement("a");
+            lien.href = "nouvelle_demande.php";
+            lien.className = "lien-creer-demande";
+            lien.textContent = choix.lien || "Ouvrir la page Créer une demande";
+            bulle.appendChild(document.createElement("br"));
+            bulle.appendChild(lien);
+        });
+
+        bloc.append(assistant, moiMeme);
+        chatWindow.appendChild(bloc);
+        chatWindow.scrollTop = chatWindow.scrollHeight;
+    }
+
+    function retirerChoix() {
+        chatWindow.querySelectorAll(".choix-demande").forEach(b => b.remove());
+    }
+
+    /* Lit la réponse JSON du serveur. Si le serveur renvoie autre chose
+       (page d'erreur Apache, accès refusé...), on garde le code HTTP pour
+       pouvoir l'afficher : sans lui, impossible de savoir ce qui a échoué. */
+    function lireJson(res) {
+        return res.json().catch(() => {
+            throw new Error("HTTP " + res.status);
+        });
+    }
+
+    function codeErreur(erreur) {
+        return erreur && /^HTTP \d+$/.test(erreur.message) ? ` (erreur technique : ${erreur.message})` : "";
     }
 
     function attente(active) {
@@ -77,6 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         chatWindow.appendChild(msg);
         chatWindow.scrollTop = chatWindow.scrollHeight;
+        return msg;
     }
 
     /* ---------------------------------------------------------
@@ -152,18 +224,22 @@ document.addEventListener("DOMContentLoaded", () => {
             headers: entetes,
             body: JSON.stringify(corps)
         })
-        .then(res => res.json())
+        .then(lireJson)
         .then(data => {
             if (data.success) {
                 carte.remove();
+                // Prévient le tableau de bord (tableau_citoyen.js) de se mettre à jour
+                if (data.demande_id) {
+                    document.dispatchEvent(new CustomEvent("demande:creee", { detail: { id: data.demande_id } }));
+                }
             } else {
                 carte.querySelectorAll("button, textarea").forEach(el => el.disabled = false);
             }
             addMessage(data.message ?? "Réponse invalide du serveur.", "bot", langue);
         })
-        .catch(() => {
+        .catch(erreur => {
             carte.querySelectorAll("button, textarea").forEach(el => el.disabled = false);
-            addMessage("La demande n'a pas pu être envoyée. Merci de réessayer.", "bot");
+            addMessage("La demande n'a pas pu être envoyée. Merci de réessayer." + codeErreur(erreur), "bot");
         });
     }
 });

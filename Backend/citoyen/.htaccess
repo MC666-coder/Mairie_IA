@@ -1,0 +1,6 @@
+# Seul tableau_de_bord.php est un endpoint ; tout autre fichier ajouté ici
+# reste interdit au navigateur (liste blanche)
+Require all denied
+<Files "tableau_de_bord.php">
+    Require all granted
+</Files>

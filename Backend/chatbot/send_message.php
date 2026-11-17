@@ -26,6 +26,23 @@ function repondre(array $donnees, int $code = 200): never
     exit;
 }
 
+/**
+ * Garde uniquement les libellés attendus, en texte court, sans les
+ * guillemets que l'IA recopie parfois des consignes (« Annuler » -> Annuler).
+ * Ils sont affichés avec textContent : aucun HTML n'est interprété.
+ */
+function libellesIA(mixed $source, array $cles): array
+{
+    $libelles = [];
+    foreach ($cles as $cle) {
+        $valeur = is_array($source) ? ($source[$cle] ?? null) : null;
+        if (is_string($valeur) && trim($valeur) !== '' && mb_strlen($valeur) <= 300) {
+            $libelles[$cle] = trim(preg_replace('/^[\s«»"“”„]+|[\s«»"“”„]+$/u', '', $valeur));
+        }
+    }
+    return $libelles;
+}
+
 /* 1. Citoyen connecté + POST + jeton CSRF */
 if (!isset($_SESSION['citoyen_id'])) {
     repondre(['response' => "Vous devez être connecté pour utiliser l'assistant."], 401);
@@ -85,14 +102,9 @@ if ($IA['brouillon'] !== null) {
     }
     $description = trim((string) ($b['description'] ?? ''));
 
-    // Libellés de la carte traduits par l'IA : clés attendues, texte court
-    $interface = [];
-    foreach (['entete', 'service', 'priorite', 'aide', 'confirmer', 'annuler', 'envoyee', 'annulee'] as $cle) {
-        $valeur = $b['interface'][$cle] ?? null;
-        if (is_string($valeur) && trim($valeur) !== '' && mb_strlen($valeur) <= 300) {
-            $interface[$cle] = trim($valeur);
-        }
-    }
+    // Libellés de la carte traduits par l'IA
+    $interface = libellesIA($b['interface'] ?? null,
+        ['entete', 'service', 'priorite', 'aide', 'confirmer', 'annuler', 'envoyee', 'annulee']);
     if (isset($interface['envoyee']) && !str_contains($interface['envoyee'], '{numero}')) {
         unset($interface['envoyee']);   // sans le numéro, on garde le message français
     }
@@ -124,6 +136,15 @@ if ($brouillon !== null && $IA['langue'] !== 'fr'
 
 /* 6. Réponse (le navigateur reçoit le brouillon pour l'afficher et le modifier) */
 $reponse = ['response' => $IA['reponse'], 'intention' => $IA['intention'], 'langue' => $IA['langue']];
+
+// Choix proposé au citoyen : faire sa demande lui-même ou la faire préparer.
+// (pas de choix en même temps qu'un brouillon : il a déjà choisi)
+if ($brouillon === null && $IA['choix'] !== null) {
+    $choix = libellesIA($IA['choix'], ['assistant', 'moi_meme', 'ou_aller', 'lien']);
+    if (isset($choix['assistant'], $choix['moi_meme'])) {
+        $reponse['choix'] = $choix;
+    }
+}
 if ($brouillon !== null) {
     unset($brouillon['service_id']);
     $reponse['brouillon'] = $brouillon;

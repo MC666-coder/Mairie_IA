@@ -24,6 +24,14 @@ if (!isset($_SESSION['citoyen_id'])) {
 $citoyenId = (int) $_SESSION['citoyen_id'];
 
 /* ---------------------------------------
+   Chatbot : nouvelle page = nouvelle conversation.
+   La fenêtre du chat est vide à l'affichage : l'historique gardé côté
+   serveur doit l'être aussi, sinon l'IA « se souviendrait » d'échanges
+   que le citoyen ne voit plus (et reproduirait d'anciennes réponses).
+---------------------------------------- */
+unset($_SESSION['chat_ia_historique'], $_SESSION['brouillon_demande']);
+
+/* ---------------------------------------
    Récupération sécurisée du citoyen
 ---------------------------------------- */
 
@@ -42,24 +50,11 @@ if (!$citoyen) {
 }
 
 /* ---------------------------------------
-   Statistiques sécurisées
+   Statistiques et demandes : même gabarit que la mise à jour
+   automatique (Backend/citoyen/tableau_de_bord.php)
 ---------------------------------------- */
-
-$demandecount = $pdo->prepare("
-    SELECT 
-        SUM(statut='nouvelle') AS NEW_demande,
-        SUM(statut='analyse_ia') AS analyse_IA,
-        SUM(statut='en_cours') AS en_cours,
-        SUM(statut='resolue') AS Resolue
-    FROM demandes
-    WHERE citoyen_id = ?
-");
-$demandecount->execute([$citoyenId]);
-
-$stats = $demandecount->fetch(PDO::FETCH_ASSOC);
-
-// Valeurs par défaut si NULL
-$stats = array_map(fn($v) => $v ?? 0, $stats);
+require_once __DIR__ . '/../Backend/Fonctions/tableau_citoyen.php';
+$tableau = donneesTableauCitoyen($pdo, $citoyenId);
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -158,52 +153,21 @@ $stats = array_map(fn($v) => $v ?? 0, $stats);
         </h2>
 
         <!-- STATISTIQUES -->
-        <section class="stats-agent">
-            <div class="stat-card"><h3>Nouvelles demandes</h3><p><?= htmlspecialchars((string)$stats['NEW_demande']) ?></p></div>
-            <div class="stat-card"><h3>Analysées par l'IA</h3><p><?= htmlspecialchars((string)$stats['analyse_IA']) ?></p></div>
-            <div class="stat-card"><h3>En cours</h3><p><?= htmlspecialchars((string)$stats['en_cours']) ?></p></div>
-            <div class="stat-card"><h3>Résolues</h3><p><?= htmlspecialchars((string)$stats['Resolue']) ?></p></div>
+        <!-- Mis à jour automatiquement par tableau_citoyen.js -->
+        <section class="stats-agent" id="stats-citoyen">
+            <?= htmlStatsCitoyen($tableau['stats']) ?>
         </section>
 
         <!-- DERNIÈRES DEMANDES -->
         <section class="last-requette">
             <h2 class="section-title">Vos dernières demandes</h2>
 
-            <div class="last-requests-container">
-                <?php
-                $allrequets = $pdo->prepare("
-                    SELECT d.id, t.libelle AS type, d.message, d.priorite, d.statut, d.created_at,
-                           services.nom_service, services.description_service
-                    FROM demandes d
-                    LEFT JOIN services ON d.service_id = services.id
-                    LEFT JOIN types_demandes t ON d.type_id = t.id
-                    WHERE d.citoyen_id = ?
-                    ORDER BY d.created_at DESC
-                ");
-                $allrequets->execute([$citoyenId]);
-
-                if ($allrequets->rowCount() === 0): ?>
-                    <p class='no-data'>Aucune demande trouvée.</p>
-                <?php else:
-                    while ($request = $allrequets->fetch()): ?>
-                        <div class="request-card">
-                            <p><strong>Type :</strong> <?= htmlspecialchars($request['type']?? 'non renseigné') ?></p>
-                            <p><strong>Message :</strong> <?= nl2br(htmlspecialchars($request['message'])?? 'non renseigné') ?></p>
-                            <p><strong>Priorité :</strong> <?= htmlspecialchars($request['priorite']?? 'non renseigné') ?></p>
-                            <p><strong>Statut :</strong> <?= htmlspecialchars($request['statut']?? 'non reseigné') ?></p>
-                            <p><strong>Date :</strong> <?= htmlspecialchars($request['created_at']?? 'non renseigné') ?></p>
-                            <p><strong>Service :</strong>
-                                <?= htmlspecialchars($request['nom_service']?? 'non renseigné') ?> -
-                                <?= htmlspecialchars($request['description_service']?? 'non renseigné') ?>
-                            </p>
-
-                            <a class="btn-details"
-                               href="details_demande.php?id=<?= urlencode($request['id']) ?>">
-                                Voir les détails
-                            </a>
-                        </div>
-                <?php endwhile; endif; ?>
+            <div class="last-requests-container" id="liste-demandes"
+                 data-signature="<?= signatureTableauCitoyen($tableau) ?>">
+                <?= htmlDemandesCitoyen($tableau['demandes']) ?>
             </div>
+            <!-- Annonce les mises à jour aux lecteurs d'écran -->
+            <p id="annonce-tableau" class="visually-hidden" aria-live="polite"></p>
         </section>
 
         <!-- CHATBOT PREMIUM -->
@@ -234,6 +198,7 @@ $stats = array_map(fn($v) => $v ?? 0, $stats);
 </div>
 
 <script src="assets/js/chatbot.js"></script>
+<script src="assets/js/tableau_citoyen.js"></script>
 
 <!-- BOUTON FLOTTANT IA -->
 <button id="ia-toggle-btn" class="ia-floating-btn">

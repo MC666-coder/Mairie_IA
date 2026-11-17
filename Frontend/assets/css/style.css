@@ -2986,3 +2986,49 @@ p {
 }
 .brouillon-demande button.secondaire { background: #fff; color: #000091; border: 1px solid #000091; }
 .brouillon-demande button:disabled { opacity: 0.6; cursor: wait; }
+
+/* --- Tableau de bord citoyen : mise à jour automatique --- */
+/* Texte lu par les lecteurs d'écran mais invisible à l'écran */
+.visually-hidden {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+/* Demande qui vient d'apparaître : surlignage qui s'estompe */
+.request-card.carte-nouvelle {
+    animation: carte-nouvelle 4s ease-out;
+}
+@keyframes carte-nouvelle {
+    0%   { box-shadow: 0 0 0 3px #000091; background-color: #e3e3fd; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .request-card.carte-nouvelle { animation: none; outline: 3px solid #000091; }
+}
+
+/* --- Chatbot : choix « préparée par l'assistant » ou « je la fais moi-même » --- */
+.choix-demande {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 8px 0;
+}
+.choix-demande button {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 4px;
+    background: #000091;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+}
+.choix-demande button.secondaire { background: #fff; color: #000091; border: 1px solid #000091; }
+.choix-demande button:focus-visible,
+.brouillon-demande button:focus-visible { outline: 3px solid #0a76f6; outline-offset: 2px; }
+.bot-message a.lien-creer-demande { color: #000091; font-weight: bold; text-decoration: underline; }

@@ -1,5 +1,6 @@
-# Seul send_message.php est un endpoint ; les autres fichiers sont des bibliothèques internes
+# Seuls send_message.php et confirmer_demande.php sont des endpoints ;
+# tout autre fichier ajouté ici reste interdit au navigateur (liste blanche)
 Require all denied
-<Files "send_message.php">
+<FilesMatch "^(send_message|confirmer_demande)\.php$">
     Require all granted
-</Files>
+</FilesMatch>
