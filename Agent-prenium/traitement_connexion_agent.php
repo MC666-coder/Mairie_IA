@@ -104,10 +104,8 @@ $_SESSION['niveau_acces'] = $agent['niveau_acces'];
 /* ---------------------------------------------------------
    11) Log de sécurité
 --------------------------------------------------------- */
-file_put_contents("logs/connexion.log",
-    date("Y-m-d H:i:s") . " - Connexion réussie : Agent ID " . $agent['id'] . "\n",
-    FILE_APPEND
-);
+require_once __DIR__ . '/../Backend/Config/app.php';
+journal_securite('connexion.log', "Connexion réussie : Agent ID " . (int) $agent['id']);
 
 /* ---------------------------------------------------------
    12) Redirection vers le dashboard

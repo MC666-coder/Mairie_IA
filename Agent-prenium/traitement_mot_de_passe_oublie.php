@@ -2,6 +2,7 @@
 /* session_init.php : initialisation de la session pour les agents */
 require_once __DIR__ . '/../Backend/Config/session_init.php';
 require_once __DIR__ . '/../Backend/Config/db.php';
+require_once __DIR__ . '/../Backend/Config/app.php'; // APP_URL, MAIL_FROM, NOM_COMMUNE (.env)
 
 /* ---------------------------------------------------------
    0) Sécurité HTTP renforcée
@@ -87,9 +88,11 @@ $update->execute([$token, $expiration, $agent['id']]);
 /* ---------------------------------------------------------
    9) Envoi de l’email de réinitialisation
 --------------------------------------------------------- */
-$reset_link = "http://localhost/Site_officiel/Agent-prenium/reset_password.php?token=" . urlencode($token);
+// Adresse du site lue dans .env (APP_URL) : le lien fonctionne en local ET en ligne
+$reset_link = url_app("Agent-prenium/reset_password.php?token=" . urlencode($token));
+$commune = NOM_COMMUNE;
 
-$subject = "Réinitialisation de votre mot de passe - Portail Agent";
+$subject = mb_encode_mimeheader("Réinitialisation de votre mot de passe - Portail Agent", 'UTF-8');
 
 $message = "
 Bonjour,
@@ -105,21 +108,20 @@ Ce lien est valable 24 heures.
 Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.
 
 Cordialement,
-Commune de L’Aiguillon-sur-Vie
+$commune
 ";
 
-$headers = "From: mairie@localhost\r\n";
-$headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+$headers = entetes_email(); // expéditeur lu dans .env (MAIL_FROM, MAIL_FROM_NAME)
 
-mail($email, $subject, $message, $headers);
+// En local (sans serveur SMTP), l'envoi échoue : on journalise au lieu d'afficher un warning
+if (!@mail($email, $subject, $message, $headers)) {
+    error_log("Email de réinitialisation non envoyé (SMTP indisponible)");
+}
 
 /* ---------------------------------------------------------
    10) Log de sécurité
 --------------------------------------------------------- */
-file_put_contents("logs/reset_request.log",
-    date("Y-m-d H:i:s") . " - Demande de reset pour email : $email\n",
-    FILE_APPEND
-);
+journal_securite('reset_request.log', "Demande de reset pour email : $email");
 
 /* ---------------------------------------------------------
    11) Redirection vers confirmation

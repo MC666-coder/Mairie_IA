@@ -18,7 +18,7 @@
                 <a href="Actualités.php">Actualités</a>
                 <a href="Services.php">Services</a>
                 <a href="Contacts.php">Contacts</a>
-                <a href="choix_connexion" class="nav-btn">🔒Connexion</a>
+                <a href="choix_connexion.php" class="nav-btn">🔒Connexion</a>
                 <a href="choix_inscription.php" class="nav-btn">🆕Inscription</a>
             </nav>   
         </header>

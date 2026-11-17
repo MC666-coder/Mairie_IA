@@ -31,7 +31,8 @@ if (isset($_SESSION['LAST_ACTIVITY'])) {
             echo json_encode(['success' => false, 'message' => 'Session expirée, veuillez vous reconnecter.']);
             exit;
         }
-        header("Location: /Site_officiel/Agent-prenium/connexion_agent.php");
+        require_once __DIR__ . '/app.php';
+        header("Location: " . chemin_app('Agent-prenium/connexion_agent.php'));
         exit;
     }
 }

@@ -67,11 +67,14 @@ try {
 
     // Envoyer email
     // Construction du mail en HEREDOC (aucun risque de casser la chaîne)
+    // (à la réactivation : require_once __DIR__ . '/../Config/app.php';)
+    $lienDemande = url_app("Frontend/details_demande.php?id=" . (int) $demande_id);
+    $libelleStatut = $statuts_autorises[$nouveau_statut];
     $body = <<<HTML
     <p>Bonjour,</p>
     <p>Le statut de votre demande a été mis à jour :</p>
-    <p><strong>$nouveau_statut</strong></p>
-    <p><a href="https://ton-site.fr/espace-citoyen/demande.php?id=$demande_id">
+    <p><strong>$libelleStatut</strong></p>
+    <p><a href="$lienDemande">
         Accéder à ma demande
     </a></p>
     HTML;

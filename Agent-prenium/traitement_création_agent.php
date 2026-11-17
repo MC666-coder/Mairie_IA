@@ -2,6 +2,7 @@
 /* session_init.php : initialisation de la session pour les agents */
 require_once __DIR__ . '/../Backend/Config/session_init.php';
 require_once __DIR__ . '/../Backend/Middleware/auth.php';
+require_once __DIR__ . '/../Backend/Config/app.php'; // APP_URL, MAIL_FROM, NOM_COMMUNE (.env)
 
 /* ---------------------------------------------------------
    0) Sécurité HTTP renforcée
@@ -154,9 +155,11 @@ $update->execute([$identifiant, $agent_id]);
 /* ---------------------------------------------------------
    9) Envoi de l’email d’activation (sécurisé)
 --------------------------------------------------------- */
-$activation_link = "http://localhost/Site_officiel/Agent-prenium/activation.php?token=" . urlencode($token);
+// Adresse du site lue dans .env (APP_URL) : le lien fonctionne en local ET en ligne
+$activation_link = url_app("Agent-prenium/activation.php?token=" . urlencode($token));
+$commune = NOM_COMMUNE;
 
-$subject = "Activation de votre compte agent - Commune de L’Aiguillon-sur-Vie";
+$subject = mb_encode_mimeheader("Activation de votre compte agent - $commune", 'UTF-8');
 
 $message = "
 Bonjour $prenom $nom,
@@ -170,12 +173,10 @@ $activation_link
 Ce lien est valable 24 heures.
 
 Cordialement,
-Commune de L’Aiguillon-sur-Vie
+$commune
 ";
 
-$headers = "From: mairie@localhost\r\n";
-$headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
-$headers .= "X-Mailer: PHP/" . phpversion();
+$headers = entetes_email(); // expéditeur lu dans .env (MAIL_FROM, MAIL_FROM_NAME)
 
 // En local (sans serveur SMTP), l'envoi échoue : on journalise au lieu d'afficher un warning
 if (!@mail($email, $subject, $message, $headers)) {
@@ -185,11 +186,7 @@ if (!@mail($email, $subject, $message, $headers)) {
 /* ---------------------------------------------------------
    10) Log de sécurité
 --------------------------------------------------------- */
-$dossier_logs = __DIR__ . '/logs';
-if (!is_dir($dossier_logs)) {
-    mkdir($dossier_logs, 0750, true);
-}
-file_put_contents($dossier_logs . '/creation_agents.log',date("Y-m-d H:i:s") . " - Agent créé : $email (niveau $niveau_acces) par agent ID " . $createur_id . "\n", FILE_APPEND);
+journal_securite('creation_agents.log', "Agent créé : $email (niveau $niveau_acces) par agent ID " . (int) $createur_id);
 
 /* ---------------------------------------------------------
    11) Redirection

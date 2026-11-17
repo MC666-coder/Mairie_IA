@@ -44,8 +44,9 @@ function refuser_acces(int $code, string $message, ?string $redirection = null):
 function exiger_agent(): int
 {
     if (empty($_SESSION['agent_id'])) {
+        require_once __DIR__ . '/../Config/app.php';
         refuser_acces(401, 'Session expirée, veuillez vous reconnecter.',
-            '/Site_officiel/Agent-prenium/connexion_agent.php');
+            chemin_app('Agent-prenium/connexion_agent.php'));
     }
     return (int) $_SESSION['agent_id'];
 }

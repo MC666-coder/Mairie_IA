@@ -107,10 +107,8 @@ $update->execute([
 /* ---------------------------------------------------------
    9) Log de sécurité
 --------------------------------------------------------- */
-file_put_contents("logs/activation.log",
-    date("Y-m-d H:i:s") . " - Activation du compte agent ID " . $agent['id'] . "\n",
-    FILE_APPEND
-);
+require_once __DIR__ . '/../Backend/Config/app.php';
+journal_securite('activation.log', "Activation du compte agent ID " . (int) $agent['id']);
 
 /* ---------------------------------------------------------
    10) Suppression du token CSRF
