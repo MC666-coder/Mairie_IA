@@ -10,9 +10,7 @@ header("X-Frame-Options: DENY");
 header("X-Content-Type-Options: nosniff");
 header("X-XSS-Protection: 1; mode=block");
 header("Referrer-Policy: strict-origin-when-cross-origin");
-/*debug temporaire*/
-error_log("Traitement connexion agent : " . print_r($_POST, true));
-error_log("Session avant traitement : " . print_r($_SESSION, true));
+// Ne jamais journaliser $_POST ni $_SESSION : ils contiennent le mot de passe et les jetons CSRF
 /* ---------------------------------------------------------
    1) Vérification CSRF
 --------------------------------------------------------- */

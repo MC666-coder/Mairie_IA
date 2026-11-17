@@ -10,7 +10,6 @@ require_once __DIR__ . '/sanitize.php';
 function callAgentAI(string $prompt, array $context = []): ?string {
 
     global $API_KEY_AGENT;
-    file_put_contents("debug_prompt.txt", $systemPrompt);
 
     //on nettoie avant Tout sécurisation RGPD
     $prompt_clean = sanitizeAgentMessage($prompt);
@@ -18,7 +17,7 @@ function callAgentAI(string $prompt, array $context = []): ?string {
     // Fichier de log
     $logFile = __DIR__ . "/ia_agent_debug.log";
 
-    // Fonction interne pour écrire dans le log
+    // Journal technique : uniquement des métadonnées (jamais le contenu des échanges)
     $log = function($msg) use ($logFile) {
         file_put_contents(
             $logFile,
@@ -27,10 +26,19 @@ function callAgentAI(string $prompt, array $context = []): ?string {
         );
     };
 
+    // Contenu des échanges (prompts, contexte citoyen, réponses) : RGPD
+    // => journalisé UNIQUEMENT si DEBUG_IA=true dans .env (développement local)
+    $debugIA = ($_ENV['DEBUG_IA'] ?? 'false') === 'true';
+    $logContenu = function($msg) use ($log, $debugIA) {
+        if ($debugIA) {
+            $log($msg);
+        }
+    };
+
     // Début log
-    $log("=== Nouvelle requête IA Agent ===");
-    $log("Prompt reçu : " . $prompt);
-    $log("Contexte reçu : " . json_encode($context, JSON_UNESCAPED_UNICODE));
+    $log("=== Nouvelle requête IA Agent === (" . mb_strlen($prompt) . " caractères)");
+    $logContenu("Prompt reçu : " . $prompt);
+    $logContenu("Contexte reçu : " . json_encode($context, JSON_UNESCAPED_UNICODE));
 
     // Détermination du mode d'analyse en fonction de l'action
     
@@ -380,7 +388,7 @@ CONTEXTE MÉTIER SPÉCIFIQUE AU SERVICE :
     ];
     
 
-    $log("Payload envoyé : " . json_encode($data, JSON_UNESCAPED_UNICODE));
+    $logContenu("Payload envoyé : " . json_encode($data, JSON_UNESCAPED_UNICODE));
 
     // ---------------------------------------------------------
     // 4. ENDPOINT GOOGLE
@@ -413,7 +421,7 @@ CONTEXTE MÉTIER SPÉCIFIQUE AU SERVICE :
         return null;
     }
 
-    $log("Réponse brute Google : " . $response);
+    $logContenu("Réponse brute Google : " . $response);
 
     curl_close($ch);
 
@@ -423,7 +431,8 @@ CONTEXTE MÉTIER SPÉCIFIQUE AU SERVICE :
     $decoded = json_decode($response, true);
 
     if (!is_array($decoded)) {
-        $log("❌ Réponse non JSON : " . $response);
+        $log("❌ Réponse non JSON (" . strlen($response) . " octets)");
+        $logContenu("Réponse non JSON : " . $response);
         return null;
     }
 
@@ -438,12 +447,13 @@ CONTEXTE MÉTIER SPÉCIFIQUE AU SERVICE :
     $text = $decoded['candidates'][0]['content']['parts'][0]['text'] ?? null;
 
     if (!$text) {
-        $log("❌ Réponse IA invalide : " . $response);
+        $log("❌ Réponse IA invalide (aucun texte dans la réponse)");
+        $logContenu("Réponse IA invalide : " . $response);
         return null;
     }
 
-    $log("Réponse IA extraite : " . $text);
-    $log("=== Fin requête IA Agent ===");
+    $logContenu("Réponse IA extraite : " . $text);
+    $log("=== Fin requête IA Agent === (" . mb_strlen($text) . " caractères)");
     // Nettoyage du texte
     
 
