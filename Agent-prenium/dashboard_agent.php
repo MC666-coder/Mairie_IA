@@ -293,7 +293,8 @@ $demandes = $lastRequests->fetchAll(PDO::FETCH_ASSOC);
 
 
         <div class="ia-input-zone">
-            <input type="text" id="ia-input" placeholder="Posez votre question…">
+            <input type="text" id="ia-input" placeholder="Décrivez la demande, sans nom ni coordonnées du citoyen…"
+                   title="Les noms, téléphones, adresses précises et données de santé sont masqués automatiquement, mais évitez de les saisir. Rien n'est conservé.">
             <button id="ia-send-btn">Envoyer</button>
         </div>
 

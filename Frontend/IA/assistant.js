@@ -126,7 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
-        jsLog("Message envoyé: " + msg);
+        jsLog("Message envoyé (" + msg.length + " caractères)");
         addMessage(msg, "agent");
         input.value = "";
         input.style.height = "40px";
@@ -134,15 +134,11 @@ document.addEventListener("DOMContentLoaded", () => {
         lockInput();
         loader.classList.remove("hidden");
 
+        // Le serveur détermine lui-même l'agent et son service (session) :
+        // on n'envoie que le message et le mode.
         const payload = {
             message: msg,
-            page: "dashboard_agent",
-            action: "free_prompt",
-            agent: {
-                id: 1,
-                role: "admin",
-                service: "voirie"
-            }
+            action: "free_prompt"
         };
 
         let res;

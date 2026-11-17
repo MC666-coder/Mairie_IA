@@ -15,10 +15,10 @@ require_once __DIR__ . '/../Config/db.php';
 require_once __DIR__ . '/../Config/env.php';
 /* fonctions API mairie */
 require_once __DIR__ . '/gemini.php';
-/* fonction d'enregistrement de la conversation IA */
-require_once __DIR__ . '/save_ai_conversation_agent.php';
-/* contexte métier pour l'agent IA */
-$context_metier = require_once __DIR__ . '/context_agent_IA.php';
+
+/* RGPD : les échanges avec l'IA agent ne sont JAMAIS enregistrés
+   (ni en base, ni dans les journaux). Ils ne vivent que le temps de
+   la requête et dans la fenêtre du navigateur de l'agent. */
 
 
 
@@ -80,24 +80,30 @@ if ($message === '' || strlen($message) < 2) {
    Construction du contexte IA
 ---------------------------------------- */
 
-$context = [
-    'page'   => $data['page']   ?? null,   // ex: demandes, messages, notes, dashboard
-    'action' => $data['action'] ?? null,   // ex: analyse, resume, reponse, workflow
-    'agent' => [
-        'id'   => $agentId,
-        'role' => $agentRole,
-        'service' => $data['agent']['service'] ?? null
-    ],
-    'demande' => $data['demande'] ?? null, // ID demande si présent
-    'statut'  => $data['statut']  ?? null,
-    'messages' => $data['messages'] ?? [],
-    'notes'    => $data['notes'] ?? [],
-    'agents_internes' => $data['agents_internes'] ?? [], // liste des agents internes
-];
-//fallback : si aucun service n'est précisé, on force "voirie" pour bénéficier du contexte métier spécifique
-if (empty($context['agent']['service'])) {
-    $context['agent']['service'] = 'voirie';
+// Service de l'agent : lu en base à partir de SA session (jamais fourni
+// par le navigateur, qui pourrait l'usurper).
+$serviceAgent = null;
+$services = [];
+try {
+    $stmt = $pdo->query("SELECT id, nom_service, description_service FROM services WHERE actif = 1 ORDER BY nom_service");
+    foreach ($stmt->fetchAll(PDO::FETCH_ASSOC) as $s) {
+        $services[$s['nom_service']] = $s['description_service'];
+        if ((int) $s['id'] === (int) ($_SESSION['service_id'] ?? 0)) {
+            $serviceAgent = $s['nom_service'];
+        }
+    }
+} catch (PDOException $e) {
+    error_log("chat_agent : lecture des services impossible");
 }
+
+$context = [
+    'agent' => [
+        'role'    => $agentRole,
+        'service' => $serviceAgent ?? 'non renseigné',
+    ],
+    // Liste officielle des services de la commune (pour le routage)
+    'services' => $services,
+];
 
 /* sécurisation et passage à l'action */
 $action = $data['action'] ?? 'free_prompt';
@@ -118,32 +124,14 @@ if (!$IA_response) {
 }
 
 /* ---------------------------------------
-   Enregistrement de la conversation IA
----------------------------------------- */
-
-saveAIConversationAgent(
-    $pdo,
-    $agentId,
-    $context,
-    $message,
-    $IA_response
-);
-
-
-
-/* ---------------------------------------
-   Réponse finale
+   Réponse finale (rien n'est conservé côté serveur)
 ---------------------------------------- */
 $debug = ob_get_clean();
-ob_end_clean();
 if ($debug !== '') {
-    error_log("DEBUG IA AGENT OUTPUT: " . $debug);
+    error_log("chat_agent : sortie inattendue (" . strlen($debug) . " octets)");
 }
 
-echo json_encode([
-    'response' => $IA_response,
-    'context_used' => $context
-]);
+echo json_encode(['response' => $IA_response]);
 
 exit();
 ?>
