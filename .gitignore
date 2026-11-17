@@ -31,3 +31,7 @@ desktop.ini
 
 # Build front-end
 Frontend/dist/
+
+# Dumps SQL réels (données personnelles) — seule la base de démo est versionnée
+sql/*.sql
+!sql/mairie_ia_demo.sql
