@@ -132,43 +132,14 @@ if (!$erreur) {
 }
 
 /* ---------------------------------------------------------
-   7) Récupération des notes internes
+   7-8) Notes internes et historique : TOUT est chargé ici.
+   Le choix de ce qui est affiché (5 derniers par type, filtres,
+   « Afficher tout ») est fait par historique_notes.js.
 --------------------------------------------------------- */
+require_once __DIR__ . '/../Backend/Fonctions/historique_demande.php';
 if (!$erreur) {
-    $notesQuery = $pdo->prepare("
-        SELECT n.*, a.prenom, a.nom
-        FROM notes_demandes n
-        LEFT JOIN agents a ON n.agent_id = a.id
-        WHERE n.demande_id = ?
-        ORDER BY n.created_at DESC
-    ");
-    $notesQuery->execute([$demande_id]);
-    $notes = $notesQuery->fetchAll(PDO::FETCH_ASSOC);
-}
-
-/* ---------------------------------------------------------
-   8) Récupération de l'historique
---------------------------------------------------------- */
-if (!$erreur) {
-    $historiqueQuery = $pdo->prepare("
-        SELECT h.*, a.prenom, a.nom
-        FROM historique_demandes h
-        LEFT JOIN agents a ON h.agent_id = a.id
-        WHERE h.demande_id = ?
-        ORDER BY h.created_at DESC
-    ");
-    $historiqueQuery->execute([$demande_id]);
-    $historique = $historiqueQuery->fetchAll(PDO::FETCH_ASSOC);
-}
-
-/* -------------------------------------------------------------------------
- Fonction qui va detecter le type d'action dans l'historique des actions
---------------------------------------------------------------------------*/
-function detectType($action) {
-    if (stripos($action, "statut") !== false) return "status";
-    if (stripos($action, "assign") !== false) return "assignation";
-    if (stripos($action, "note") !== false) return "notes";
-    return "other";
+    $notes      = notesDemande($pdo, $demande_id);
+    $historique = historiqueDemande($pdo, $demande_id);
 }
 
 
@@ -483,72 +454,12 @@ function detectType($action) {
             </div>
         </div>
 
-        <!-- Timeline -->
-        <div class="notes-timeline" id="liste-notes">
-            <?php if (empty($notes)): ?>
-                <p class="notes-empty"><em>Aucune note interne pour le moment.</em></p>
-            <?php else: ?>
-                <?php
-                    // Regroupement par date (YYYY-MM-DD)
-                    $grouped = [];
-                    foreach ($notes as $n) {
-                        $dateKey = substr($n['created_at'], 0, 10);
-                        $grouped[$dateKey][] = $n;
-                    }
+        <!-- Compteur (« 5 notes affichées sur 12 »), mis à jour par historique_notes.js -->
+        <p class="liste-compteur" id="notes-compteur" aria-live="polite"></p>
 
-                    // Fonction label humain
-                    function humanDateLabel($dateKey) {
-                        $today = date('Y-m-d');
-                        $yesterday = date('Y-m-d', strtotime('-1 day'));
-                        if ($dateKey === $today) return "Aujourd'hui";
-                        if ($dateKey === $yesterday) return "Hier";
-                        return $dateKey;
-                    }
-                ?>
-
-                <?php foreach ($grouped as $dateKey => $notesDuJour): ?>
-                    <div class="notes-date-group" data-date-group="<?= htmlspecialchars($dateKey) ?>">
-                        <div class="notes-date-separator">
-                            <span><?= htmlspecialchars(humanDateLabel($dateKey)) ?></span>
-                        </div>
-
-                        <?php foreach ($notesDuJour as $n): ?>
-                            <?php
-                                $initiales = mb_strtoupper(
-                                    mb_substr($n['prenom'], 0, 1) .
-                                    mb_substr($n['nom'], 0, 1)
-                                );
-                            ?>
-                            <div class="note-item"
-                                data-agent-id="<?= (int)$n['agent_id'] ?>"
-                                data-created-at="<?= htmlspecialchars($n['created_at']) ?>"
-                                data-text="<?= htmlspecialchars($n['note']) ?>">
-                                <div class="note-timeline-dot"></div>
-                                <div class="note-content">
-                                    <div class="note-header">
-                                        <div class="note-avatar"><?= htmlspecialchars($initiales) ?></div>
-                                        <div class="note-meta-main">
-                                            <span class="note-author">
-                                                <?= htmlspecialchars($n['prenom'] . ' ' . $n['nom']) ?>
-                                            </span>
-                                            <span class="note-date">
-                                                <?= htmlspecialchars($n['created_at']) ?>
-                                            </span>
-                                        </div>
-                                        <div class="note-tags">
-                                            <span class="note-tag note-tag-info">Note</span>
-                                        </div>
-                                    </div>
-                                    <div class="note-body">
-                                        <?= nl2br(htmlspecialchars($n['note'])) ?>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-
-                    </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
+        <!-- Timeline : toutes les notes (gabarit Backend/Fonctions/historique_demande.php) -->
+        <div class="notes-timeline" id="liste-notes" data-demande-id="<?= (int) $demande_id ?>">
+            <?= htmlNotes($notes ?? []) ?>
         </div>
     </section>
 
@@ -602,128 +513,14 @@ function detectType($action) {
             </div>
         </div>
 
-       <?php // Charger tout l’historique complet
-        $allQuery = $pdo->prepare("
-            SELECT h.*, a.prenom, a.nom
-            FROM historique_demandes h
-            LEFT JOIN agents a ON h.agent_id = a.id
-            WHERE h.demande_id = ?
-            ORDER BY h.created_at DESC
-        ");
-        $allQuery->execute([$demande_id]);
-        $all = $allQuery->fetchAll(PDO::FETCH_ASSOC);
+        <!-- Compteur (« 15 actions affichées sur 48 »), mis à jour par historique_notes.js -->
+        <p class="liste-compteur" id="history-compteur" aria-live="polite"></p>
 
-        // Séparer par type
-        $assignations = array_filter($all, fn($h) => detectType($h['action']) === 'assignation');
-        $notes        = array_filter($all, fn($h) => detectType($h['action']) === 'notes');
-        $statuts      = array_filter($all, fn($h) => detectType($h['action']) === 'status');
-        $autres       = array_filter($all,fn($h)=> detectType($h['action']) === 'other');
-
-        $autres = array_filter($all, fn($h) =>
-            stripos($h['action'], 'assign') === false &&
-            stripos($h['action'], 'note') === false &&
-            stripos($h['action'], 'statut') === false 
-        );
-
-        // Prendre les 5 dernières de chaque type
-        $assignations = array_slice($assignations, 0, 5);
-        $notes = array_slice($notes, 0, 5);
-        $statuts = array_slice($statuts, 0, 5);
-        $autres = array_slice($autres, 0, 5);
-
-        // Fusionner
-        $compact = array_merge($assignations, $notes, $statuts, $autres);
-
-        // Trier par date DESC
-        usort($compact, fn($a, $b) => strcmp($b['created_at'], $a['created_at']));
-
-        // C’est CE tableau qui sera affiché avant le bouton
-        $historique = $compact;
-        ?>
-    
-
-        <?php if (empty($historique)): ?>
-            <p><em>Aucune action enregistrée pour cette demande.</em></p>
-        <?php else: ?>
-
-            <div class="history-timeline" id="history-timeline">
-
-                <?php
-                    // Regroupement par date
-                    $grouped = [];
-                    foreach ($historique as $h) {
-                        $dateKey = substr($h['created_at'], 0, 10);
-                        $grouped[$dateKey][] = $h;
-                    }
-
-                    function humanDate($date) {
-                        $today = date('Y-m-d');
-                        $yesterday = date('Y-m-d', strtotime('-1 day'));
-                        if ($date === $today) return "Aujourd'hui";
-                        if ($date === $yesterday) return "Hier";
-                        return date('d/m/Y', strtotime($date));
-                    }
-                ?>
-
-                <?php foreach ($grouped as $dateKey => $actions): ?>
-                    <div class="history-date-group" data-date="<?= $dateKey ?>">
-                        <div class="history-date-separator">
-                            <span><?= humanDate($dateKey) ?></span>
-                        </div>
-
-                        <?php foreach ($actions as $h): ?>
-
-                            <?php
-                                // Détection du type d’action
-                                $type = detectType($h['action']);
-                                
-
-                                // Initiales
-                                $initiales = mb_strtoupper(
-                                    mb_substr($h['prenom'], 0, 1) .
-                                    mb_substr($h['nom'], 0, 1)
-                                );
-                            ?>
-
-                            <div class="history-item"
-                                data-type="<?= $type ?>"
-                                data-text="<?= htmlspecialchars($h['action'] . ' ' . $h['details']) ?>">
-
-                                <div class="history-dot history-dot-<?= $type ?>"></div>
-
-                                <div class="history-content">
-                                    <div class="history-header">
-                                        <div class="history-avatar"><?= $initiales ?></div>
-
-                                        <div class="history-meta">
-                                            <span class="history-author">
-                                                <?= htmlspecialchars($h['prenom'] . ' ' . $h['nom']) ?>
-                                            </span>
-                                            <span class="history-time">
-                                                <?= htmlspecialchars($h['created_at']) ?>
-                                            </span>
-                                        </div>
-
-                                        <span class="history-tag history-tag-<?= $type ?>">
-                                            <?= ucfirst($type) ?>
-                                        </span>
-                                    </div>
-
-                                    <div class="history-body">
-                                        <strong><?= htmlspecialchars($h['action']) ?></strong><br>
-                                        <?= nl2br(htmlspecialchars($h['details'])) ?>
-                                    </div>
-                                </div>
-                            </div>
-
-                        <?php endforeach; ?>
-
-                    </div>
-                <?php endforeach; ?>
-
-            </div>
-
-        <?php endif; ?>
+        <!-- Timeline : TOUT l'historique (gabarit Backend/Fonctions/historique_demande.php).
+             Par défaut, historique_notes.js n'en montre que les 5 derniers de chaque type. -->
+        <div class="history-timeline" id="history-timeline" data-demande-id="<?= (int) $demande_id ?>">
+            <?= htmlHistorique($historique ?? []) ?>
+        </div>
     </section>
 
 
@@ -733,8 +530,7 @@ function detectType($action) {
 <script>
     window.CURRENT_AGENT_ID = <?= (int)$_SESSION['agent_id'] ?>;
 </script>
-<script src="../Frontend/assets/js/ouvrir_notes.js"></script>
-<script src="../Frontend/assets/js/ouvrir_historique.js"></script>
+<script src="../Frontend/assets/js/historique_notes.js"></script>
 <script src="../Frontend/assets/js/ouvrir_conv.js"></script>
 <script src="../Frontend/assets/js/demande.js"></script>
 

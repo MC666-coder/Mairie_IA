@@ -53,6 +53,10 @@ $stmt->execute([
     $fichier['type'],
     $fichier['size']
 ]);
+
+// Trace dans l'historique, écrite par le serveur au moment de l'action
+require_once __DIR__ . '/../Fonctions/historique_demande.php';
+journaliserAction($pdo, (int) $demande_id, (int) $agent_id, "Ajout d'une pièce jointe", "Nom du fichier : " . $nom);
 /*/ recuperer le citoyen_id pour la notification
 $citoyen_id = getCitoyenIdFromDemande($pdo, $demande_id);
 // envoie de la notification

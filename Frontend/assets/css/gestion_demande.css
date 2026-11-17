@@ -1446,3 +1446,19 @@ button:hover {
     display: none !important;
 }
 /* Fin Style boutons historiques (affichage totale) */
+
+/* --- Historique et notes : l'attribut hidden l'emporte toujours ---
+   (sinon un display: flex/grid de la feuille de style le neutralise) */
+.history-item[hidden],
+.history-date-group[hidden],
+.note-item[hidden],
+.notes-date-group[hidden],
+.history-expand-btn[hidden] {
+    display: none !important;
+}
+/* Compteur « 5 actions affichées sur 23 » */
+.liste-compteur {
+    margin: 4px 0 8px;
+    font-size: 0.9rem;
+    color: #555;
+}

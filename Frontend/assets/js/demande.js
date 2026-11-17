@@ -226,35 +226,18 @@ function applyMessagesFilters(filter) {
 
 
 /* ============================================================
-   AJOUT AUTOMATIQUE DANS L’HISTORIQUE (SILENCIEUX)
+   HISTORIQUE : rechargé après chaque action
+   ------------------------------------------------------------
+   Chaque action est enregistrée dans l'historique PAR LE SERVEUR
+   (update_statut, Assigner_agent, Ajouter_note, upload_pj,
+   supprimer_pj, Ajouter_message_agent). Ici, on se contente de
+   réafficher l'historique et les notes (historique_notes.js).
 ============================================================ */
 
-function ajouterHistorique(demandeId, action, details = "") {
-    const formData = new FormData();
-    formData.append("demande_id", demandeId);
-    formData.append("action", action);
-    formData.append("details", details);
-
-    fetch("../Backend/ajax/Ajouter_historique.php", {
-        method: "POST",
-        headers: enTetesSecurite(),
-        body: formData
-    })
-    .then(res => res.json())
-    .then(result => {
-        if (!result.success) return;
-
-        const timeline = document.getElementById("history-timeline");
-
-        if (timeline.querySelector("em")) timeline.innerHTML = "";
-
-        timeline.insertAdjacentHTML("afterbegin", result.html);
-
-        if (typeof window.applyHistoryFilters === "function") {
-            window.applyHistoryFilters();
-        }
-    })
-    .catch(err => console.error("Erreur historique:", err));
+function rafraichirHistorique() {
+    if (typeof window.rafraichirHistoriqueNotes === "function") {
+        window.rafraichirHistoriqueNotes();
+    }
 }
 
 /* Mettre à jour le badge de nouveaux messages sur la liste des demandes */
@@ -345,11 +328,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         if (dateSpan) dateSpan.textContent = result.date_mise_a_jour;
                     }
 
-                    ajouterHistorique(
-                        demandeId,
-                        "Changement de statut",
-                        "Nouveau statut : " + newStatut
-                    );
+                    rafraichirHistorique();
                 }
             );
         });
@@ -382,11 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
                         if (dateSpan) dateSpan.textContent = result.date_mise_a_jour;
                     }
 
-                    ajouterHistorique(
-                        demandeId,
-                        "Assignation d'un agent",
-                        "Assigné à : " + result.agent_nom
-                    );
+                    rafraichirHistorique();
                 }
             );
         });
@@ -409,110 +384,18 @@ document.addEventListener("DOMContentLoaded", () => {
             ajaxAction(
                 `../Backend/ajax/Ajouter_note.php?id=${demandeId}`,
                 formData,
-                (result) => {
-
-                    const liste = document.getElementById("liste-notes");
-
-                    if (liste.querySelector("em")) liste.innerHTML = "";
-
-                    liste.insertAdjacentHTML("afterbegin", result.note_html);
-
-                    const lastNote = liste.querySelector(".note-item");
-                    if (lastNote && !lastNote.dataset.text) {
-                        lastNote.dataset.text = formData.get("note");
-                    }
-
+                () => {
                     document.getElementById("note").value = "";
-
-                    ajouterHistorique(
-                        demandeId,
-                        "Ajout d'une note interne",
-                        formData.get("note")
-                    );
-
-                    if (typeof window.applyNotesFilters === "function") {
-                        window.applyNotesFilters();
-                    }
+                    // La note et sa trace dans l'historique sont déjà
+                    // enregistrées par Ajouter_note.php : on réaffiche les deux
+                    rafraichirHistorique();
                 }
             );
         });
     }
 
 
-/* ============================================================
-   FILTRES & RECHERCHE — NOTES (VERSION DYNAMIQUE)
-============================================================ */
-
-const notesFilterBtns = document.querySelectorAll(".notes-filter-btn");
-const notesSearchInput = document.getElementById("notes-search-input");
-
-let notesFilter = "all";
-
-function getNoteItems() {
-    return document.querySelectorAll(".note-item");
-}
-
-function applyNotesFilters() {
-    const search = (notesSearchInput?.value || "").toLowerCase();
-    const now = new Date();
-
-    getNoteItems().forEach(note => {
-        const text = (note.dataset.text || "").toLowerCase();
-        const createdAt = new Date(note.dataset.createdAt);
-        const agentId = note.dataset.agentId;
-
-        let visible = true;
-
-        if (notesFilter === "me") {
-            if (typeof CURRENT_AGENT_ID !== "undefined") {
-                visible = visible && agentId === CURRENT_AGENT_ID;
-            }
-        }
-        if (notesFilter === "month"){
-            visible = visible && createdAt.getMonth() === now.getMonth() && 
-            createdAt.getFullYear() === now.getFullYear();
-        }
-
-        if (notesFilter === "24h") {
-            const diff = now - createdAt;
-            visible = visible && diff <= 24 * 60 * 60 * 1000;
-        }
-
-        if (notesFilter === "week") {
-            const diff = now - createdAt;
-            visible = visible && diff <= 7 * 24 * 60 * 60 * 1000;
-        }
-
-        if (search) {
-            visible = visible && text.includes(search);
-        }
-
-        note.style.display = visible ? "" : "none";
-    });
-
-    document.querySelectorAll(".notes-date-group").forEach(group => {
-        const hasVisible = Array.from(group.querySelectorAll(".note-item"))
-            .some(i => i.style.display !== "none");
-
-        group.style.display = hasVisible ? "" : "none";
-    });
-}
-
-window.applyNotesFilters = applyNotesFilters;
-
-notesFilterBtns.forEach(btn => {
-    btn.addEventListener("click", () => {
-        notesFilterBtns.forEach(b => b.classList.remove("active"));
-        btn.classList.add("active");
-
-        notesFilter = btn.dataset.filter;
-        applyNotesFilters();
-    });
-});
-
-if (notesSearchInput) {
-    notesSearchInput.addEventListener("input", applyNotesFilters);
-}
+/* Filtres et recherche des NOTES : voir historique_notes.js */
 
 
 /* ============================================================
@@ -602,12 +485,7 @@ if (notesSearchInput) {
                 (result) => {
 
                     chargerPiecesJointes(demandeId);
-
-                    ajouterHistorique(
-                        demandeId,
-                        "Ajout d'une pièce jointe",
-                        result.nom_fichier
-                    );
+                    rafraichirHistorique();
 
                     this.reset();
                 }
@@ -624,12 +502,7 @@ if (notesSearchInput) {
             formData,
             (data) => {
                 chargerPiecesJointes(demandeId);
-
-                ajouterHistorique(
-                    demandeId,
-                    "Suppression d'une pièce jointe",
-                    "Nom du fichier : " + data.nom_fichier
-                );
+                rafraichirHistorique();
             }
         );
     };
@@ -659,60 +532,7 @@ if (notesSearchInput) {
     }
 
 
-/* ============================================================
-   FILTRES & RECHERCHE — HISTORIQUE
-============================================================ */
-
-    const historyFilterBtns = document.querySelectorAll(".history-filter-btn");
-    const historySearchInput = document.getElementById("history-search-input");
-
-    let historyFilter = "all";
-
-    function getHistoryItems() {
-        return document.querySelectorAll(".history-item");
-    }
-
-    function applyHistoryFilters() {
-        const search = (historySearchInput?.value || "").toLowerCase();
-
-        getHistoryItems().forEach(item => {
-            const type = item.dataset.type;
-            const text = item.dataset.text.toLowerCase();
-
-            let visible = true;
-
-            if (historyFilter !== "all") {
-                visible = visible && type === historyFilter;
-            }
-
-            if (search) {
-                visible = visible && text.includes(search);
-            }
-
-            item.style.display = visible ? "" : "none";
-        });
-
-        document.querySelectorAll(".history-date-group").forEach(group => {
-            const hasVisible = Array.from(group.querySelectorAll(".history-item"))
-                .some(i => i.style.display !== "none");
-            group.style.display = hasVisible ? "" : "none";
-        });
-    }
-
-    window.applyHistoryFilters = applyHistoryFilters;
-
-    historyFilterBtns.forEach(btn => {
-        btn.addEventListener("click", () => {
-            historyFilterBtns.forEach(b => b.classList.remove("active"));
-            btn.classList.add("active");
-            historyFilter = btn.dataset.filter;
-            applyHistoryFilters();
-        });
-    });
-
-    if (historySearchInput) {
-        historySearchInput.addEventListener("input", applyHistoryFilters);
-    }
+/* Filtres et recherche de l'HISTORIQUE : voir historique_notes.js */
 
 
     /* ============================================================
@@ -822,12 +642,8 @@ function ensureDateGroup(dateStr) {
                     this.reset();
                     this.dataset.parentId = ""; // reset parent_id
 
-                    // Ajouter dans l’historique
-                    ajouterHistorique(
-                        demandeId,
-                        "Réponse agent",
-                        formData.get("message")
-                    );
+                    // La réponse est enregistrée dans l'historique par le serveur
+                    rafraichirHistorique();
                 }
             );
         });

@@ -50,6 +50,10 @@ try {
 
     $message_id = $pdo->lastInsertId();
 
+    // Trace dans l'historique, écrite par le serveur au moment de l'action
+    require_once __DIR__ . '/../Fonctions/historique_demande.php';
+    journaliserAction($pdo, $demande_id, (int) $agent_id, "Réponse agent", $message);
+
     // Si l’agent répond à un message citoyen → mettre à jour son statut
     if ($parent_id) {
         $pdo->prepare("

@@ -29,4 +29,8 @@ if (is_file($chemin)) {
 $stmt = $pdo->prepare("DELETE FROM fichiers_demandes WHERE id = ?");
 $stmt->execute([$id]);
 
+// Trace dans l'historique, écrite par le serveur au moment de l'action
+require_once __DIR__ . '/../Fonctions/historique_demande.php';
+journaliserAction($pdo, (int) $file['demande_id'], (int) $agent_id, "Suppression d'une pièce jointe", "Nom du fichier : " . $file['nom_fichier']);
+
 echo json_encode(["success" => true, "message" => "Pièce jointe supprimée.", "nom_fichier" => $file["nom_fichier"]]);
