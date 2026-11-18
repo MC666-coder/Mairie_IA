@@ -1604,3 +1604,59 @@ button:hover {
     font-size: 1rem;
     cursor: pointer;
 }
+
+/* =========================================================
+   Historique et notes : bouton sous la liste, « Réduire » en haut,
+   cadre déroulant quand la liste est longue
+   ========================================================= */
+.history-timeline.liste-deroulante,
+.notes-timeline.liste-deroulante {
+    max-height: 520px;
+    overflow-y: auto;
+    padding-right: 6px;
+    border: 1px solid #e3e3e3;
+    border-radius: 8px;
+    scroll-behavior: smooth;
+}
+.history-expand-btn:disabled {
+    background: #eef0f3;
+    color: #555;
+    box-shadow: none;
+    cursor: default;
+    transform: none;
+}
+.history-expand-btn:focus-visible,
+.btn-reduire:focus-visible { outline: 3px solid #0a76f6; outline-offset: 2px; }
+.btn-reduire {
+    display: inline-block;
+    margin: 0 0 8px;
+    padding: 6px 14px;
+    border: 1px solid #005fa3;
+    border-radius: 8px;
+    background: #fff;
+    color: #005fa3;
+    font-weight: bold;
+    cursor: pointer;
+}
+.btn-reduire[hidden] { display: none; }
+
+/* Filtre « Mois » des notes : un bouton par mois contenant des notes */
+.notes-mois {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 4px 0 10px;
+}
+.notes-mois[hidden] { display: none; }
+.mois-btn {
+    padding: 6px 14px;
+    border: 1px solid #c9c9e8;
+    border-radius: 18px;
+    background: #fff;
+    color: #2d2d6e;
+    font-weight: 600;
+    cursor: pointer;
+}
+.mois-btn:hover { background: #f1f1fb; }
+.mois-btn.active { background: #4f46e5; border-color: #4f46e5; color: #fff; }
+.mois-btn:focus-visible { outline: 3px solid #0a76f6; outline-offset: 2px; }

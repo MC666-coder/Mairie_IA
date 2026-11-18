@@ -70,7 +70,8 @@ const MOIS_FR  = ['', 'janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'ju
 /** « mardi 17 novembre 2026 » */
 function jourLongFr(int $t): string
 {
-    return JOURS_FR[(int) date('w', $t)] . ' ' . date('j', $t) . ' ' . MOIS_FR[(int) date('n', $t)] . ' ' . date('Y', $t);
+    $jour = date('j', $t) === '1' ? '1er' : date('j', $t);   // « 1er novembre »
+    return JOURS_FR[(int) date('w', $t)] . ' ' . $jour . ' ' . MOIS_FR[(int) date('n', $t)] . ' ' . date('Y', $t);
 }
 
 /** Titre d'un groupe de dates : « Aujourd'hui · mardi 17 novembre 2026 » */

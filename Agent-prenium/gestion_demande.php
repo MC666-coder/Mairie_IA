@@ -454,8 +454,6 @@ if (!$erreur) {
     <section class="notes-internes">
         <h2>Notes internes</h2>
 
-        <button id="show-full-notes" class="history-expand-btn">Afficher toutes les notes</button>
-
         <form method="POST" class="form-note" id="form-note" data-demande-id="<?= $demande_id ?>">
             <label for="note">Ajouter une note :</label>
             <textarea name="note" id="note" rows="4" required></textarea>
@@ -476,13 +474,22 @@ if (!$erreur) {
             </div>
         </div>
 
+        <!-- Filtre « Mois » : les mois qui contiennent des notes (historique_notes.js) -->
+        <div class="notes-mois" id="notes-mois" role="group" aria-label="Choisir le mois des notes" hidden></div>
+
         <!-- Compteur (« 5 notes affichées sur 12 »), mis à jour par historique_notes.js -->
         <p class="liste-compteur" id="notes-compteur" aria-live="polite"></p>
+
+        <!-- « Réduire » en haut : visible seulement quand toutes les notes sont dépliées -->
+        <button type="button" class="btn-reduire" id="reduire-notes-haut" hidden>▲ Réduire les notes</button>
 
         <!-- Timeline : toutes les notes (gabarit Backend/Fonctions/historique_demande.php) -->
         <div class="notes-timeline" id="liste-notes" data-demande-id="<?= (int) $demande_id ?>">
             <?= htmlNotes($notes ?? []) ?>
         </div>
+
+        <!-- Sous la liste : « Afficher toutes les notes (N) » / « Réduire » / « Tout est affiché » -->
+        <button type="button" id="show-full-notes" class="history-expand-btn"></button>
     </section>
 
 
@@ -532,8 +539,6 @@ if (!$erreur) {
     <section class="historique-actions">
         <h2>Historique des actions</h2>
 
-        <button id="show-full-history" class="history-expand-btn">Afficher tout l’historique</button>
-
         <!-- Barre de filtres -->
         <div class="history-toolbar">
             <div class="history-filters">
@@ -551,11 +556,18 @@ if (!$erreur) {
         <!-- Compteur (« 15 actions affichées sur 48 »), mis à jour par historique_notes.js -->
         <p class="liste-compteur" id="history-compteur" aria-live="polite"></p>
 
+        <!-- « Réduire » en haut : visible seulement quand tout l'historique est déplié -->
+        <button type="button" class="btn-reduire" id="reduire-historique-haut" hidden>▲ Réduire l’historique</button>
+
         <!-- Timeline : TOUT l'historique (gabarit Backend/Fonctions/historique_demande.php).
-             Par défaut, historique_notes.js n'en montre que les 5 derniers de chaque type. -->
+             Par défaut, historique_notes.js n'en montre que les 5 dernières actions
+             (« Toutes ») ou les 5 dernières du type filtré. -->
         <div class="history-timeline" id="history-timeline" data-demande-id="<?= (int) $demande_id ?>">
             <?= htmlHistorique($historique ?? []) ?>
         </div>
+
+        <!-- Sous la liste : « Afficher tout l'historique (N) » / « Réduire » / « Tout est affiché » -->
+        <button type="button" id="show-full-history" class="history-expand-btn"></button>
     </section>
 
 
