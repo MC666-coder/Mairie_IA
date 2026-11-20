@@ -31,7 +31,7 @@
 
 ## Pourquoi ce projet
 
-Pendant une année sabbatique, je me suis attaqué à un problème réel des mairies : **les agents croulent sous des demandes souvent mal orientées, et les citoyens peinent à trouver la bonne démarche.**
+Pendant mon année sabbatique, je me suis attaqué à un problème réel des mairies : **les agents croulent sous des demandes souvent mal orientées, et les citoyens peinent à trouver la bonne démarche.**
 
 Mairie_IA répond aux deux côtés :
 - le **citoyen** trouve une réponse à toute heure, dans sa langue, et suit ses demandes en ligne ;
