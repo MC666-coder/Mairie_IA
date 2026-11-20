@@ -22,6 +22,7 @@
 - [Sécurité et RGPD](#sécurité-et-rgpd)
 - [Installation](#installation)
 - [Tester les assistants IA](#tester-les-assistants-ia)
+- [Difficultés rencontrées](#difficultés-rencontrées)
 - [Feuille de route](#feuille-de-route)
 - [Méthode de travail](#méthode-de-travail)
 - [Auteur](#auteur)
@@ -191,6 +192,35 @@ php tests/ia/comparer_ia.php --fournisseurs=gemini
 ```
 
 Le rapport est écrit **hors du projet** (variable `RAPPORTS_IA_DIR`), avec une grille de notation par critère.
+
+---
+
+## Difficultés rencontrées
+
+**1. Un code de départ avec des failles de sécurité**
+- *Problème :* en changeant un numéro dans l'adresse, un citoyen pouvait voir la demande d'un autre (IDOR). Il n'y avait pas de protection CSRF, et les fichiers déposés n'étaient pas contrôlés.
+- *Solution :* audit complet selon l'OWASP Top 10, puis corrections une par une : vérification que la demande appartient bien au citoyen connecté, jeton CSRF, contrôle du type réel des fichiers, listes blanches `.htaccess`.
+- *Ce que j'en retiens :* la sécurité se pense dès la conception, pas à la fin.
+
+**2. Utiliser une IA sans lui confier de données personnelles (RGPD)**
+- *Problème :* les messages des citoyens contiennent des noms, des téléphones, parfois des informations de santé, qui ne doivent pas partir chez un fournisseur d'IA.
+- *Solution :* masquage automatique avant chaque envoi (noms, emails, téléphones, IBAN, numéros de sécurité sociale, santé…), et aucune conversation conservée en base.
+- *Ce que j'en retiens :* le RGPD est une contrainte technique, il se traite dans le code.
+
+**3. Une IA qui sautait des étapes ou sortait du sujet**
+- *Problème :* l'assistant oubliait parfois une étape (par exemple proposer de préparer la demande après une urgence), répondait à des questions hors sujet ou se laissait manipuler (« ignore tes instructions »).
+- *Solution :* réponses au format JSON, vérifiées par le serveur avant d'être utilisées ; règles explicites dans le prompt ; le texte du citoyen est traité comme une donnée, jamais comme une instruction ; aucune demande n'est créée sans la confirmation du citoyen.
+- *Ce que j'en retiens :* on ne fait pas confiance à la sortie d'une IA, on la contrôle, et l'humain garde la décision.
+
+**4. Une API d'IA instable**
+- *Problème :* erreurs de quota, modèle retiré, serveurs saturés, réponses coupées au milieu d'une phrase.
+- *Solution :* nouvelles tentatives automatiques sur les erreurs temporaires, modèle réglable dans `.env`, lecture de la réponse complète (elle arrivait en plusieurs morceaux).
+- *Ce que j'en retiens :* un service externe peut tomber à tout moment, il faut le prévoir.
+
+**5. Des bugs visibles seulement en conditions réelles**
+- *Problème :* les événements de l'agenda s'affichaient avec une heure de décalage, une nouvelle page était bloquée sous Apache alors qu'elle marchait en test, et certains changements de style n'apparaissaient pas.
+- *Causes et solutions :* heures envoyées sans fuseau horaire (corrigé) ; règle `.htaccess` ignorée par le serveur de test (tests désormais aussi sous Apache) ; cache du navigateur (numéro de version automatique sur les fichiers CSS et JS).
+- *Ce que j'en retiens :* tester dans les mêmes conditions que la production.
 
 ---
 
