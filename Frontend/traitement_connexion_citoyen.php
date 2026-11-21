@@ -98,5 +98,9 @@ $_SESSION['nom_citoyen'] = $citoyen['nom_citoyen'];
 $_SESSION['prenom_citoyen'] = $citoyen['prenom_citoyen'];
 $_SESSION['email_citoyen'] = $citoyen['email_citoyen'];
 
-header('Location: Portail_citoyen.php');
+// Retour sur la page demandée avant la connexion (sinon le tableau de bord)
+require_once __DIR__ . '/../Backend/Fonctions/session_citoyen.php';
+$retour = retourCitoyenValide($_SESSION['retour_apres_connexion'] ?? null);
+unset($_SESSION['retour_apres_connexion']);
+header('Location: ' . ($retour ?? 'Portail_citoyen.php'));
 exit();

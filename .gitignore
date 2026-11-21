@@ -15,6 +15,7 @@ Agent-prenium/logs/
 # Dépendances (réinstaller avec composer install / npm install)
 /vendor/
 /node_modules/
+/Frontend/node_modules/
 
 # Fichiers uploadés par les utilisateurs
 Backend/uploads/demandes/*

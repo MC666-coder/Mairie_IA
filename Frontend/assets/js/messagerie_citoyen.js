@@ -121,6 +121,9 @@ document.addEventListener("DOMContentLoaded", () => {
             });
             if (res.status === 401) {
                 arreter();
+                // Session expirée : connexion, puis retour sur cette demande
+                const retour = "details_demande.php" + window.location.search;
+                window.location.href = "connexion_citoyen.php?session=expiree&retour=" + encodeURIComponent(retour);
                 indisponible.hidden = false;
                 indisponible.textContent = "Votre session a expiré. Rechargez la page pour vous reconnecter.";
                 form.hidden = true;

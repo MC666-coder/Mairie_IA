@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../Backend/Fonctions/icones.php';
+require_once __DIR__ . '/../Backend/Fonctions/gabarit_public.php';
 require_once __DIR__ . '/../Backend/Fonctions/carte_profil.php';
 /* ---------------------------------------
    Sécurisation session
@@ -17,10 +18,9 @@ require_once __DIR__ . '/../Backend/Middleware/auth.php'; // jeton CSRF du chatb
 
 
 // Vérification stricte du rôle citoyen
-if (!isset($_SESSION['citoyen_id'])) {
-    http_response_code(403);
-    die("Accès refusé.");
-}
+// Pas connecté ou session expirée : retour à la connexion avec un message
+require_once __DIR__ . '/../Backend/Fonctions/session_citoyen.php';
+exigerCitoyen();
 
 
 $citoyenId = (int) $_SESSION['citoyen_id'];
@@ -66,6 +66,7 @@ $tableau = donneesTableauCitoyen($pdo, $citoyenId);
     <title>Portail Citoyen - Commune de L’Aiguillon-sur-Vie</title>
     <link rel="stylesheet" href="assets/css/style.css?v=<?= @filemtime(__DIR__ . '/assets/css/style.css') ?>">
     <link rel="stylesheet" href="assets/css/carte_profil.css?v=<?= @filemtime(__DIR__ . '/assets/css/carte_profil.css') ?>">
+    <?= feuillesGabarit() ?>
     <!-- Jeton anti-CSRF lu par chatbot.js (en-tête X-CSRF-Token) -->
     <meta name="csrf-token" content="<?= htmlspecialchars(jeton_csrf(), ENT_QUOTES, 'UTF-8') ?>">
     <!-- Content Security Policy stricte -->
@@ -103,65 +104,48 @@ $tableau = donneesTableauCitoyen($pdo, $citoyenId);
     <?php endif; ?>
 <div class="page-wrapper">
 
-    <!-- HEADER PREMIUM -->
-    <header id="header-agent">
-
-        <div class="rf-banner">
-            <span class="rf-title">République Française</span>
-            <span class="rf-subtitle">Liberté • Égalité • Fraternité</span>
-        </div>
-
-        <div class="header-main">
-
-            <nav id="nav-agent">
-                <a href="portail_citoyen.php" class="active">Tableau de bord</a>
-                <a href="nouvelle_demande.php">Créer une demande</a>
-
-                <a href="logout.php" class="nav-btn">
-                    <span class="nav-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#003b8e" stroke-width="2">
-                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-                            <polyline points="10 17 15 12 10 7"/>
-                            <line x1="15" y1="12" x2="3" y2="12"/>
-                        </svg>
-                    </span>
-                    Déconnexion
-                </a>
-            </nav>
-
-            <!-- Bulle de connexion -->
-            <?= carteProfilCitoyen($citoyen, (int) $citoyenId) ?>
-
-        </div>
-    </header>
-
-    <!-- HERO -->
-    <section class="hero-page">
-        <div class="hero-overlay"></div>
-        <div class="hero-content">
-            <h1>Portail Citoyen</h1>
-            <p>Suivez vos demandes et échangez avec la mairie.</p>
-        </div>
-    </section>
+    <?= enTeteCitoyen('tableau', $citoyen, (int) $citoyenId) ?>
 
     <!-- CONTENU -->
     <main id="content_portail_citoyen">
 
-        <h2 class="section-title">
-            Bienvenue, <?= htmlspecialchars($citoyen['prenom_citoyen'] . ' ' . $citoyen['nom_citoyen']) ?> !
-        </h2>
+        <!-- EN-TÊTE DU TABLEAU DE BORD -->
+        <div class="mb-6 flex flex-col gap-4 text-left sm:flex-row sm:items-end sm:justify-between">
+            <div>
+                <p class="m-0 text-sm font-medium text-slate-500">Portail citoyen</p>
+                <h1 class="m-0 mt-1 text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+                    Bonjour, <?= htmlspecialchars($citoyen['prenom_citoyen']) ?>
+                </h1>
+                <p class="m-0 mt-1 text-sm text-slate-500">Suivez vos demandes et échangez avec la mairie.</p>
+            </div>
+            <a href="nouvelle_demande.php"
+               class="inline-flex w-fit items-center gap-2 rounded-full bg-[#003b8e] px-5 py-2.5 text-sm font-semibold text-white no-underline shadow-sm transition hover:bg-[#002a66]">
+                <?= icone('plus') ?> Nouvelle demande
+            </a>
+        </div>
 
-        <!-- STATISTIQUES -->
-        <!-- Mis à jour automatiquement par tableau_citoyen.js -->
-        <section class="stats-agent" id="stats-citoyen">
+        <?php if (($_GET['demande'] ?? '') === 'success'): ?>
+            <div class="mb-6 flex items-start gap-2 rounded-2xl bg-green-50 px-4 py-3 text-left text-sm font-medium text-green-800 ring-1 ring-green-600/20" role="status">
+                <?= icone('valide', 'mt-0.5') ?> Votre demande a bien été envoyée à la mairie. Vous pouvez suivre son avancement ci-dessous.
+            </div>
+        <?php endif; ?>
+
+        <?php if (($_GET['erreur'] ?? '') === 'demande-introuvable'): ?>
+            <div class="mb-6 flex items-start gap-2 rounded-2xl bg-red-50 px-4 py-3 text-left text-sm font-medium text-red-800 ring-1 ring-red-600/20" role="alert">
+                <?= icone('croix') ?> Cette demande est introuvable. Voici la liste de vos demandes.
+            </div>
+        <?php endif; ?>
+
+        <!-- STATISTIQUES (mises à jour automatiquement par tableau_citoyen.js) -->
+        <section id="stats-citoyen" class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="Vos demandes en chiffres">
             <?= htmlStatsCitoyen($tableau['stats']) ?>
         </section>
 
-        <!-- DERNIÈRES DEMANDES -->
-        <section class="last-requette">
-            <h2 class="section-title">Vos dernières demandes</h2>
+        <!-- DEMANDES : une carte par demande avec sa frise d'avancement -->
+        <section class="mt-10 text-left" aria-labelledby="titre-demandes">
+            <h2 id="titre-demandes" class="m-0 mb-4 text-lg font-bold text-slate-900">Vos demandes</h2>
 
-            <div class="last-requests-container" id="liste-demandes"
+            <div class="flex flex-col gap-3" id="liste-demandes"
                  data-signature="<?= signatureTableauCitoyen($tableau) ?>">
                 <?= htmlDemandesCitoyen($tableau['demandes']) ?>
             </div>
@@ -187,12 +171,6 @@ $tableau = donneesTableauCitoyen($pdo, $citoyenId);
 
     </main>
 
-    <!-- BANDE TRICOLORE -->
-    <div class="bande-tricolore">
-        <div class="bleu"></div>
-        <div class="blanc"></div>
-        <div class="rouge"></div>
-    </div>
 
 </div>
 
@@ -211,42 +189,7 @@ $tableau = donneesTableauCitoyen($pdo, $citoyenId);
 <script src="assets/js/click_chatbot.js?v=<?= @filemtime(__DIR__ . '/assets/js/click_chatbot.js') ?>"></script>
 
 
-<!-- FOOTER PREMIUM -->
-<footer id="footer-premium">
-
-    <div class="footer-content">
-
-        <div class="footer-col">
-            <h3 class="footer-title">Commune de L’Aiguillon-sur-Vie</h3>
-            <p class="footer-slogan">
-                Vos idées, Notre action,<br>
-                Partageons la réussite de L'Aiguillon-sur-Vie.
-            </p>
-        </div>
-
-        <div class="footer-col">
-            <h4>Informations légales</h4>
-            <ul class="footer-links">
-                <li><a href="#">Mentions légales</a></li>
-                <li><a href="#">Politique de confidentialité</a></li>
-            </ul>
-        </div>
-
-        <div class="footer-col">
-            <h4>Coordonnées</h4>
-            <p>Mairie de L’Aiguillon-sur-Vie</p>
-            <p>Adresse : [Ton adresse ici]</p>
-            <p>Téléphone : [Ton numéro]</p>
-            <p>Email : [Ton email]</p>
-        </div>
-
-    </div>
-
-    <div class="footer-bottom">
-        © 2026 - Commune de L’Aiguillon-sur-Vie — Tous droits réservés
-    </div>
-
-</footer>
+<?= piedDePage() ?>
 
 </body>
 </html>

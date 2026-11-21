@@ -38,8 +38,9 @@ document.addEventListener("DOMContentLoaded", () => {
                 cache: "no-store"
             });
 
-            if (res.status === 401) {     // session expirée : on arrête
+            if (res.status === 401) {     // session expirée : retour à la connexion avec un message
                 arreter();
+                window.location.href = "connexion_citoyen.php?session=expiree&retour=Portail_citoyen.php";
                 annoncer("Votre session a expiré. Rechargez la page pour vous reconnecter.");
                 return;
             }
@@ -60,7 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
             // Mise en évidence des demandes apparues depuis le dernier affichage
             const nouvelles = (data.ids || []).filter(id => !anciensIds.has(id));
             nouvelles.forEach(id => {
-                liste.querySelector(`.request-card[data-id="${id}"]`)?.classList.add("carte-nouvelle");
+                liste.querySelector(`.carte-demande[data-id="${id}"]`)?.classList.add("carte-nouvelle");
             });
             annoncer(nouvelles.length
                 ? `${nouvelles.length} nouvelle(s) demande(s) dans votre tableau de bord.`
@@ -73,7 +74,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function idsAffiches() {
-        return new Set([...liste.querySelectorAll(".request-card[data-id]")].map(c => Number(c.dataset.id)));
+        return new Set([...liste.querySelectorAll(".carte-demande[data-id]")].map(c => Number(c.dataset.id)));
     }
 
     function annoncer(texte) {

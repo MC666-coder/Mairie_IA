@@ -5,14 +5,17 @@
   "main": "index.js",
   "scripts": {
     "dev": "vite",
-    "build": "vite build"
+    "build": "vite build",
+    "css": "tailwindcss -i assets/css/tailwind-source.css -o assets/css/tailwind.css --minify",
+    "css:watch": "tailwindcss -i assets/css/tailwind-source.css -o assets/css/tailwind.css --watch"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "devDependencies": {
-    "tailwindcss": "^4.1.18",
+    "@tailwindcss/cli": "^4.3.5",
+    "tailwindcss": "^4.3.5",
     "vite": "^7.3.1"
   },
   "dependencies": {

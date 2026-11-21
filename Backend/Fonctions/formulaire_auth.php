@@ -80,6 +80,16 @@ function choixProfil(string $lien, string $nomIcone, string $titre, string $text
         . '</a>';
 }
 
+/** Message « session expirée » (page de connexion ouverte avec ?session=expiree). */
+function messageSessionExpiree(): string
+{
+    if (($_GET['session'] ?? '') !== 'expiree') {
+        return '';
+    }
+    return '<div class="message-auth-info" role="status">' . icone('horloge')
+        . ' <span>Votre session a expiré ou vous n’êtes pas connecté. Reconnectez-vous pour continuer.</span></div>';
+}
+
 /** Message de réussite ou d'erreur lu dans la session (puis effacé), affiché dans la carte. */
 function messageAuth(string $cleSession, string $type = 'error'): string
 {

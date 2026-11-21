@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/../Backend/Fonctions/icones.php';
+require_once __DIR__ . '/../Backend/Fonctions/gabarit_public.php';
 
 // Si le programme a déjà été affiché durant cette session, on redirige vers l'accueil
 if (isset($_SESSION['programme_vu']) && $_SESSION['programme_vu'] === true) {
@@ -14,24 +15,13 @@ if (isset($_SESSION['programme_vu']) && $_SESSION['programme_vu'] === true) {
     <meta charset="UTF-8">
     <title>Accueil - L’Aiguillon-sur-Vie</title>
     <link rel="stylesheet" href="assets/css/style.css?v=<?= @filemtime(__DIR__ . '/assets/css/style.css') ?>">
+    <?= feuillesGabarit() ?>
 </head>
 
 <body>
 <div class="page-wrapper">
 
-    <!-- HEADER UNIFIÉ -->
-    <header id="header-agent">
-        <div id="logo-agent">𝕸𝖆𝖎𝖗𝖎𝖊 𝖉𝖊 𝖑’𝕬𝖎𝖌𝖚𝖎𝖑𝖑𝖔𝖓‑𝖘𝖚𝖗‑𝖁𝖎𝖊</div>
-
-        <nav id="nav-agent">
-            <a href="index.php">Accueil</a>
-            <a href="mairie.php">La mairie</a>
-            <a href="Actualités.php">Actualités</a>
-            <a href="Services.php">Services</a>
-            <a href="Contacts.php">Contacts</a>
-            <?= boutonsConnexion() ?>
-        </nav>
-    </header>
+    <?= enTetePublic('') ?>
 
     <!-- CONTENU PRINCIPAL -->
     <main id="content_portail_citoyen">
@@ -61,22 +51,10 @@ if (isset($_SESSION['programme_vu']) && $_SESSION['programme_vu'] === true) {
 
     </main>
 
-    <!-- BANDE TRICOLORE -->
-    <div class="bande-tricolore">
-        <div class="bleu"></div>
-        <div class="blanc"></div>
-        <div class="rouge"></div>
-    </div>
 
 </div>
 
-<!-- FOOTER UNIFIÉ -->
-<footer id="footer">
-    <p id="slogan">Vos idées, Notre action, Partageons la réussite de L'Aiguillon-sur-Vie</p>
-    <p>&copy; 2026 - Commune de L’Aiguillon-sur-Vie</p>
-    <a href="#">Mentions légales</a> |
-    <a href="#">Politique de confidentialité</a>
-</footer>
+<?= piedDePage() ?>
 
 </body>
 </html>

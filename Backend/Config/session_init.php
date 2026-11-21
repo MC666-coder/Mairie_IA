@@ -32,7 +32,7 @@ if (isset($_SESSION['LAST_ACTIVITY'])) {
             exit;
         }
         require_once __DIR__ . '/app.php';
-        header("Location: " . chemin_app('Agent-prenium/connexion_agent.php'));
+        header("Location: " . chemin_app('Agent-prenium/connexion_agent.php?session=expiree'));
         exit;
     }
 }

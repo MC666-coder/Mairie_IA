@@ -10,79 +10,89 @@ session_set_cookie_params([
 ]);
 session_start();
 require_once __DIR__ . '/../Backend/Config/db.php';
+require_once __DIR__ . '/../Backend/Fonctions/demande_citoyen.php'; // types, priorités, longueur du message
 
 
 
 // Vérification connexion citoyen
-if (!isset($_SESSION['citoyen_id']) || !isset($_SESSION['email_citoyen'])) {
-    http_response_code(403);
-    die("Accès refusé.");
-}
+// Session expirée pendant la saisie : retour à la connexion, puis au formulaire
+require_once __DIR__ . '/../Backend/Fonctions/session_citoyen.php';
+exigerCitoyen('nouvelle_demande.php');
 
 $citoyenId = (int) $_SESSION['citoyen_id'];
+
+/* ---------------------------------------
+   En cas d'erreur : retour au formulaire avec un message rouge
+   et la saisie conservée (au lieu d'une page blanche)
+---------------------------------------- */
+
+function retourFormulaire(string $erreur, array $saisie = []): never
+{
+    $_SESSION['erreur_demande'] = $erreur;
+    $_SESSION['saisie_demande'] = $saisie;
+    header('Location: nouvelle_demande.php');
+    exit();
+}
 
 /* ---------------------------------------
    Vérification méthode POST
 ---------------------------------------- */
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    die("Méthode non autorisée.");
+    header('Location: nouvelle_demande.php');
+    exit();
 }
-
-/* ---------------------------------------
-   Vérification CSRF
----------------------------------------- */
-
-if (empty($_POST['csrf_token']) || empty($_SESSION['csrf_token']) ||
-    !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-    session_destroy();
-    die("Requête invalide.");
-}
-
-/* ---------------------------------------
-   Anti-spam simple : 1 demande / 5 sec
----------------------------------------- */
-
-if (!isset($_SESSION['last_demande_submit'])) {
-    $_SESSION['last_demande_submit'] = 0;
-}
-if (time() - $_SESSION['last_demande_submit'] < 5) {
-    die("Veuillez patienter avant de soumettre une nouvelle demande.");
-}
-$_SESSION['last_demande_submit'] = time();
 
 /* ---------------------------------------
    Nettoyage des données
 ---------------------------------------- */
 
-$service_id = trim($_POST['services_id'] ?? '');
-$type_demande = trim($_POST['type'] ?? '');
-$message = trim($_POST['message'] ?? '');
-$priorite = trim($_POST['priorite'] ?? '');
+$service_id   = trim((string) ($_POST['services_id'] ?? ''));
+$type_demande = trim((string) ($_POST['type'] ?? ''));
+$message      = trim((string) ($_POST['message'] ?? ''));
+$priorite     = trim((string) ($_POST['priorite'] ?? ''));
+
+// Saisie renvoyée au formulaire en cas d'erreur (message tronqué à la longueur maximale)
+$saisie = [
+    'services_id' => $service_id,
+    'type'        => $type_demande,
+    'message'     => mb_substr($message, 0, MESSAGE_MAX, 'UTF-8'),
+    'priorite'    => $priorite,
+];
+
+/* ---------------------------------------
+   Vérification CSRF
+   (jeton absent ou faux : formulaire trop ancien ou envoyé depuis un autre site)
+---------------------------------------- */
+
+if (empty($_POST['csrf_token']) || empty($_SESSION['csrf_token']) ||
+    !hash_equals($_SESSION['csrf_token'], (string) $_POST['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32)); // nouveau jeton
+    retourFormulaire('Le formulaire a expiré. Vérifiez vos informations puis renvoyez la demande.', $saisie);
+}
 
 /* ---------------------------------------
    Validation des champs
 ---------------------------------------- */
 
-$types_valides = ['plainte', 'question', 'suggestion'];
-// Valeurs de l'ENUM demandes.priorite ('urgente' est réservée aux agents)
-$priorites_valides = ['basse', 'normale', 'haute'];
-
-if (!in_array($type_demande, $types_valides, true)) {
-    die("Type de demande invalide.");
-}
-
-if (!in_array($priorite, $priorites_valides, true)) {
-    die("Priorité invalide.");
-}
-
-if ($message === '' || strlen($message) < 5) {
-    die("Le message est trop court.");
-}
-
 if (!ctype_digit($service_id)) {
-    die("Service invalide.");
+    retourFormulaire('Choisissez le service concerné par votre demande.', $saisie);
+}
+
+if (!array_key_exists($type_demande, TYPES_DEMANDE)) {
+    retourFormulaire('Choisissez le type de demande : plainte, question ou suggestion.', $saisie);
+}
+
+$longueur = mb_strlen($message, 'UTF-8');
+if ($longueur < MESSAGE_MIN) {
+    retourFormulaire('Votre message est trop court : écrivez au moins ' . MESSAGE_MIN . ' caractères.', $saisie);
+}
+if ($longueur > MESSAGE_MAX) {
+    retourFormulaire('Votre message est trop long : ' . MESSAGE_MAX . ' caractères au maximum.', $saisie);
+}
+
+if (!array_key_exists($priorite, PRIORITES_DEMANDE)) {
+    retourFormulaire('Choisissez une priorité : basse, normale ou haute.', $saisie);
 }
 
 /* ---------------------------------------
@@ -90,11 +100,22 @@ if (!ctype_digit($service_id)) {
 ---------------------------------------- */
 
 $checkService = $pdo->prepare("SELECT id FROM services WHERE id = ?");
-$checkService->execute([$service_id]);
+$checkService->execute([(int) $service_id]);
 
-if ($checkService->rowCount() === 0) {
-    die("Service introuvable.");
+if ($checkService->fetchColumn() === false) {
+    $saisie['services_id'] = '';
+    retourFormulaire('Ce service n’existe pas. Choisissez un service dans la liste.', $saisie);
 }
+
+/* ---------------------------------------
+   Anti-spam simple : 1 demande / 5 sec
+   (après la validation : une erreur de saisie ne bloque pas le nouvel essai)
+---------------------------------------- */
+
+if (time() - (int) ($_SESSION['last_demande_submit'] ?? 0) < 5) {
+    retourFormulaire('Vous venez d’envoyer une demande. Patientez quelques secondes avant d’en envoyer une autre.', $saisie);
+}
+$_SESSION['last_demande_submit'] = time();
 
 /* ---------------------------------------
    Insertion sécurisée dans `demandes`
@@ -121,4 +142,3 @@ $insert->execute([
 
 header("Location: Portail_citoyen.php?demande=success");
 exit();
-?>

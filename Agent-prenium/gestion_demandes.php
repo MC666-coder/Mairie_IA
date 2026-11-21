@@ -10,7 +10,7 @@ require_once __DIR__ . '/../Backend/Config/db.php';
    1) Sécurité session
 --------------------------------------------------------- */
 if (!isset($_SESSION['agent_id'])) {
-    header("Location: connexion_agent.php");
+    header("Location: connexion_agent.php?session=expiree"); // session absente ou expirée : message sur la page de connexion
     exit;
 }
 

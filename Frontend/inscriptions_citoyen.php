@@ -7,6 +7,7 @@ session_set_cookie_params([
 ]);
 session_start();
 require_once __DIR__ . '/../Backend/Fonctions/formulaire_auth.php';
+require_once __DIR__ . '/../Backend/Fonctions/gabarit_public.php';
 require_once __DIR__ . '/../Backend/Fonctions/regles_mot_de_passe.php';
 
 // Génération du token CSRF
@@ -26,6 +27,7 @@ $valeur = fn(string $cle): string => (string) ($saisie[$cle] ?? '');
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inscription Citoyen - Commune de L’Aiguillon-sur-Vie</title>
     <link rel="stylesheet" href="assets/css/style.css?v=<?= @filemtime(__DIR__ . '/assets/css/style.css') ?>"/>
+    <?= feuillesGabarit() ?>
 
     <!-- Content Security Policy stricte -->
     <meta http-equiv="Content-Security-Policy"
@@ -41,28 +43,7 @@ $valeur = fn(string $cle): string => (string) ($saisie[$cle] ?? '');
 <body>
 <div class="page-wrapper">
 
-    <!-- HEADER PREMIUM -->
-    <header id="header-agent">
-
-        <div class="rf-banner">
-            <span class="rf-title">République Française</span>
-            <span class="rf-subtitle">Liberté • Égalité • Fraternité</span>
-        </div>
-
-        <div class="header-main">
-            <nav id="nav-agent">
-                <a href="index.php">Accueil</a>
-                <a href="agenda.php">Agenda</a>
-                <a href="Actualités.php">Actualités</a>
-                <a href="Services.php">Services</a>
-                <a href="Contacts.php">Contacts</a>
-                <a href="Newsletter.php">Newsletter</a>
-
-                <?= boutonsConnexion('inscription') ?>
-            </nav>
-        </div>
-
-    </header>
+    <?= enTetePublic('inscription') ?>
 
     <!-- HERO SECTION -->
     <section class="hero-page">
@@ -110,57 +91,10 @@ $valeur = fn(string $cle): string => (string) ($saisie[$cle] ?? '');
 
     </main>
 
-    <!-- BANDE TRICOLORE -->
-    <div class="bande-tricolore">
-        <div class="bleu"></div>
-        <div class="blanc"></div>
-        <div class="rouge"></div>
-    </div>
 
 </div>
 
-<!-- FOOTER PREMIUM -->
-<footer id="footer-premium">
-
-    <div class="footer-content">
-
-        <div class="footer-col">
-            <h3 class="footer-title">Commune de L’Aiguillon-sur-Vie</h3>
-            <p class="footer-slogan">
-                Vos idées, Notre action,<br>
-                Partageons la réussite de L'Aiguillon-sur-Vie.
-            </p>
-        </div>
-
-        <div class="footer-col">
-            <h4>Informations légales</h4>
-            <ul class="footer-links">
-                <li><a href="mentions-legales.php">Mentions légales</a></li>
-                <li><a href="politique-confidentialite.php">Politique de confidentialité</a></li>
-                <li><a href="accessibilite.php">Accessibilité</a></li>
-                <li><a href="rgpd.php">Données personnelles (RGPD)</a></li>
-            </ul>
-        </div>
-
-        <div class="footer-col">
-            <h4>Coordonnées</h4>
-            <p>Mairie de L’Aiguillon-sur-Vie</p>
-            <p>Adresse : [Ton adresse ici]</p>
-            <p>Téléphone : [Ton numéro]</p>
-            <p>Email : [Ton email]</p>
-
-            <h4 style="margin-top:15px;">Horaires</h4>
-            <p>Lun–Ven : 9h00–12h00 / 14h00–17h00</p>
-            <p>Samedi : 9h00–12h00</p>
-        </div>
-
-    </div>
-
-    <div class="footer-bottom">
-        &copy; 2026 - Commune de L’Aiguillon-sur-Vie — Tous droits réservés
-    </div>
-
-</footer>
+<?= piedDePage() ?>
 
 <script src="assets/js/mot_de_passe_visible.js?v=<?= @filemtime(__DIR__ . '/assets/js/mot_de_passe_visible.js') ?>"></script>
 <script src="assets/js/regles_mot_de_passe.js?v=<?= @filemtime(__DIR__ . '/assets/js/regles_mot_de_passe.js') ?>"></script>

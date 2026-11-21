@@ -72,6 +72,7 @@ unset($_SESSION['login_email_agent']);
             <div class="carte-auth">
                 <?= retourAuth('../Frontend/choix_connexion.php', 'Retour') ?>
                 <?= enteteAuth('mallette', 'Espace agent', 'Connectez-vous avec vos identifiants professionnels') ?>
+                <?= messageSessionExpiree() ?>
                 <?= messageAuth('login_error_agent') ?>
                 <form action="traitement_connexion_agent.php" method="POST" autocomplete="off">
 

@@ -21,7 +21,7 @@ header("Content-Security-Policy: frame-ancestors 'none';");
    1) Vérification de la session agent
 --------------------------------------------------------- */
 if (!isset($_SESSION['agent_id'])) {
-    header("Location: connexion_agent.php");
+    header("Location: connexion_agent.php?session=expiree"); // session absente ou expirée : message sur la page de connexion
     exit;
 }
 

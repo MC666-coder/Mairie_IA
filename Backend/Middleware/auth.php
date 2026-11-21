@@ -46,7 +46,7 @@ function exiger_agent(): int
     if (empty($_SESSION['agent_id'])) {
         require_once __DIR__ . '/../Config/app.php';
         refuser_acces(401, 'Session expirée, veuillez vous reconnecter.',
-            chemin_app('Agent-prenium/connexion_agent.php'));
+            chemin_app('Agent-prenium/connexion_agent.php?session=expiree'));
     }
     return (int) $_SESSION['agent_id'];
 }
