@@ -265,9 +265,9 @@ $demandes = $lastRequests->fetchAll(PDO::FETCH_ASSOC);
         ASSISTANT IA AGENT — BOUTON FLOTTANT + FENÊTRE PREMIUM
     ============================================================ -->
 
-    <link rel="stylesheet" href="../Frontend/IA/assistant.css">
-    <script src="../Frontend/assets/js/icones.js" defer></script>
-    <script src="../Frontend/IA/assistant.js" defer></script>
+    <link rel="stylesheet" href="../Frontend/IA/assistant.css?v=<?= @filemtime(__DIR__ . '/../Frontend/IA/assistant.css') ?>">
+    <script src="../Frontend/assets/js/icones.js?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/js/icones.js') ?>" defer></script>
+    <script src="../Frontend/IA/assistant.js?v=<?= @filemtime(__DIR__ . '/../Frontend/IA/assistant.js') ?>" defer></script>
 
     <!-- BOUTON FLOTTANT IA -->
     <div id="ia-agent-button">

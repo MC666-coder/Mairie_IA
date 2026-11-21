@@ -32,9 +32,9 @@ function showAlert(type, message) {
     const container = document.getElementById("alert-container");
 
     container.innerHTML = `
-        <div class="alert ${type}">
-            ${icone(type === "success" ? "valide" : "erreur")}
-            ${escapeHTML(message)}
+        <div class="alert ${type}" role="${type === "success" ? "status" : "alert"}">
+            ${icone(type === "success" ? "valide" : "croix")}
+            <span>${escapeHTML(message)}</span>
         </div>
     `;
 

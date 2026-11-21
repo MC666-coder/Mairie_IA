@@ -71,6 +71,19 @@ document.addEventListener("DOMContentLoaded", () => {
         return div;
     }
 
+    /* Message d'erreur : bulle rouge avec une croix (styles .msg-erreur dans assistant.css) */
+    function afficherErreur(texte) {
+        const div = document.createElement("div");
+        div.className = "msg-ia msg-erreur";
+        div.setAttribute("role", "alert");
+        const span = document.createElement("span");
+        span.textContent = texte;
+        div.appendChild(span);
+        if (window.iconeElement) div.prepend(iconeElement("croix"));
+        messages.appendChild(div);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
     /* ---------------------------------------------------------
        LOCK / UNLOCK
     --------------------------------------------------------- */
@@ -153,20 +166,21 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (e) {
             jsLog("Erreur fetch: " + e.message);
             loader.classList.add("hidden");
-            addMessage("Erreur IA (fetch)", "ia");
+            afficherErreur("Impossible de joindre l'assistant IA. Vérifiez votre connexion puis réessayez.");
             unlockInput();
             return;
         }
 
+        // On lit le texte UNE fois (le corps d'une réponse ne peut être lu qu'une seule fois)
+        const texteBrut = await res.text();
         let data;
         try {
-            data = await res.json();
+            data = JSON.parse(texteBrut);
         } catch (e) {
             jsLog("Erreur JSON: " + e.message);
-            const text = await res.text();
-            jsLog("Réponse brute: " + text);
+            jsLog("Réponse brute: " + texteBrut.slice(0, 300));
             loader.classList.add("hidden");
-            addMessage("Erreur IA (JSON)", "ia");
+            afficherErreur("Le serveur a renvoyé une réponse illisible (erreur HTTP " + res.status + "). Réessayez dans un instant.");
             unlockInput();
             return;
         }
@@ -174,8 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
         loader.classList.add("hidden");
 
         if (data.error) {
-            const erreur = addMessage(" " + data.error, "ia");
-            if (window.iconeElement) erreur.prepend(iconeElement("alerte"));
+            afficherErreur(data.error);
             unlockInput();
             return;
         }

@@ -274,6 +274,26 @@ button:hover {
     background: #28a745 !important;
     box-shadow: 0 4px 14px rgba(0,0,0,0.15) !important;
     animation: slideIn 0.4s ease, fadeOut 0.4s ease 3.5s forwards;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    max-width: 420px;
+}
+
+/* Icône (coche ou croix) un peu plus grande que le texte */
+.alert .icone {
+    width: 22px;
+    height: 22px;
+    flex-shrink: 0;
+}
+
+/* Réussite : vert ; erreur : rouge (showSuccess / showError dans demande.js) */
+.alert.success {
+    background: #1f7a3a !important;
+}
+
+.alert.error {
+    background: #c62828 !important;
 }
 
 /* Liste des notes de manière prenium top %1 mondial */
