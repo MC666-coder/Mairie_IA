@@ -197,13 +197,20 @@ if (empty($_SESSION['csrf_token'])) {
                         <span class="grid size-7 place-items-center rounded-full bg-[#e6eef9] text-sm text-[#003b8e]">4</span>
                         Priorité
                     </legend>
-                    <div class="inline-grid w-full grid-cols-3 gap-1 rounded-full bg-slate-100 p-1 sm:w-auto">
-                        <?php foreach (PRIORITES_DEMANDE as $code => $libelle): ?>
-                            <label class="cursor-pointer rounded-full px-5 py-2 text-center text-sm font-semibold text-slate-600 transition hover:text-[#003b8e] has-[:checked]:bg-white has-[:checked]:text-[#003b8e] has-[:checked]:shadow-sm has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#003b8e]">
+                    <!-- Une couleur par priorité : gris, bleu, orange (le rouge reste pour l'urgence côté agent) -->
+                    <div class="grid gap-2 sm:grid-cols-3">
+                        <?php foreach (PRIORITES_DEMANDE as $code => $p): ?>
+                            <label class="flex cursor-pointer items-start gap-3 rounded-2xl bg-slate-50 p-3 text-slate-700 ring-1 ring-slate-900/5 transition hover:bg-white has-[:checked]:ring-2 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#003b8e] <?= $p['choisi'] ?>">
                                 <input type="radio" name="priorite" value="<?= $code ?>" class="sr-only" required
-                                       data-libelle="<?= $libelle ?>"
+                                       data-libelle="<?= $p['libelle'] ?>"
                                        <?= $saisie['priorite'] === $code ? 'checked' : '' ?>>
-                                <?= $libelle ?>
+                                <span class="tuile-icone mt-0.5 grid size-5 shrink-0 place-items-center">
+                                    <?= icone('cercle', 'fill-current ' . $p['point']) ?>
+                                </span>
+                                <span>
+                                    <span class="block text-sm font-bold"><?= $p['libelle'] ?></span>
+                                    <span class="block text-xs text-slate-500"><?= $p['aide'] ?></span>
+                                </span>
                             </label>
                         <?php endforeach; ?>
                     </div>
@@ -226,7 +233,7 @@ if (empty($_SESSION['csrf_token'])) {
                                 <dd class="m-0 font-medium text-slate-800" data-recap="type" data-vide="À choisir">À choisir</dd></div>
                         </div>
                         <div class="flex items-start gap-2">
-                            <span class="mt-0.5 text-slate-400"><?= icone('alerte') ?></span>
+                            <span class="mt-0.5 text-slate-400" data-recap-icone="priorite"><?= icone('alerte') ?></span>
                             <div><dt class="text-xs text-slate-500">Priorité</dt>
                                 <dd class="m-0 font-medium text-slate-800" data-recap="priorite" data-vide="À choisir">À choisir</dd></div>
                         </div>
