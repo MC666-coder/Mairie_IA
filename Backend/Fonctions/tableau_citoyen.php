@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../Backend/Fonctions/icones.php';
+require_once __DIR__ . '/icones.php';
 /* =========================================================
    Tableau de bord citoyen : données + gabarits HTML
    ---------------------------------------------------------
