@@ -187,7 +187,7 @@ function badgeStatut($statut) {
         case 'resolue':     $class = 'badge-resolue'; break;
         case 'cloturee':    $class = 'badge-cloturee'; break;
     }
-    return '<span class="badge ' . $class . '">' . htmlspecialchars($statut) . '</span>';
+    return '<span class="badge ' . $class . '">' . htmlspecialchars((string) $statut) . '</span>';
 }
 
 function badgePriorite($priorite) {
@@ -198,7 +198,7 @@ function badgePriorite($priorite) {
         case 'haute':   $class = 'badge-prio-haute'; break;
         case 'urgente': $class = 'badge-prio-urgente'; break;
     }
-    return '<span class="badge ' . $class . '">' . htmlspecialchars($priorite) . '</span>';
+    return '<span class="badge ' . $class . '">' . htmlspecialchars((string) $priorite) . '</span>';
 }
 
 ?>
@@ -359,24 +359,24 @@ function badgePriorite($priorite) {
                     <?php foreach ($demandes as $d): ?>
                         <tr>
                             <td>DEM-<?= htmlspecialchars($d['id']) ?></td>
-                            <td><?= htmlspecialchars($d['type_libelle']?? 'non reseigné') ?></td>
+                            <td><?= htmlspecialchars($d['type_libelle'] ?? 'Non renseigné') ?></td>
                             <td class="col-message">
-                                <?= htmlspecialchars(mb_strimwidth($d['message'], 0, 80, '…')) ?>
+                                <?= htmlspecialchars(mb_strimwidth((string) ($d['message'] ?? ''), 0, 80, '…')) ?>
                             </td>
                             <td><?= badgePriorite($d['priorite']?? 'non renseigné') ?></td>
                             <td><?= badgeStatut($d['statut']) ?></td>
-                            <td><?= htmlspecialchars($d['nom_service']) ?></td>
+                            <td><?php if (!empty($d['nom_service'])): ?><?= htmlspecialchars($d['nom_service']) ?><?php else: ?><em>Non attribué</em><?php endif; ?></td>
                             <td>
-                                <?= htmlspecialchars(trim($d['prenom_citoyen'] . ' ' . $d['nom_citoyen'])) ?>
+                                <?= htmlspecialchars(trim(($d['prenom_citoyen'] ?? '') . ' ' . ($d['nom_citoyen'] ?? ''))) ?>
                             </td>
                             <td>
                                 <?php if ($d['agent_id']): ?>
-                                    <?= htmlspecialchars(trim($d['prenom_agent'] . ' ' . $d['nom_agent'])) ?>
+                                    <?= htmlspecialchars(trim(($d['prenom_agent'] ?? '') . ' ' . ($d['nom_agent'] ?? ''))) ?>
                                 <?php else: ?>
                                     <em>Non assignée</em>
                                 <?php endif; ?>
                             </td>
-                            <td><?= htmlspecialchars($d['created_at']) ?></td>
+                            <td><?= htmlspecialchars((string) ($d['created_at'] ?? '')) ?></td>
                             <td>
                                 <a href="gestion_demande.php?id=<?= $d['id'] ?>" class="btn-gestion">
                                     Gérer <?= icone('fleche-droite') ?>
@@ -399,23 +399,23 @@ function badgePriorite($priorite) {
                     <span class="demande-statut"><?= badgeStatut($d['statut']) ?></span>
                 </header>
 
-                <p><strong>Type :</strong> <?= htmlspecialchars($d['type_libelle']?? 'non renseigné') ?></p>
+                <p><strong>Type :</strong> <?= htmlspecialchars($d['type_libelle'] ?? 'Non renseigné') ?></p>
                 <p><strong>Message :</strong><br>
                     <?= nl2br(htmlspecialchars(mb_strimwidth($d['message'], 0, 160, '…'))) ?>
                 </p>
                 <p><strong>Priorité :</strong> <?= badgePriorite($d['priorite']) ?></p>
-                <p><strong>Service :</strong> <?= htmlspecialchars($d['nom_service']) ?></p>
+                <p><strong>Service :</strong> <?= htmlspecialchars($d['nom_service'] ?? 'Non attribué') ?></p>
                 <p><strong>Citoyen :</strong>
-                    <?= htmlspecialchars(trim($d['prenom_citoyen'] . ' ' . $d['nom_citoyen'])) ?>
+                    <?= htmlspecialchars(trim(($d['prenom_citoyen'] ?? '') . ' ' . ($d['nom_citoyen'] ?? ''))) ?>
                 </p>
                 <p><strong>Assigné à :</strong>
                     <?php if ($d['agent_id']): ?>
-                        <?= htmlspecialchars(trim($d['prenom_agent'] . ' ' . $d['nom_agent'])) ?>
+                        <?= htmlspecialchars(trim(($d['prenom_agent'] ?? '') . ' ' . ($d['nom_agent'] ?? ''))) ?>
                     <?php else: ?>
                         <em>Non assignée</em>
                     <?php endif; ?>
                 </p>
-                <p><strong>Soumise le :</strong> <?= htmlspecialchars($d['created_at']) ?></p>
+                <p><strong>Soumise le :</strong> <?= htmlspecialchars((string) ($d['created_at'] ?? '')) ?></p>
 
                 <footer class="demande-card-footer">
                     <a href="gestion_demande.php?id=<?= $d['id'] ?>" class="btn-gestion">
