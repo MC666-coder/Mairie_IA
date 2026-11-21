@@ -266,6 +266,7 @@ $demandes = $lastRequests->fetchAll(PDO::FETCH_ASSOC);
     ============================================================ -->
 
     <link rel="stylesheet" href="../Frontend/IA/assistant.css">
+    <script src="../Frontend/assets/js/icones.js" defer></script>
     <script src="../Frontend/IA/assistant.js" defer></script>
 
     <!-- BOUTON FLOTTANT IA -->

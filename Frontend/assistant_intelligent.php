@@ -1,3 +1,4 @@
+<?php require_once __DIR__ . '/../Backend/Fonctions/icones.php'; ?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -20,8 +21,8 @@
                 <a href="Actualités.php">Actualités</a>
                 <a href="Services.php">Services</a>
                 <a href="Contacts.php">Contacts</a>
-                <a href="choix_connexion.php" class="nav-btn">🔒Connexion</a>
-                <a href="choix_inscription.php" class="nav-btn">🆕Inscription</a>
+                <a href="choix_connexion.php" class="nav-btn"><?= icone('connexion') ?> Connexion</a>
+                <a href="choix_inscription.php" class="nav-btn"><?= icone('inscription') ?> Inscription</a>
             </nav>   
         </header>
 

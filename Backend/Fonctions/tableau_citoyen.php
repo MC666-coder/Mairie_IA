@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../Backend/Fonctions/icones.php';
 /* =========================================================
    Tableau de bord citoyen : données + gabarits HTML
    ---------------------------------------------------------
@@ -110,7 +111,7 @@ function htmlDemandesCitoyen(array $demandes): string
         $nonLus = (int) ($d['messages_non_lus'] ?? 0);
         $badge = $nonLus > 0
             ? '<a class="badge-message-mairie" href="details_demande.php?id=' . (int) $d['id'] . '#messagerie-citoyen">'
-              . '✉️ ' . ($nonLus > 1 ? $nonLus . ' nouveaux messages' : 'Nouveau message') . ' de la mairie</a>'
+              . icone('courrier') . ' ' . ($nonLus > 1 ? $nonLus . ' nouveaux messages' : 'Nouveau message') . ' de la mairie</a>'
             : '';
 
         $html .= '<div class="request-card' . ($nonLus > 0 ? ' a-un-message' : '') . '" data-id="' . (int) $d['id'] . '">'

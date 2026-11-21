@@ -1,6 +1,7 @@
 <?php
 /* session_init.php : initialisation de la session pour les agents */
 require_once __DIR__ . '/../Backend/Config/session_init.php';
+require_once __DIR__ . '/../Backend/Fonctions/icones.php';
 
 require_once __DIR__ . '/../Backend/Config/db.php';
 
@@ -378,7 +379,7 @@ function badgePriorite($priorite) {
                             <td><?= htmlspecialchars($d['created_at']) ?></td>
                             <td>
                                 <a href="gestion_demande.php?id=<?= $d['id'] ?>" class="btn-gestion">
-                                    Gérer →
+                                    Gérer <?= icone('fleche-droite') ?>
                                 </a>
                             </td>
                         </tr>
@@ -418,7 +419,7 @@ function badgePriorite($priorite) {
 
                 <footer class="demande-card-footer">
                     <a href="gestion_demande.php?id=<?= $d['id'] ?>" class="btn-gestion">
-                        Gérer la demande →
+                        Gérer la demande <?= icone('fleche-droite') ?>
                     </a>
                 </footer>
             </article>
@@ -429,7 +430,7 @@ function badgePriorite($priorite) {
     <?php if ($pagesTotal > 1): ?>
         <nav class="pagination">
             <?php if ($page > 1): ?>
-                <a href="?<?= http_build_query(array_merge($_GET, ['page' => $page - 1])) ?>" class="page-link">← Précédent</a>
+                <a href="?<?= http_build_query(array_merge($_GET, ['page' => $page - 1])) ?>" class="page-link"><?= icone('fleche-gauche') ?> Précédent</a>
             <?php endif; ?>
 
             <?php for ($p = 1; $p <= $pagesTotal; $p++): ?>
@@ -440,7 +441,7 @@ function badgePriorite($priorite) {
             <?php endfor; ?>
 
             <?php if ($page < $pagesTotal): ?>
-                <a href="?<?= http_build_query(array_merge($_GET, ['page' => $page + 1])) ?>" class="page-link">Suivant →</a>
+                <a href="?<?= http_build_query(array_merge($_GET, ['page' => $page + 1])) ?>" class="page-link">Suivant <?= icone('fleche-droite') ?></a>
             <?php endif; ?>
         </nav>
     <?php endif; ?>

@@ -9,6 +9,7 @@ require_once __DIR__ . '/../Backend/Middleware/auth.php';
 $agent_id = exiger_agent();
 
 require_once __DIR__ . '/../Backend/Config/db.php';
+require_once __DIR__ . '/../Backend/Fonctions/icones.php';
 
 $erreur = null;
 $success = null;
@@ -366,7 +367,7 @@ if (!$erreur) {
 
                         <!-- Document envoyé au citoyen (attestation...), visible dans sa conversation -->
                         <label class="joindre-document-citoyen" id="joindre-nouveau-fichier">
-                            📎 Joindre un document pour le citoyen
+                            <?= icone('trombone') ?> Joindre un document pour le citoyen
                             <input type="file" name="fichier" id="fichier-pour-citoyen" accept=".pdf,.jpg,.jpeg,.png,.docx,.xlsx">
                         </label>
 
@@ -374,7 +375,7 @@ if (!$erreur) {
                         <input type="hidden" name="fichier_id" id="fichier-dossier-id" value="">
                         <div class="document-dossier-pret" id="document-dossier-pret" hidden>
                             <span id="document-dossier-nom"></span>
-                            <button type="button" id="annuler-document-dossier" aria-label="Ne pas joindre ce document">✕</button>
+                            <button type="button" id="annuler-document-dossier" aria-label="Ne pas joindre ce document"><?= icone('fermer') ?></button>
                         </div>
 
                         <button type="submit" class="send-btn">
@@ -481,7 +482,7 @@ if (!$erreur) {
         <p class="liste-compteur" id="notes-compteur" aria-live="polite"></p>
 
         <!-- « Réduire » en haut : visible seulement quand toutes les notes sont dépliées -->
-        <button type="button" class="btn-reduire" id="reduire-notes-haut" hidden>▲ Réduire les notes</button>
+        <button type="button" class="btn-reduire" id="reduire-notes-haut" hidden><?= icone('chevron-haut') ?> Réduire les notes</button>
 
         <!-- Timeline : toutes les notes (gabarit Backend/Fonctions/historique_demande.php) -->
         <div class="notes-timeline" id="liste-notes" data-demande-id="<?= (int) $demande_id ?>">
@@ -509,7 +510,7 @@ if (!$erreur) {
 
             <!-- Ajout d'un document INTERNE (AJAX, upload_pj.php) -->
             <form enctype="multipart/form-data" class="form-upload" data-demande-id="<?= (int) $demande['id'] ?>">
-                <label for="fichier">🔒 Ajouter un document interne (non visible par le citoyen) :</label>
+                <label for="fichier"><?= icone('cadenas') ?> Ajouter un document interne (non visible par le citoyen) :</label>
                 <input type="file" name="fichier" id="fichier" accept=".pdf,.jpg,.jpeg,.png,.docx,.xlsx" required>
                 <button type="submit">Ajouter au dossier</button>
             </form>
@@ -519,15 +520,15 @@ if (!$erreur) {
 
             <div class="liste-pj documents-dossier" id="liste-pj" data-demande-id="<?= (int) $demande['id'] ?>">
                 <div class="case-dossier">
-                    <h3 class="case-dossier-titre">📥 Reçus du citoyen <span class="pj-count-badge" id="pj-count-recus">0</span></h3>
+                    <h3 class="case-dossier-titre"><?= icone('boite-reception') ?> Reçus du citoyen <span class="pj-count-badge" id="pj-count-recus">0</span></h3>
                     <ul class="liste-dossier" id="pj-recus"><li class="dossier-vide">Chargement…</li></ul>
                 </div>
                 <div class="case-dossier">
-                    <h3 class="case-dossier-titre">📤 Envoyés au citoyen <span class="pj-count-badge" id="pj-count-envoyes">0</span></h3>
+                    <h3 class="case-dossier-titre"><?= icone('envoyer') ?> Envoyés au citoyen <span class="pj-count-badge" id="pj-count-envoyes">0</span></h3>
                     <ul class="liste-dossier" id="pj-envoyes"><li class="dossier-vide">Chargement…</li></ul>
                 </div>
                 <div class="case-dossier case-interne">
-                    <h3 class="case-dossier-titre">🔒 Internes à la mairie <span class="pj-count-badge" id="pj-count-internes">0</span></h3>
+                    <h3 class="case-dossier-titre"><?= icone('cadenas') ?> Internes à la mairie <span class="pj-count-badge" id="pj-count-internes">0</span></h3>
                     <ul class="liste-dossier" id="pj-internes"><li class="dossier-vide">Chargement…</li></ul>
                 </div>
             </div>
@@ -557,7 +558,7 @@ if (!$erreur) {
         <p class="liste-compteur" id="history-compteur" aria-live="polite"></p>
 
         <!-- « Réduire » en haut : visible seulement quand tout l'historique est déplié -->
-        <button type="button" class="btn-reduire" id="reduire-historique-haut" hidden>▲ Réduire l’historique</button>
+        <button type="button" class="btn-reduire" id="reduire-historique-haut" hidden><?= icone('chevron-haut') ?> Réduire l’historique</button>
 
         <!-- Timeline : TOUT l'historique (gabarit Backend/Fonctions/historique_demande.php).
              Par défaut, historique_notes.js n'en montre que les 5 dernières actions
@@ -571,12 +572,13 @@ if (!$erreur) {
     </section>
 
 
-    <a href="dashboard_agent.php" class="btn-retour">← Retour au tableau de bord</a>
+    <a href="dashboard_agent.php" class="btn-retour"><?= icone('fleche-gauche') ?> Retour au tableau de bord</a>
 
 </div>
 <script>
     window.CURRENT_AGENT_ID = <?= (int)$_SESSION['agent_id'] ?>;
 </script>
+<script src="../Frontend/assets/js/icones.js?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/js/icones.js') ?>"></script>
 <script src="../Frontend/assets/js/historique_notes.js?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/js/historique_notes.js') ?>"></script>
 <script src="../Frontend/assets/js/ouvrir_conv.js?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/js/ouvrir_conv.js') ?>"></script>
 <script src="../Frontend/assets/js/demande.js?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/js/demande.js') ?>"></script>

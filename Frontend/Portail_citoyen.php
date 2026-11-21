@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/../Backend/Fonctions/icones.php';
 /* ---------------------------------------
    Sécurisation session
 ---------------------------------------- */
@@ -172,7 +173,7 @@ $tableau = donneesTableauCitoyen($pdo, $citoyenId);
 
         <!-- CHATBOT PREMIUM -->
         <div id="chatbot" class="chatbot-hidden" data-user="<?= htmlspecialchars((string)$citoyenId) ?>">
-            <div id="chatbot-header">🇫🇷 Assistant IA de la Mairie</div>
+            <div id="chatbot-header"><?= icone('assistant') ?> Assistant IA de la Mairie</div>
             <div id="chat-window"></div>
 
             <div id="ia-loading" style="display:none;">

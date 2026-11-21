@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../Backend/Config/db.php';
+require_once __DIR__ . '/../Backend/Fonctions/icones.php';
 
 // Désactiver l'affichage brut des erreurs en production (à gérer dans la config globale idéalement)
 // ini_set('display_errors', 0);
@@ -115,7 +116,7 @@ $imagePath = 'uploads/' . $image;
     <main class="article-container">
 
         <!-- Bouton retour -->
-        <a href="Actualités.php" class="retour-btn">← Retour aux actualités</a>
+        <a href="Actualités.php" class="retour-btn"><?= icone('fleche-gauche') ?> Retour aux actualités</a>
 
         <!-- Image principale -->
         <div class="article-image"
@@ -128,7 +129,7 @@ $imagePath = 'uploads/' . $image;
         </div>
 
         <!-- Bouton retour bas de page -->
-        <a href="Actualités.php" class="retour-btn bottom">← Retour aux actualités</a>
+        <a href="Actualités.php" class="retour-btn bottom"><?= icone('fleche-gauche') ?> Retour aux actualités</a>
 
     </main>
 

@@ -1,6 +1,7 @@
 <?php
 // Nom de la commune et adresse du site lus dans .env (Backend/Config/app.php)
 require_once __DIR__ . '/../Backend/Config/app.php';
+require_once __DIR__ . '/../Backend/Fonctions/icones.php';
 $commune = htmlspecialchars(NOM_COMMUNE, ENT_QUOTES, 'UTF-8');
 ?>
 <!DOCTYPE html>
@@ -21,8 +22,8 @@ $commune = htmlspecialchars(NOM_COMMUNE, ENT_QUOTES, 'UTF-8');
                 <a href="Actualités.php">Actualités</a>
                 <a href="Services.php">Services</a>
                 <a href="Contacts.php" class="active">Contacts</a>
-                <a href="choix_connexion.php" class="nav-btn">🔒Connexion</a>
-                <a href="choix_inscription.php" class="nav-btn">🆕Inscription</a>
+                <a href="choix_connexion.php" class="nav-btn"><?= icone('connexion') ?> Connexion</a>
+                <a href="choix_inscription.php" class="nav-btn"><?= icone('inscription') ?> Inscription</a>
             </nav>
         </header>
 

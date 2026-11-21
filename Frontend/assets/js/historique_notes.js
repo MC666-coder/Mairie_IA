@@ -95,11 +95,13 @@
         if (o.bouton) {
             o.bouton.hidden = false;
             if (o.tout && o.masquables > 0) {
-                o.bouton.textContent = "▲ " + o.libelleReduire;
+                o.bouton.textContent = " " + o.libelleReduire;
+                o.bouton.prepend(iconeElement("chevron-haut"));
                 o.bouton.disabled = false;
                 o.bouton.setAttribute("aria-expanded", "true");
             } else if (o.masquables > 0) {
-                o.bouton.textContent = `▼ Afficher tout (${o.total} ${o.total > 1 ? o.nomPluriel : o.nom})`;
+                o.bouton.textContent = ` Afficher tout (${o.total} ${o.total > 1 ? o.nomPluriel : o.nom})`;
+                o.bouton.prepend(iconeElement("chevron-bas"));
                 o.bouton.disabled = false;
                 o.bouton.setAttribute("aria-expanded", "false");
             } else {

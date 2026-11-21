@@ -68,6 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         messages.appendChild(div);
         messages.scrollTop = messages.scrollHeight;
+        return div;
     }
 
     /* ---------------------------------------------------------
@@ -173,7 +174,8 @@ document.addEventListener("DOMContentLoaded", () => {
         loader.classList.add("hidden");
 
         if (data.error) {
-            addMessage("⚠️ " + data.error, "ia");
+            const erreur = addMessage(" " + data.error, "ia");
+            if (window.iconeElement) erreur.prepend(iconeElement("alerte"));
             unlockInput();
             return;
         }

@@ -6,6 +6,7 @@ session_set_cookie_params([
 ]);
 session_start();
 require_once __DIR__ . '/../Backend/Config/db.php';
+require_once __DIR__ . '/../Backend/Fonctions/icones.php';
 require_once __DIR__ . '/../Backend/Middleware/auth.php'; // jeton CSRF de la messagerie
 
 /**
@@ -177,7 +178,7 @@ if (!$demande) {
 
             <!-- Case 1 : la conversation -->
             <div class="case-messagerie">
-                <h3 class="case-titre">💬 Conversation</h3>
+                <h3 class="case-titre"><?= icone('conversation') ?> Conversation</h3>
                 <div class="fil-messages" id="fil-messages" role="log" aria-live="polite" aria-label="Conversation avec la mairie">
                     <p class="fil-vide">Chargement de la conversation…</p>
                 </div>
@@ -185,7 +186,7 @@ if (!$demande) {
 
             <!-- Case 2 : la réponse du citoyen (document et/ou court message, après un message de l'agent) -->
             <div class="case-messagerie">
-                <h3 class="case-titre">✍️ Votre réponse</h3>
+                <h3 class="case-titre"><?= icone('stylo') ?> Votre réponse</h3>
 
                 <!-- Affiché tant que le citoyen ne peut pas répondre -->
                 <p class="reponse-indisponible" id="reponse-indisponible" hidden></p>
@@ -210,12 +211,12 @@ if (!$demande) {
             <!-- Case 3 : les documents, en deux cases côte à côte -->
             <div class="documents-citoyen">
                 <div class="case-messagerie">
-                    <h3 class="case-titre">📥 Documents de la mairie
+                    <h3 class="case-titre"><?= icone('boite-reception') ?> Documents de la mairie
                         <span class="compteur-documents" id="compteur-docs-mairie">0</span></h3>
                     <ul id="liste-docs-mairie" class="liste-documents"></ul>
                 </div>
                 <div class="case-messagerie">
-                    <h3 class="case-titre">📤 Vos documents
+                    <h3 class="case-titre"><?= icone('envoyer') ?> Vos documents
                         <span class="compteur-documents" id="compteur-docs-citoyen">0</span></h3>
                     <ul id="liste-docs-citoyen" class="liste-documents"></ul>
                 </div>
@@ -276,6 +277,7 @@ if (!$demande) {
 
 </div>
 
+<script src="assets/js/icones.js?v=<?= @filemtime(__DIR__ . '/assets/js/icones.js') ?>"></script>
 <script src="assets/js/messagerie_citoyen.js?v=<?= @filemtime(__DIR__ . '/assets/js/messagerie_citoyen.js') ?>"></script>
 </body>
 </html>

@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once __DIR__ . '/../Backend/Fonctions/icones.php';
 
 // Si le programme a déjà été affiché durant cette session, on redirige vers l'accueil
 if (isset($_SESSION['programme_vu']) && $_SESSION['programme_vu'] === true) {
@@ -28,15 +29,15 @@ if (isset($_SESSION['programme_vu']) && $_SESSION['programme_vu'] === true) {
             <a href="Actualités.php">Actualités</a>
             <a href="Services.php">Services</a>
             <a href="Contacts.php">Contacts</a>
-            <a href="choix_connexion.php" class="nav-btn">🔒Connexion</a>
-            <a href="choix_inscription.php" class="nav-btn">🆕Inscription</a>
+            <a href="choix_connexion.php" class="nav-btn"><?= icone('connexion') ?> Connexion</a>
+            <a href="choix_inscription.php" class="nav-btn"><?= icone('inscription') ?> Inscription</a>
         </nav>
     </header>
 
     <!-- CONTENU PRINCIPAL -->
     <main id="content_portail_citoyen">
 
-        <h1>🏛️ Bienvenue sur le site de L’Aiguillon-sur-Vie</h1>
+        <h1><?= icone('mairie') ?> Bienvenue sur le site de L’Aiguillon-sur-Vie</h1>
 
         <p>
             Explorez les services municipaux, découvrez les projets de la commune et profitez de nos outils numériques pour faciliter vos démarches.
@@ -45,13 +46,13 @@ if (isset($_SESSION['programme_vu']) && $_SESSION['programme_vu'] === true) {
         <h2>Ce que vous pouvez faire dès maintenant</h2>
 
         <ul class="liste-fonctionnalites">
-            <li>✅ Accéder aux services municipaux</li>
-            <li>✅ Contacter la mairie via le chatbot intelligent</li>
-            <li>✅ Suivre les projets et travaux de la commune</li>
-            <li>✅ Participer au jeu d’énigmes interactif</li>
-            <li>✅ S’abonner à la newsletter</li>
-            <li>✅ Créer votre espace citoyen</li>
-            <li>✅ Consulter les actualités en temps réel</li>
+            <li><?= icone('valide') ?> Accéder aux services municipaux</li>
+            <li><?= icone('valide') ?> Contacter la mairie via le chatbot intelligent</li>
+            <li><?= icone('valide') ?> Suivre les projets et travaux de la commune</li>
+            <li><?= icone('valide') ?> Participer au jeu d’énigmes interactif</li>
+            <li><?= icone('valide') ?> S’abonner à la newsletter</li>
+            <li><?= icone('valide') ?> Créer votre espace citoyen</li>
+            <li><?= icone('valide') ?> Consulter les actualités en temps réel</li>
         </ul>
 
         <div class="actions-accueil">

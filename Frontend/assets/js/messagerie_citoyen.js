@@ -41,7 +41,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function lienDocument(doc) {
-        const a = element("a", "bulle-document", "📎 " + doc.nom);
+        const a = element("a", "bulle-document", " " + doc.nom);
+        a.prepend(iconeElement(iconeDocument(doc.type)));
         a.href = doc.url;
         return a;
     }

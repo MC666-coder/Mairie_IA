@@ -33,7 +33,7 @@ function showAlert(type, message) {
 
     container.innerHTML = `
         <div class="alert ${type}">
-            <i class="fa-solid ${type === "success" ? "fa-circle-check" : "fa-circle-exclamation"}"></i>
+            ${icone(type === "success" ? "valide" : "erreur")}
             ${escapeHTML(message)}
         </div>
     `;
@@ -197,7 +197,7 @@ function chargerMessages(demandeId) {
                             ${m.fichier_id ? `
                             <a class="message-piece-jointe"
                                href="../Backend/ajax/download_pj.php?id=${parseInt(m.fichier_id, 10)}">
-                                📎 ${escapeHTML(m.fichier_nom)}
+                                ${icone("trombone")} ${escapeHTML(m.fichier_nom)}
                             </a>` : ""}
                         </div>
                     </div>
@@ -496,7 +496,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
             const lien = document.createElement("a");
             lien.href = f.url;
-            lien.textContent = (f.type === "application/pdf" ? "📄 " : f.type?.startsWith("image/") ? "🖼️ " : "📎 ") + f.nom;
+            lien.textContent = " " + f.nom;
+            lien.prepend(iconeElement(iconeDocument(f.type)));
             lien.className = "document-nom";
 
             const infos = document.createElement("span");
@@ -557,7 +558,9 @@ document.addEventListener("DOMContentLoaded", () => {
     function preparerEnvoiDocument(f) {
         if (!champDossierId || !encartDossier) return;
         champDossierId.value = f.id;
-        document.getElementById("document-dossier-nom").textContent = `📎 ${f.nom} (document du dossier)`;
+        const nomDocument = document.getElementById("document-dossier-nom");
+        nomDocument.textContent = ` ${f.nom} (document du dossier)`;
+        nomDocument.prepend(iconeElement("trombone"));
         encartDossier.hidden = false;
         // Un seul document par message : on retire un éventuel nouveau fichier
         if (champNouveauFichier) champNouveauFichier.value = "";
