@@ -1,6 +1,7 @@
 <?php
 /* session_init.php : initialisation de la session pour les agents */
 require_once __DIR__ . '/../Backend/Config/session_init.php';
+require_once __DIR__ . '/../Backend/Fonctions/carte_profil.php';
 
 
 require_once __DIR__ . '/../Backend/Config/db.php';
@@ -106,6 +107,7 @@ $demandes = $lastRequests->fetchAll(PDO::FETCH_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tableau de bord Agent</title>
     <link rel="stylesheet" href="../Frontend/assets/css/dashboard.css?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/css/dashboard.css') ?>"/>
+    <link rel="stylesheet" href="../Frontend/assets/css/carte_profil.css?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/css/carte_profil.css') ?>">
 
     <meta http-equiv="Content-Security-Policy"
           content="default-src 'self';
@@ -154,14 +156,7 @@ $demandes = $lastRequests->fetchAll(PDO::FETCH_ASSOC);
                 </a>
             </nav>
 
-            <div id="bulle-connexion-agent">
-                Identifiant Agent : <?= htmlspecialchars($agent['identifiant_agent']) ?><br>
-                Prénom : <?= htmlspecialchars($agent['prenom_agent']) ?><br>
-                Nom : <?= htmlspecialchars($agent['nom_agent']) ?><br>
-                Rôle : <?= htmlspecialchars($agent['role']) ?><br>
-                Service : <?= htmlspecialchars($agent['Nom_service']) ?><br>
-                Niveau d'accès : <?= htmlspecialchars($agent['niveau_acces']) ?>
-            </div>
+            <?= carteProfilAgent($agent) ?>
 
         </div>
     </header>

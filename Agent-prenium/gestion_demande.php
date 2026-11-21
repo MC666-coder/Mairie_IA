@@ -1,6 +1,7 @@
 <?php
 /* session_init.php : initialisation de la session pour les agents */
 require_once __DIR__ . '/../Backend/Config/session_init.php';
+require_once __DIR__ . '/../Backend/Fonctions/carte_profil.php';
 require_once __DIR__ . '/../Backend/Middleware/auth.php';
 
 /* ---------------------------------------------------------
@@ -179,6 +180,7 @@ if (!$erreur) {
     <meta name="csrf-token" content="<?= htmlspecialchars(jeton_csrf(), ENT_QUOTES, 'UTF-8') ?>">
     <title>Détail de la demande</title>
     <link rel="stylesheet" href="../Frontend/assets/css/gestion_demande.css?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/css/gestion_demande.css') ?>">
+    <link rel="stylesheet" href="../Frontend/assets/css/carte_profil.css?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/css/carte_profil.css') ?>">
 </head>
 
 <body>
@@ -210,14 +212,7 @@ if (!$erreur) {
                 </a>
             </nav>
 
-            <div id="bulle-connexion-agent">
-                Identifiant Agent : <?= htmlspecialchars($agent['identifiant_agent']) ?><br>
-                Prénom : <?= htmlspecialchars($agent['prenom_agent']) ?><br>
-                Nom : <?= htmlspecialchars($agent['nom_agent']) ?><br>
-                Rôle : <?= htmlspecialchars($agent['role']) ?><br>
-                Service : <?= htmlspecialchars($agent['nom_service']) ?><br>
-                Niveau d'accès : <?= htmlspecialchars($agent['niveau_acces']) ?>
-            </div>
+            <?= carteProfilAgent($agent) ?>
 
         </div>
     </header>

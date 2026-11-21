@@ -1,6 +1,7 @@
 <?php
 /* session_init.php : initialisation de la session pour les agents */
 require_once __DIR__ . '/../Backend/Config/session_init.php';
+require_once __DIR__ . '/../Backend/Fonctions/carte_profil.php';
 require_once __DIR__ . '/../Backend/Fonctions/icones.php';
 
 require_once __DIR__ . '/../Backend/Config/db.php';
@@ -208,6 +209,7 @@ function badgePriorite($priorite) {
     <meta charset="UTF-8">
     <title>Gestion des demandes</title>
     <link rel="stylesheet" href="../Frontend/assets/css/gestion_demandes.css?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/css/gestion_demandes.css') ?>">
+    <link rel="stylesheet" href="../Frontend/assets/css/carte_profil.css?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/css/carte_profil.css') ?>">
 </head>
 <body>
 
@@ -239,14 +241,7 @@ function badgePriorite($priorite) {
                 </a>
             </nav>
 
-            <div id="bulle-connexion-agent">
-                Identifiant Agent : <?= htmlspecialchars($agent['identifiant_agent']) ?><br>
-                Prénom : <?= htmlspecialchars($agent['prenom_agent']) ?><br>
-                Nom : <?= htmlspecialchars($agent['nom_agent']) ?><br>
-                Rôle : <?= htmlspecialchars($agent['role']) ?><br>
-                Service : <?= htmlspecialchars($agent['Nom_service']) ?><br>
-                Niveau d'accès : <?= htmlspecialchars($agent['niveau_acces']) ?>
-            </div>
+            <?= carteProfilAgent($agent) ?>
 
         </div>
 

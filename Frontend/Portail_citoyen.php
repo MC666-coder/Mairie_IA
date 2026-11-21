@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../Backend/Fonctions/icones.php';
+require_once __DIR__ . '/../Backend/Fonctions/carte_profil.php';
 /* ---------------------------------------
    Sécurisation session
 ---------------------------------------- */
@@ -64,6 +65,7 @@ $tableau = donneesTableauCitoyen($pdo, $citoyenId);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Portail Citoyen - Commune de L’Aiguillon-sur-Vie</title>
     <link rel="stylesheet" href="assets/css/style.css?v=<?= @filemtime(__DIR__ . '/assets/css/style.css') ?>">
+    <link rel="stylesheet" href="assets/css/carte_profil.css?v=<?= @filemtime(__DIR__ . '/assets/css/carte_profil.css') ?>">
     <!-- Jeton anti-CSRF lu par chatbot.js (en-tête X-CSRF-Token) -->
     <meta name="csrf-token" content="<?= htmlspecialchars(jeton_csrf(), ENT_QUOTES, 'UTF-8') ?>">
     <!-- Content Security Policy stricte -->
@@ -128,11 +130,7 @@ $tableau = donneesTableauCitoyen($pdo, $citoyenId);
             </nav>
 
             <!-- Bulle de connexion -->
-            <div id="bulle-connexion-agent">
-                Prénom : <?= htmlspecialchars($citoyen['prenom_citoyen']) ?><br>
-                Nom : <?= htmlspecialchars($citoyen['nom_citoyen']) ?><br>
-                ID citoyen : <?= htmlspecialchars((string)$citoyenId) ?>
-            </div>
+            <?= carteProfilCitoyen($citoyen, (int) $citoyenId) ?>
 
         </div>
     </header>

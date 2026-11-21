@@ -10,6 +10,7 @@ session_set_cookie_params([
 ]);
 session_start();
 require_once __DIR__ . '/../Backend/Config/db.php';
+require_once __DIR__ . '/../Backend/Fonctions/carte_profil.php';
 
 
 
@@ -61,6 +62,7 @@ if (empty($_SESSION['csrf_token'])) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Créer une demande - Commune de L’Aiguillon-sur-Vie</title>
     <link rel="stylesheet" href="assets/css/style.css?v=<?= @filemtime(__DIR__ . '/assets/css/style.css') ?>">
+    <link rel="stylesheet" href="assets/css/carte_profil.css?v=<?= @filemtime(__DIR__ . '/assets/css/carte_profil.css') ?>">
 
     <!-- Content Security Policy stricte -->
     <meta http-equiv="Content-Security-Policy"
@@ -103,11 +105,7 @@ if (empty($_SESSION['csrf_token'])) {
                 </a>
             </nav>
 
-            <div id="bulle-connexion-agent">
-                Prénom : <?= htmlspecialchars($citoyen['prenom_citoyen']) ?><br>
-                Nom : <?= htmlspecialchars($citoyen['nom_citoyen']) ?><br>
-                ID citoyen : <?= htmlspecialchars((string)$citoyenId) ?>
-            </div>
+            <?= carteProfilCitoyen($citoyen, (int) $citoyenId) ?>
 
         </div>
     </header>

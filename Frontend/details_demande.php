@@ -6,6 +6,7 @@ session_set_cookie_params([
 ]);
 session_start();
 require_once __DIR__ . '/../Backend/Config/db.php';
+require_once __DIR__ . '/../Backend/Fonctions/carte_profil.php';
 require_once __DIR__ . '/../Backend/Fonctions/icones.php';
 require_once __DIR__ . '/../Backend/Middleware/auth.php'; // jeton CSRF de la messagerie
 
@@ -88,6 +89,7 @@ if (!$demande) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Détails d'une demande - Espace Citoyen</title>
     <link rel="stylesheet" href="assets/css/style.css?v=<?= @filemtime(__DIR__ . '/assets/css/style.css') ?>">
+    <link rel="stylesheet" href="assets/css/carte_profil.css?v=<?= @filemtime(__DIR__ . '/assets/css/carte_profil.css') ?>">
     <!-- Jeton anti-CSRF lu par messagerie_citoyen.js (en-tête X-CSRF-Token) -->
     <meta name="csrf-token" content="<?= htmlspecialchars(jeton_csrf(), ENT_QUOTES, 'UTF-8') ?>">
 
@@ -136,11 +138,7 @@ if (!$demande) {
             </nav>
 
             <!-- Bulle de connexion citoyen -->
-            <div id="bulle-connexion-agent">
-                Prénom: <?= htmlspecialchars($citoyen['prenom_citoyen']) ?><br>
-                Nom: <?= htmlspecialchars($citoyen['nom_citoyen']) ?><br>
-                id_citoyen: <?= htmlspecialchars((string)$citoyenId) ?>
-            </div>
+            <?= carteProfilCitoyen($citoyen, (int) $citoyenId) ?>
 
         </div>
     </header>

@@ -26,6 +26,7 @@ const ICONES_SVG = [
     'chevron-haut'   => '<path d="m18 15-6-6-6 6"/>',
     'fleche-gauche'  => '<path d="m12 19-7-7 7-7"/><path d="M19 12H5"/>',
     'fleche-droite'  => '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
+    'carte-identite' => '<rect x="2" y="5" width="20" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M6.17 15a3 3 0 0 1 5.66 0"/><path d="M16 10h2"/><path d="M16 14h2"/>',
     'chevron-bas'    => '<path d="m6 9 6 6 6-6"/>',
     'bouclier'       => '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/>',
     'chevron-droite' => '<path d="m9 18 6-6-6-6"/>',
