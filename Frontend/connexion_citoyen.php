@@ -9,6 +9,10 @@ if (session_status() === PHP_SESSION_ACTIVE) {
 session_start();
 require_once __DIR__ . '/../Backend/Fonctions/formulaire_auth.php';
 
+// Adresse saisie lors de l'essai précédent (réaffichée dans le champ)
+$emailSaisi = (string) ($_SESSION['login_email_citoyen'] ?? '');
+unset($_SESSION['login_email_citoyen']);
+
 
 
 ?>
@@ -109,7 +113,7 @@ require_once __DIR__ . '/../Backend/Fonctions/formulaire_auth.php';
                     ?>
                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
 
-                    <?= champAuth('email_citoyen', 'Adresse e-mail', 'email', 'courrier') ?>
+                    <?= champAuth('email_citoyen', 'Adresse e-mail', 'email', 'courrier', '', $emailSaisi) ?>
                     <?= champAuth('password', 'Mot de passe', 'password', 'cadenas') ?>
                     <a class="lien-auth-discret" href="mot_de_passe_oublie_citoyen.php">Mot de passe oublié ?</a>
 

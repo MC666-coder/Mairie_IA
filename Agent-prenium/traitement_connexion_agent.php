@@ -11,25 +11,36 @@ header("X-Content-Type-Options: nosniff");
 header("X-XSS-Protection: 1; mode=block");
 header("Referrer-Policy: strict-origin-when-cross-origin");
 // Ne jamais journaliser $_POST ni $_SESSION : ils contiennent le mot de passe et les jetons CSRF
+
+/* Retour au formulaire avec un message rouge dans la carte (et l'adresse déjà saisie) */
+function erreurConnexion(string $message, string $email = ''): void
+{
+    $_SESSION['login_error_agent'] = $message;
+    $_SESSION['login_email_agent'] = $email;
+    header("Location: connexion_agent.php");
+    exit;
+}
+
 /* ---------------------------------------------------------
    1) Vérification CSRF
 --------------------------------------------------------- */
 if (!isset($_POST['csrf_login']) ||
     !isset($_SESSION['csrf_login']) ||
     !hash_equals($_SESSION['csrf_login'], $_POST['csrf_login'])) {
-    die("Requête non autorisée.");
+    erreurConnexion("La page a expiré. Merci de réessayer.");
 }
 
 /* ---------------------------------------------------------
-   2) Protection anti-bruteforce
+   2) Protection anti-bruteforce : 10 essais, puis 15 minutes d'attente
 --------------------------------------------------------- */
-if (!isset($_SESSION['login_attempts'])) {
+if (empty($_SESSION['login_debut']) || time() - $_SESSION['login_debut'] > 900) {
+    $_SESSION['login_debut'] = time();
     $_SESSION['login_attempts'] = 0;
 }
 $_SESSION['login_attempts']++;
 
 if ($_SESSION['login_attempts'] > 10) {
-    die("Trop de tentatives. Réessayez plus tard.");
+    erreurConnexion("Trop de tentatives. Réessayez dans quelques minutes.");
 }
 
 /* ---------------------------------------------------------
@@ -48,7 +59,7 @@ $password = $_POST['password'] ?? "";
    4) Vérification email valide
 --------------------------------------------------------- */
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    die("Identifiants incorrects.");
+    erreurConnexion("L'adresse e-mail n'est pas valide.", $email);
 }
 
 /* ---------------------------------------------------------
@@ -59,35 +70,36 @@ $sql->execute([$email]);
 $agent = $sql->fetch();
 
 if (!$agent) {
-    // Pas d’info précise pour éviter fuite
-    die("Identifiants incorrects.");
+    erreurConnexion("Aucun compte agent n'est associé à cette adresse e-mail.", $email);
 }
 
 /* ---------------------------------------------------------
    6) Vérification statut du compte
 --------------------------------------------------------- */
 if ($agent['statut'] !== 'actif') {
-    die("Votre compte n'est pas encore activé.");
+    // Statut « inactif » : compte créé mais pas encore activé avec le lien reçu par e-mail
+    erreurConnexion("Votre compte n'est pas encore activé : cliquez sur le lien reçu par e-mail. Sans e-mail, contactez votre responsable.", $email);
 }
 
 /* ---------------------------------------------------------
    7) Vérification que l’agent a défini son mot de passe
 --------------------------------------------------------- */
 if ($agent['doit_definir_mot_de_passe'] == 1) {
-    die("Votre compte n'est pas encore activé. Vérifiez vos emails.");
+    erreurConnexion("Votre compte n'est pas encore activé : cliquez sur le lien reçu par e-mail pour choisir votre mot de passe.", $email);
 }
 
 /* ---------------------------------------------------------
    8) Vérification du mot de passe
 --------------------------------------------------------- */
 if (!password_verify($password, $agent['mot_de_passe'])) {
-    die("Identifiants incorrects.");
+    erreurConnexion("Mot de passe incorrect.", $email);
 }
 
 /* ---------------------------------------------------------
    9) Réinitialisation des tentatives
 --------------------------------------------------------- */
 $_SESSION['login_attempts'] = 0;
+unset($_SESSION['login_email_agent']);
 
 /* ---------------------------------------------------------
    10) Création d’une session sécurisée

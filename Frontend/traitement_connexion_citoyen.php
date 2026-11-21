@@ -16,20 +16,31 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
+/* Retour au formulaire avec un message rouge dans la carte (et l'adresse déjà saisie) */
+function erreurConnexion(string $message, string $email = ''): void
+{
+    $_SESSION['login_error'] = $message;
+    $_SESSION['login_email_citoyen'] = $email;
+    header("Location: connexion_citoyen.php");
+    exit;
+}
+
 // Vérification CSRF
 if (empty($_POST['csrf_token']) || empty($_SESSION['csrf_token']) ||
     !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-
-    session_destroy();
-    die("Requête invalide.");
+    erreurConnexion("La page a expiré. Merci de réessayer.");
 }
 
 // Nettoyage des données
-$email_citoyen = filter_var($_POST['email_citoyen'], FILTER_VALIDATE_EMAIL);
-$password = $_POST['password'] ?? '';
+$emailSaisi = trim((string) ($_POST['email_citoyen'] ?? ''));
+$email_citoyen = filter_var($emailSaisi, FILTER_VALIDATE_EMAIL);
+$password = (string) ($_POST['password'] ?? '');
 
-if (!$email_citoyen || empty($password)) {
-    die("Veuillez remplir tous les champs.");
+if ($emailSaisi === '' || $password === '') {
+    erreurConnexion("Veuillez remplir tous les champs.", $emailSaisi);
+}
+if (!$email_citoyen) {
+    erreurConnexion("L'adresse e-mail n'est pas valide.", $emailSaisi);
 }
 
 // Prévention bruteforce (5 tentatives / 10 minutes)
@@ -40,11 +51,10 @@ if (!isset($_SESSION['login_attempts_citoyen'])) {
 
 if ($_SESSION['login_attempts_citoyen'] >= 5) {
     if (time() - $_SESSION['first_attempt_time_citoyen'] < 600) {
-        die("Trop de tentatives. Réessayez dans quelques minutes.");
-    } else {
-        $_SESSION['login_attempts_citoyen'] = 0;
-        $_SESSION['first_attempt_time_citoyen'] = time();
+        erreurConnexion("Trop de tentatives. Réessayez dans quelques minutes.", $emailSaisi);
     }
+    $_SESSION['login_attempts_citoyen'] = 0;
+    $_SESSION['first_attempt_time_citoyen'] = time();
 }
 
 // Requête SQL sécurisée
@@ -57,39 +67,36 @@ $stmt = $pdo->prepare("
 $stmt->execute([$email_citoyen]);
 $citoyen = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Vérification du mot de passe
-if ($citoyen && password_verify($password, $citoyen['password'])) {
-
-    // Compte pas encore confirmé : il faut d'abord cliquer sur le bouton reçu par e-mail
-    if ((int) $citoyen['email_verifie'] !== 1) {
-        $_SESSION['login_error'] = "Votre adresse e-mail n'est pas encore confirmée. "
-            . "Cliquez sur le bouton « Confirmer mon adresse e-mail » reçu après votre inscription.";
-        header("Location: connexion_citoyen.php");
-        exit;
-    }
-
-    // Reset bruteforce
-    $_SESSION['login_attempts_citoyen'] = 0;
-
-    // Regénération de l’ID de session
-    session_regenerate_id(true);
-
-    // Stockage des infos citoyen
-    $_SESSION['citoyen_id'] = $citoyen['id'];
-    $_SESSION['nom_citoyen'] = $citoyen['nom_citoyen'];
-    $_SESSION['prenom_citoyen'] = $citoyen['prenom_citoyen'];
-    $_SESSION['email_citoyen'] = $citoyen['email_citoyen'];
-
-    header('Location: Portail_citoyen.php');
-    exit();
-
-} else {
-
+// Adresse inconnue
+if (!$citoyen) {
     $_SESSION['login_attempts_citoyen']++;
-
-    $_SESSION['login_error'] = "Email ou mot de passe incorrect.";
-    header("Location: connexion_citoyen.php");
-    exit;
-
+    erreurConnexion("Aucun compte citoyen n'est associé à cette adresse e-mail.", $emailSaisi);
 }
-?>
+
+// Mauvais mot de passe (ou compte sans mot de passe)
+if (!password_verify($password, (string) $citoyen['password'])) {
+    $_SESSION['login_attempts_citoyen']++;
+    erreurConnexion("Mot de passe incorrect.", $emailSaisi);
+}
+
+// Compte pas encore confirmé : il faut d'abord cliquer sur le bouton reçu par e-mail
+if ((int) $citoyen['email_verifie'] !== 1) {
+    erreurConnexion("Votre adresse e-mail n'est pas encore confirmée. "
+        . "Cliquez sur le bouton « Confirmer mon adresse e-mail » reçu après votre inscription.", $emailSaisi);
+}
+
+// Connexion réussie : remise à zéro du compteur
+$_SESSION['login_attempts_citoyen'] = 0;
+unset($_SESSION['login_email_citoyen']);
+
+// Regénération de l’ID de session
+session_regenerate_id(true);
+
+// Stockage des infos citoyen
+$_SESSION['citoyen_id'] = $citoyen['id'];
+$_SESSION['nom_citoyen'] = $citoyen['nom_citoyen'];
+$_SESSION['prenom_citoyen'] = $citoyen['prenom_citoyen'];
+$_SESSION['email_citoyen'] = $citoyen['email_citoyen'];
+
+header('Location: Portail_citoyen.php');
+exit();

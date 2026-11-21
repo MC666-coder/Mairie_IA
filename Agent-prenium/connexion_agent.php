@@ -20,12 +20,17 @@ header("Referrer-Policy: strict-origin-when-cross-origin");
 /* ---------------------------------------------------------
    Protection anti-bruteforce
 --------------------------------------------------------- */
-if (!isset($_SESSION['login_attempts'])) {
+// 10 essais, puis 15 minutes d'attente (compteur géré par traitement_connexion_agent.php)
+if (!empty($_SESSION['login_debut']) && time() - $_SESSION['login_debut'] > 900) {
     $_SESSION['login_attempts'] = 0;
 }
-if ($_SESSION['login_attempts'] > 10) {
-    die("Trop de tentatives. Réessayez plus tard.");
+if (($_SESSION['login_attempts'] ?? 0) > 10 && empty($_SESSION['login_error_agent'])) {
+    $_SESSION['login_error_agent'] = "Trop de tentatives. Réessayez dans quelques minutes.";
 }
+
+// Adresse saisie lors de l'essai précédent (réaffichée dans le champ)
+$emailSaisi = (string) ($_SESSION['login_email_agent'] ?? '');
+unset($_SESSION['login_email_agent']);
 
 
 ?>
@@ -67,13 +72,14 @@ if ($_SESSION['login_attempts'] > 10) {
             <div class="carte-auth">
                 <?= retourAuth('../Frontend/choix_connexion.php', 'Retour') ?>
                 <?= enteteAuth('mallette', 'Espace agent', 'Connectez-vous avec vos identifiants professionnels') ?>
+                <?= messageAuth('login_error_agent') ?>
                 <form action="traitement_connexion_agent.php" method="POST" autocomplete="off">
 
                     <!-- CSRF -->
                     <input type="hidden" name="csrf_login"
                            value="<?= htmlspecialchars($_SESSION['csrf_login'], ENT_QUOTES, 'UTF-8') ?>">
 
-                    <?= champAuth('email', 'Adresse e-mail', 'email', 'courrier') ?>
+                    <?= champAuth('email', 'Adresse e-mail', 'email', 'courrier', '', $emailSaisi) ?>
                     <?= champAuth('password', 'Mot de passe', 'password', 'cadenas') ?>
                     <a class="lien-auth-discret" href="mot_de_passe_oublie.php">Mot de passe oublié ?</a>
 
