@@ -48,3 +48,37 @@ function icone(string $nom, string $classe = '', string $libelle = ''): string
         . ' style="vertical-align:-0.18em;flex-shrink:0">'
         . ICONES_SVG[$nom] . '</svg>';
 }
+
+/**
+ * Boutons « Connexion » et « Inscription » de la barre de navigation, identiques sur toutes les pages
+ * (fond gris, icône bleue pour Connexion, verte pour Inscription ; blanche au survol ou quand le bouton est actif).
+ * $actif : 'connexion' ou 'inscription' pour surligner le bouton de la page en cours.
+ */
+function boutonsConnexion(string $actif = ''): string
+{
+    $boutons = [
+        'connexion' => [
+            'lien'    => 'choix_connexion.php',
+            'texte'   => 'Connexion',
+            'couleur' => '#003b8e',
+            'svg'     => '<path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/>',
+        ],
+        'inscription' => [
+            'lien'    => 'choix_inscription.php',
+            'texte'   => 'Inscription',
+            'couleur' => '#0a7c2f',
+            'svg'     => '<circle cx="12" cy="8" r="4"/><path d="M6 20v-1a6 6 0 0 1 12 0v1"/><line x1="20" y1="12" x2="20" y2="18"/><line x1="23" y1="15" x2="17" y2="15"/>',
+        ],
+    ];
+
+    $html = '';
+    foreach ($boutons as $cle => $b) {
+        $classe = 'nav-btn' . ($cle === $actif ? ' active' : '');
+        $courant = $cle === $actif ? ' aria-current="page"' : '';
+        $html .= '<a href="' . $b['lien'] . '" class="' . $classe . '"' . $courant . '>'
+            . '<span class="nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true" focusable="false"'
+            . ' stroke="' . $b['couleur'] . '" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+            . $b['svg'] . '</svg></span>' . $b['texte'] . '</a>' . "\n";
+    }
+    return $html;
+}

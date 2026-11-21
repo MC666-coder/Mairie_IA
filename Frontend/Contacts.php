@@ -22,8 +22,8 @@ $commune = htmlspecialchars(NOM_COMMUNE, ENT_QUOTES, 'UTF-8');
                 <a href="Actualités.php">Actualités</a>
                 <a href="Services.php">Services</a>
                 <a href="Contacts.php" class="active">Contacts</a>
-                <a href="choix_connexion.php" class="nav-btn"><?= icone('connexion') ?> Connexion</a>
-                <a href="choix_inscription.php" class="nav-btn"><?= icone('inscription') ?> Inscription</a>
+                <a href="Newsletter.php">Newsletter</a>
+                <?= boutonsConnexion() ?>
             </nav>
         </header>
 

@@ -6,6 +6,7 @@ session_set_cookie_params([
     'samesite' => 'Strict'
 ]);
 session_start();
+require_once __DIR__ . '/../Backend/Fonctions/icones.php';
 
 
 
@@ -53,8 +54,7 @@ if (empty($_SESSION['csrf_token'])) {
                 <a href="Contacts.php">Contacts</a>
                 <a href="Newsletter.php">Newsletter</a>
 
-                <a href="choix_connexion.php" class="nav-btn">Connexion</a>
-                <a href="choix_inscription.php" class="nav-btn active">Inscription</a>
+                <?= boutonsConnexion('inscription') ?>
             </nav>
         </div>
 

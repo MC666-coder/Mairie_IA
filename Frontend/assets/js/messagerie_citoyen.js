@@ -96,7 +96,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         documents.forEach(d => {
             const li = element("li");
-            const a = element("a", "", d.nom);
+            const a = element("a", "", " " + d.nom);
+            a.prepend(iconeElement(iconeDocument(d.type)));
             a.href = d.url;
             li.append(a, element("span", "document-infos", ` · ${tailleLisible(d.taille)} · ${d.date}`));
             liste.append(li);

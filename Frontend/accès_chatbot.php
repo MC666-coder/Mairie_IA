@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once __DIR__ . '/../Backend/Fonctions/icones.php';
 
 // Si l'utilisateur est déjà connecté → accès direct au chatbot
 if (isset($_SESSION['citoyen_id'])) {
@@ -30,8 +31,7 @@ if (isset($_SESSION['citoyen_id'])) {
                 <a href="Actualités.php">Actualités</a>
                 <a href="Services.php">Services</a>
                 <a href="Contacts.php">Contacts</a>
-                <a href="choix_connexion.php" class="nav-btn">🔒Connexion</a>
-                <a href="choix_inscription.php" class="nav-btn">🆕Inscription</a>
+                <?= boutonsConnexion() ?>
             </nav>   
         </header>
 
@@ -51,8 +51,8 @@ if (isset($_SESSION['citoyen_id'])) {
             </p>
 
             <div id="actions_chatbot">
-                <a href="choix_connexion.php" class="btn">🔒 Se connecter</a>
-                <a href="choix_inscription.php" class="btn">🆕 S'inscrire</a>
+                <a href="choix_connexion.php" class="btn"><?= icone('connexion') ?> Se connecter</a>
+                <a href="choix_inscription.php" class="btn"><?= icone('inscription') ?> S'inscrire</a>
             </div>
 
         </main>

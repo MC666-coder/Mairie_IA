@@ -2267,6 +2267,22 @@ p {
 #nav-agent .nav-btn:hover .nav-icon svg {
     transform: scale(1.12);
 }
+
+/* Survol de Connexion / Inscription : fond bleu, texte et icône en blanc
+   (la propriété CSS stroke passe avant l'attribut stroke="#003b8e" du SVG) */
+#nav-agent .nav-btn:hover,
+#nav-agent .nav-btn:focus-visible {
+    background: #003b8e;
+    color: #ffffff;
+}
+
+/* Icône blanche dès que le fond du bouton est bleu : survol, clic, clavier, page en cours */
+#nav-agent .nav-btn:hover svg,
+#nav-agent .nav-btn:active svg,
+#nav-agent .nav-btn:focus-visible svg,
+#nav-agent .nav-btn.active svg {
+    stroke: #ffffff;
+}
 /* ----------------------------------------------------
    FOOTER PREMIUM - STYLE MÉTROPOLE
 ---------------------------------------------------- */
@@ -3206,7 +3222,6 @@ p {
     background: #fafafa;
 }
 .liste-documents a { color: #000091; font-weight: bold; overflow-wrap: anywhere; }
-.liste-documents a::before { content: "📄 "; }
 .document-infos { display: block; color: #555; font-size: 0.85rem; margin-top: 2px; }
 .liste-documents li.documents-vide { border-style: dashed; background: transparent; color: #666; font-size: 0.9rem; }
 
