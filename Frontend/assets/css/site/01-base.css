@@ -1,0 +1,147 @@
+/* ================================================================
+   01-base.css
+   Base : réinitialisation, page, titres, textes, utilitaires
+   ================================================================ */
+
+/* Style pour la page de choix d'inscription */
+.content {
+    display: flex;
+    gap: 30px;
+    margin-top: 30px;
+}
+
+/* style pour le reste des pages */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.page-wrapper {
+    min-height: calc(100vh - 120px);
+    display: flex;
+    flex-direction: column;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: "Inter", "Roboto", Arial, sans-serif;
+    background: #f5f6fa;
+    color: #1d1d1d;
+    line-height: 1.7;
+}
+
+h1 {
+    font-size: 42px;
+    font-weight: 900;
+    color: #111;
+    margin-bottom: 20px;
+}
+
+h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    margin: 25px 0 10px;
+}
+
+p {
+    font-size: 18px;
+    margin-bottom: 15px;
+}
+
+#content_portail_citoyen {
+    text-align: center;
+    flex: 1;
+    max-width: 1100px;
+    margin: 60px auto;
+    background: white;
+    padding: 50px 60px;
+    border-radius: 14px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+    animation: fadeIn 0.6s ease;
+    border-left: 8px solid #111;
+}
+
+.section-title {
+    font-size: 32px;
+    font-weight: 900;
+    margin-bottom: 10px;
+    color: #111;
+}
+
+.section-subtitle {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 40px;
+}
+
+.assistant-premium .section-title {
+    font-size: 32px;
+    font-weight: 900;
+    margin-bottom: 10px;
+    color: #111;
+}
+
+.assistant-premium .section-subtitle {
+    font-size: 16px;
+    color: #555;
+    margin-bottom: 40px;
+}
+
+/* Texte lu par les lecteurs d'écran mais invisible à l'écran */
+.visually-hidden {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Pages de connexion / inscription : la carte remplace la grande boîte blanche de la page */
+#content_portail_citoyen:has(.carte-auth) {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    padding: 30px 16px;
+}
+
+/* Animations (@keyframes) utilisées dans tout le site */
+
+@keyframes blink {
+    0% { opacity: .2; }
+    20% { opacity: 1; }
+    100% { opacity: .2; }
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes actuScroll {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.9); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes carte-nouvelle {
+    0% { box-shadow: 0 0 0 3px #000091; background-color: #e3e3fd; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+}

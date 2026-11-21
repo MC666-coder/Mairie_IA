@@ -8,6 +8,8 @@ session_set_cookie_params([
 /* session_init.php : initialisation de la session pour les agents */
 require_once __DIR__ . '/../Backend/Config/session_init.php';
 require_once __DIR__ . '/../Backend/Middleware/auth.php';
+require_once __DIR__ . '/../Backend/Fonctions/formulaire_auth.php';
+require_once __DIR__ . '/../Backend/Config/db.php';
 
 // Seul un manager ou un admin connecté peut créer un compte agent
 $niveau_createur = exiger_niveau(['manager', 'admin']);
@@ -23,7 +25,7 @@ if (empty($_SESSION['csrf_token'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Créer un agent - Portail Agent</title>
-    <link rel="stylesheet" href="assets/css/style.css"/>
+    <link rel="stylesheet" href="../Frontend/assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/css/style.css') ?>"/>
 
     <!-- Content Security Policy stricte -->
     <meta http-equiv="Content-Security-Policy"
@@ -48,15 +50,9 @@ if (empty($_SESSION['csrf_token'])) {
         </div>
 
         <div class="header-main">
-            <nav id="nav-agent">
-                <a href="index.php">Accueil</a>
-                <a href="agenda.php">Agenda</a>
-                <a href="Actualités.php">Actualités</a>
-                <a href="Services.php">Services</a>
-                <a href="Contacts.php">Contacts</a>
-                <a href="Newsletter.php">Newsletter</a>
-
-                <a href="dashboard_agent.php" class="nav-btn">Espace agent</a>
+            <!-- Page réservée aux managers : pas les onglets du site public, seulement le retour -->
+            <nav id="nav-agent" aria-label="Espace agent">
+                <a href="dashboard_agent.php" class="nav-btn"><?= icone('fleche-gauche') ?> Retour au tableau de bord</a>
             </nav>
         </div>
 
@@ -75,56 +71,46 @@ if (empty($_SESSION['csrf_token'])) {
     <main id="content_portail_citoyen">
 
         <section class="connexion-section">
-            <h2 class="section-title">Informations de l’agent</h2>
-            <p class="section-subtitle">Le nouvel agent recevra un email d’activation.</p>
+            <?php
+            $services = [];
+            foreach ($pdo->query("SELECT id, nom_service FROM services ORDER BY nom_service") as $service) {
+                $services[(int) $service['id']] = $service['nom_service'];
+            }
+            $niveaux = ['agent' => 'Agent', 'manager' => 'Manager'];
+            if ($niveau_createur === 'admin') {
+                $niveaux['admin'] = 'Administrateur';
+            }
+            ?>
+            <div class="carte-auth carte-auth-large">
+                <?= retourAuth('dashboard_agent.php', 'Tableau de bord') ?>
+                <?= enteteAuth('inscription', 'Nouvel agent', 'Il recevra un e-mail pour activer son compte et choisir son mot de passe') ?>
 
-            <div class="form-card">
                 <form action="traitement_création_agent.php" method="POST" autocomplete="off">
 
                     <!-- CSRF -->
                     <input type="hidden" name="csrf_token"
                            value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
 
-                    <label for="nom_agent">Nom</label>
-                    <input type="text" id="nom_agent" name="nom_agent" required>
+                    <p class="carte-auth-section">Identité</p>
+                    <div class="champs-auth-duo">
+                        <?= champAuth('nom_agent', 'Nom', 'text', 'utilisateur') ?>
+                        <?= champAuth('prenom_agent', 'Prénom', 'text', 'utilisateur') ?>
+                    </div>
+                    <?= champAuth('email_agent', 'Adresse e-mail professionnelle', 'email', 'courrier', '', '',
+                                  'Le lien d’activation sera envoyé à cette adresse.') ?>
 
-                    <label for="prenom_agent">Prénom</label>
-                    <input type="text" id="prenom_agent" name="prenom_agent" required>
-
-                    <label for="email_agent">Adresse email professionnelle</label>
-                    <input type="email" id="email_agent" name="email_agent" required>
-
-                    <label for="service_id">Service</label>
-                    <select name="service_id" id="service_id" required>
-                        <?php
-                        require_once __DIR__ . '/../Backend/Config/db.php';
-                        $services = $pdo->query("SELECT id, nom_service FROM services ORDER BY nom_service")->fetchAll();
-                        foreach ($services as $service) {
-                            echo '<option value="' . (int) $service['id'] . '">'
-                                . htmlspecialchars($service['nom_service'], ENT_QUOTES, 'UTF-8') . '</option>';
-                        }
-                        ?>
-                    </select>
-
-                    <label for="role">Rôle</label>
-                    <select name="role" id="role" required>
-                        <option value="agent">Agent</option>
-                        <option value="responsable">Responsable</option>
-                    </select>
-
-                    <label for="niveau_acces">Niveau d’accès</label>
-                    <select name="niveau_acces" id="niveau_acces" required>
-                        <option value="agent">Agent</option>
-                        <option value="manager">Manager</option>
-                        <?php if ($niveau_createur === 'admin'): ?>
-                        <option value="admin">Administrateur</option>
-                        <?php endif; ?>
-                    </select>
+                    <p class="carte-auth-section">Affectation et droits</p>
+                    <?= selectAuth('service_id', 'Service', 'mairie', $services) ?>
+                    <div class="champs-auth-duo">
+                        <?= selectAuth('role', 'Rôle', 'mallette', ['agent' => 'Agent', 'responsable' => 'Responsable']) ?>
+                        <?= selectAuth('niveau_acces', 'Niveau d’accès', 'bouclier', $niveaux) ?>
+                    </div>
 
                     <button type="submit" class="btn-submit">Créer l’agent</button>
                 </form>
-            </div>
 
+                <p class="carte-auth-pied"><a href="dashboard_agent.php">Annuler et revenir au tableau de bord</a></p>
+            </div>
         </section>
 
     </main>

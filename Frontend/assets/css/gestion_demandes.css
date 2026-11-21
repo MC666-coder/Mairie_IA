@@ -1,6 +1,23 @@
-/* ---------------------------------------------------------
-   RESET & BASE
---------------------------------------------------------- */
+/* ================================================================
+   Page Liste des demandes (agent)
+   Utilisé par : Agent-prenium/gestion_demandes.php
+
+   SOMMAIRE — cherchez « == 03 » (Ctrl+F) pour aller à la section 3
+   01. Reset & base
+   02. Header
+   03. Filtres
+   04. Tableau (desktop)
+   05. Badges
+   06. Bouton gérer
+   07. Cartes (mobile)
+   08. Pagination
+   09. Ajustements divers
+   10. Navigation
+   11. Petits écrans et accessibilité (@media)
+   ================================================================ */
+
+/* == 01. Reset & base ====================================== */
+
 * {
     margin: 0;
     padding: 0;
@@ -20,9 +37,8 @@ body {
     padding: 30px;
 }
 
-/* ---------------------------------------------------------
-   HEADER
---------------------------------------------------------- */
+/* == 02. Header ============================================ */
+
 .header-gestion {
     margin-bottom: 30px;
 }
@@ -39,9 +55,8 @@ body {
     color: #555;
 }
 
-/* ---------------------------------------------------------
-   FILTRES
---------------------------------------------------------- */
+/* == 03. Filtres =========================================== */
+
 .filtres-section {
     background: white;
     padding: 25px;
@@ -74,8 +89,7 @@ body {
     color: #003b8e;
 }
 
-.champ input,
-.champ select {
+.champ input, .champ select {
     width: 100%;
     padding: 10px 12px;
     border-radius: 8px;
@@ -109,9 +123,8 @@ body {
     font-weight: 600;
 }
 
-/* ---------------------------------------------------------
-   TABLEAU PREMIUM (DESKTOP)
---------------------------------------------------------- */
+/* == 04. Tableau (desktop) ================================= */
+
 .table-section {
     display: block;
 }
@@ -155,9 +168,8 @@ body {
     max-width: 300px;
 }
 
-/* ---------------------------------------------------------
-   BADGES
---------------------------------------------------------- */
+/* == 05. Badges ============================================ */
+
 .badge {
     padding: 5px 10px;
     border-radius: 20px;
@@ -166,20 +178,45 @@ body {
     color: white;
 }
 
-.badge-nouvelle { background: linear-gradient(135deg, #1e3c72, #2a5298); }
-.badge-analyse  { background: linear-gradient(135deg, #0bbcd6, #0694a8); }
-.badge-encours  { background: linear-gradient(135deg, #ffcf33, #e6b400); color: #333; }
-.badge-resolue  { background: linear-gradient(135deg, #28a745, #1e7e34); }
-.badge-cloturee { background: linear-gradient(135deg, #3a3f47, #2c3036); }
+.badge-nouvelle {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+}
 
-.badge-prio-basse   { background: #6c757d; }
-.badge-prio-normale { background: #007bff; }
-.badge-prio-haute   { background: #fd7e14; }
-.badge-prio-urgente { background: #dc3545; }
+.badge-analyse {
+    background: linear-gradient(135deg, #0bbcd6, #0694a8);
+}
 
-/* ---------------------------------------------------------
-   BOUTON GÉRER
---------------------------------------------------------- */
+.badge-encours {
+    background: linear-gradient(135deg, #ffcf33, #e6b400);
+    color: #333;
+}
+
+.badge-resolue {
+    background: linear-gradient(135deg, #28a745, #1e7e34);
+}
+
+.badge-cloturee {
+    background: linear-gradient(135deg, #3a3f47, #2c3036);
+}
+
+.badge-prio-basse {
+    background: #6c757d;
+}
+
+.badge-prio-normale {
+    background: #007bff;
+}
+
+.badge-prio-haute {
+    background: #fd7e14;
+}
+
+.badge-prio-urgente {
+    background: #dc3545;
+}
+
+/* == 06. Bouton gérer ====================================== */
+
 .btn-gestion {
     background: #003b8e;
     color: white;
@@ -195,9 +232,8 @@ body {
     background: #002d6b;
 }
 
-/* ---------------------------------------------------------
-   CARTES (MOBILE)
---------------------------------------------------------- */
+/* == 07. Cartes (mobile) =================================== */
+
 .cards-section {
     display: none;
 }
@@ -225,9 +261,8 @@ body {
     margin-top: 15px;
 }
 
-/* ---------------------------------------------------------
-   PAGINATION
---------------------------------------------------------- */
+/* == 08. Pagination ======================================== */
+
 .pagination {
     margin-top: 25px;
     display: flex;
@@ -250,33 +285,7 @@ body {
     color: white;
 }
 
-/* ---------------------------------------------------------
-   RESPONSIVE DESIGN
---------------------------------------------------------- */
-@media (max-width: 900px) {
-
-    .table-section {
-        display: none;
-    }
-
-    .cards-section {
-        display: block;
-    }
-
-    .filtres-row {
-        flex-direction: column;
-    }
-}
-
-@media (max-width: 600px) {
-    .header-gestion h1 {
-        font-size: 26px;
-    }
-
-    .page-wrapper {
-        padding: 15px;
-    }
-}
+/* == 09. Ajustements divers ================================ */
 
 /* Header de la page de gestion d’une demande */
 #bulle-connexion-agent {
@@ -286,12 +295,14 @@ body {
     font-size: 14px;
     border-left: 4px solid #003b8e;
 }
+
 #header-agent {
     background: white;
     border-bottom: 3px solid #003b8e;
     padding-bottom: 10px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
+
 .rf-banner {
     background: #003b8e;
     color: white;
@@ -300,6 +311,7 @@ body {
     display: flex;
     justify-content: space-between;
 }
+
 .header-main {
     display: flex;
     justify-content: space-between;
@@ -307,10 +319,8 @@ body {
     padding: 15px 25px;
 }
 
+/* == 10. Navigation ======================================== */
 
-/* ---------------------------------------------------------
-   NAVIGATION
---------------------------------------------------------- */
 #nav-agent a {
     margin-right: 20px;
     text-decoration: none;
@@ -342,4 +352,30 @@ body {
 
 .nav-btn:hover {
     background: #002a63;
+}
+
+/* == 11. Petits écrans et accessibilité (@media) ============== */
+
+@media (max-width: 900px) {
+    .table-section {
+        display: none;
+    }
+
+    .cards-section {
+        display: block;
+    }
+
+    .filtres-row {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 600px) {
+    .header-gestion h1 {
+        font-size: 26px;
+    }
+
+    .page-wrapper {
+        padding: 15px;
+    }
 }

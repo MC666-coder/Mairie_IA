@@ -7,6 +7,7 @@ session_set_cookie_params([
 ]);
 
 session_start();
+require_once __DIR__ . '/../Backend/Fonctions/formulaire_auth.php';
 
 
 // Token CSRF pour le formulaire newsletter
@@ -94,46 +95,37 @@ if (empty($_SESSION['csrf_token'])) {
     <main id="content_portail_citoyen">
 
         <section class="connexion-section">
-            <h2 class="section-title">Abonnement à la newsletter</h2>
-            <p class="section-subtitle">Restez informé des actualités de L’Aiguillon-sur-Vie.</p>
+            <div class="carte-auth">
+                <?= retourAuth('index.php', 'Accueil') ?>
+                <?= enteteAuth('courrier', 'Restez informé', 'Recevez les actualités et les événements de L’Aiguillon-sur-Vie') ?>
 
-            <div class="form-card">
-
-                <!--  AFFICHAGE DES ERREURS -->
-                <?php if (isset($_GET['newsletter_error'])): ?>
-                    <div class="alert alert-error">
-                        <?php
-                        $errors = [
-                            'method'        => "Méthode non autorisée.",
-                            'csrf'          => "Requête invalide.",
-                            'too_fast'      => "Veuillez patienter avant une nouvelle inscription.",
-                            'invalid_fields'=> "Veuillez remplir tous les champs correctement.",
-                            'email_exists'  => "Cette adresse email est déjà inscrite à la newsletter."
-                        ];
-
-                        echo $errors[$_GET['newsletter_error']] ?? "Une erreur est survenue.";
-                        ?>
+                <?php
+                // Message d'erreur renvoyé par traitement_newletter.php (?newsletter_error=...)
+                $erreursNewsletter = [
+                    'method'         => "Méthode non autorisée.",
+                    'csrf'           => "La page a expiré. Rechargez-la puis réessayez.",
+                    'too_fast'       => "Veuillez patienter avant une nouvelle inscription.",
+                    'invalid_fields' => "Veuillez remplir tous les champs correctement.",
+                    'email_exists'   => "Cette adresse e-mail est déjà inscrite à la newsletter.",
+                ];
+                if (isset($_GET['newsletter_error'])): ?>
+                    <div class="error-message" role="alert">
+                        <?= htmlspecialchars($erreursNewsletter[$_GET['newsletter_error']] ?? "Une erreur est survenue.", ENT_QUOTES, 'UTF-8') ?>
                     </div>
                 <?php endif; ?>
 
-                <!-- 🔥 FORMULAIRE NEWSLETTER -->
                 <form id="newsletter_form" action="traitement_newletter.php" method="post" autocomplete="off">
-
-                    <!-- CSRF -->
                     <input type="hidden" name="csrf_token"
-                        value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
+                           value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
 
-                    <label for="name">Nom complet</label>
-                    <input type="text" id="name" name="nom_complet" required>
+                    <?= champAuth('name', 'Nom complet', 'text', 'utilisateur', 'nom_complet') ?>
+                    <?= champAuth('email', 'Adresse e-mail', 'email', 'courrier') ?>
 
-                    <label for="email">Adresse e-mail</label>
-                    <input type="email" id="email" name="email" required>
-
-                    <button type="submit" class="btn-submit">S'abonner</button>
+                    <button type="submit" class="btn-submit">S’abonner</button>
                 </form>
 
+                <p class="carte-auth-pied">Un e-mail de temps en temps, uniquement sur la vie de la commune.</p>
             </div>
-
         </section>
 
     </main>

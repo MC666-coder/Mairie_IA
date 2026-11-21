@@ -1,6 +1,7 @@
 <?php
 /* session_init.php : initialisation de la session pour les agents */
 require_once __DIR__ . '/../Backend/Config/session_init.php';
+require_once __DIR__ . '/../Backend/Fonctions/formulaire_auth.php';
 /* ---------------------------------------------------------
    Génération du token CSRF
 --------------------------------------------------------- */
@@ -34,7 +35,7 @@ if ($_SESSION['login_attempts'] > 10) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Connexion Agent - Portail Agent</title>
-    <link rel="stylesheet" href="assets/css/style.css"/>
+    <link rel="stylesheet" href="../Frontend/assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/css/style.css') ?>"/>
 
     <!-- Content Security Policy stricte -->
     <meta http-equiv="Content-Security-Policy"
@@ -63,27 +64,20 @@ if ($_SESSION['login_attempts'] > 10) {
     <main id="content_portail_citoyen">
 
         <section class="connexion-section">
-            <h2 class="section-title">Se connecter</h2>
-
-            <div class="form-card">
+            <div class="carte-auth">
+                <?= retourAuth('../Frontend/choix_connexion.php', 'Retour') ?>
+                <?= enteteAuth('mallette', 'Espace agent', 'Connectez-vous avec vos identifiants professionnels') ?>
                 <form action="traitement_connexion_agent.php" method="POST" autocomplete="off">
 
                     <!-- CSRF -->
                     <input type="hidden" name="csrf_login"
                            value="<?= htmlspecialchars($_SESSION['csrf_login'], ENT_QUOTES, 'UTF-8') ?>">
 
-                    <label for="email">Adresse email</label>
-                    <input type="email" id="email" name="email" required>
+                    <?= champAuth('email', 'Adresse e-mail', 'email', 'courrier') ?>
+                    <?= champAuth('password', 'Mot de passe', 'password', 'cadenas') ?>
+                    <a class="lien-auth-discret" href="mot_de_passe_oublie.php">Mot de passe oublié ?</a>
 
-                    <label for="password">Mot de passe</label>
-                    <input type="password" id="password" name="password" required>
-
-                    <button type="submit" class="btn-submit">Connexion</button>
-
-                    <p style="margin-top:15px; text-align:center;">
-                        <a href="mot_de_passe_oublie.php">Mot de passe oublié ?</a>
-                    </p>
-
+                    <button type="submit" class="btn-submit">Se connecter</button>
                 </form>
             </div>
 
@@ -100,5 +94,6 @@ if ($_SESSION['login_attempts'] > 10) {
 
 </div>
 
+<script src="../Frontend/assets/js/mot_de_passe_visible.js?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/js/mot_de_passe_visible.js') ?>"></script>
 </body>
 </html>

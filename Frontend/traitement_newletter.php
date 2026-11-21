@@ -9,7 +9,7 @@ require_once __DIR__ . '/../Backend/Config/db.php';
 
 // Vérification méthode POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header("Location: newsletter.php?newsletter_error=method");
+    header("Location: Newsletter.php?newsletter_error=method");
     exit();
 }
 
@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 if (empty($_POST['csrf_token']) || empty($_SESSION['csrf_token']) ||
     !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
     session_destroy();
-    header("Location: newsletter.php?newsletter_error=csrf");
+    header("Location: Newsletter.php?newsletter_error=csrf");
     exit();
 }
 
@@ -26,7 +26,7 @@ if (!isset($_SESSION['last_newsletter_submit'])) {
     $_SESSION['last_newsletter_submit'] = 0;
 }
 if (time() - $_SESSION['last_newsletter_submit'] < 10) {
-    header("Location: newsletter.php?newsletter_error=too_fast");
+    header("Location: Newsletter.php?newsletter_error=too_fast");
     exit();
 }
 $_SESSION['last_newsletter_submit'] = time();
@@ -37,7 +37,7 @@ $email = filter_var($_POST['email'] ?? '', FILTER_VALIDATE_EMAIL);
 
 // Vérification des champs
 if ($nom === '' || !$email) {
-    header("Location: newsletter.php?newsletter_error=invalid_fields");
+    header("Location: Newsletter.php?newsletter_error=invalid_fields");
     exit();
 }
 
@@ -46,7 +46,7 @@ $checkEmail = $pdo->prepare("SELECT id FROM newsletter_subscribers WHERE email =
 $checkEmail->execute([$email]);
 
 if ($checkEmail->rowCount() > 0) {
-    header("Location: newsletter.php?newsletter_error=email_exists");
+    header("Location: Newsletter.php?newsletter_error=email_exists");
     exit();
 }
 

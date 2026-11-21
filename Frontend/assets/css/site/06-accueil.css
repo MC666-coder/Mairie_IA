@@ -1,0 +1,266 @@
+/* ================================================================
+   06-accueil.css
+   Page d'accueil : bandeau d'actualités, alertes, services, assistant, programme
+   ================================================================ */
+
+/* Liste des fonctionnalités */
+.liste-fonctionnalites {
+    list-style: none;
+    padding: 0;
+    margin: 25px 0;
+    font-size: 18px;
+}
+
+.liste-fonctionnalites li {
+    margin-bottom: 10px;
+}
+
+/* Boutons d'accueil */
+.actions-accueil {
+    margin-top: 30px;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.service-card h2 {
+    color: #002395;
+    margin-bottom: 10px;
+}
+
+.service-card .keywords {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #555;
+    font-style: italic;
+}
+
+.actu-flash {
+    background: #eef3f8;
+    border-bottom: 1px solid #d6dce3;
+    padding: 10px 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 15px;
+    overflow: hidden;
+}
+
+.actu-items {
+    display: flex;
+    gap: 30px;
+    white-space: nowrap;
+    animation: actuScroll 18s linear infinite;
+}
+
+.actu-items span {
+    color: #333;
+}
+
+.alertes-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 15px 25px;
+    background: #f7f9fc;
+    border-bottom: 1px solid #d6dce3;
+}
+
+/* Style général d'une alerte */
+.alerte {
+    padding: 12px 18px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #222;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+/* Label */
+.alerte-label {
+    font-weight: 700;
+    text-transform: uppercase;
+    font-size: 13px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    color: white;
+}
+
+/* Types d'alertes */
+.alerte-meteo {
+    background: #DFFBF0;
+    border-left: 5px solid #7ED9BD;
+}
+
+.alerte-meteo .alerte-label {
+    background: #7ED9BD;
+}
+
+.alerte-travaux {
+    background: #fff4e5;
+    border-left: 5px solid #ff9800;
+}
+
+.alerte-travaux .alerte-label {
+    background: #ff9800;
+}
+
+.alerte-evenement {
+    background: #f3e8ff;
+    border-left: 5px solid #8e24aa;
+}
+
+.alerte-evenement .alerte-label {
+    background: #8e24aa;
+}
+
+.services-premium {
+    padding: 60px 20px;
+    background: #f7f9fc;
+    text-align: center;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 30px;
+    max-width: 1100px;
+    margin: auto;
+}
+
+/* Carte de service */
+.service-card {
+    background: white;
+    padding: 30px 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    transition: 0.25s;
+    border: 1px solid #e5e5e5;
+}
+
+.service-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 22px rgba(0,0,0,0.12);
+}
+
+.service-icon {
+    margin-bottom: 15px;
+}
+
+.service-icon svg {
+    width: 48px;
+    height: 48px;
+    stroke: #003b8e;
+    transition: 0.3s;
+}
+
+.service-card:hover svg {
+    stroke: #001f4d;
+    transform: scale(1.08);
+}
+
+.service-card h3 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 10px;
+}
+
+.service-card p {
+    color: #555;
+    margin-bottom: 20px;
+}
+
+.service-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background: #003b8e;
+    color: white;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: 0.25s;
+}
+
+.service-btn:hover {
+    background: #002a66;
+}
+
+.assistant-premium {
+    padding: 60px 20px;
+    background: #ffffff;
+    text-align: center;
+}
+
+.assistant-card {
+    max-width: 600px;
+    margin: auto;
+    background: #f7f9fc;
+    padding: 40px 30px;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+    border: 1px solid #e5e5e5;
+    transition: 0.3s;
+}
+
+.assistant-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 8px 22px rgba(0,0,0,0.12);
+}
+
+.assistant-icon {
+    margin-bottom: 20px;
+}
+
+.assistant-icon svg {
+    stroke: #003b8e;
+    transition: 0.3s;
+}
+
+.assistant-card:hover svg {
+    stroke: #001f4d;
+    transform: scale(1.08);
+}
+
+.assistant-text {
+    font-size: 17px;
+    color: #444;
+    margin-bottom: 25px;
+}
+
+.assistant-cta {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+}
+
+.assistant-btn {
+    padding: 12px 26px;
+    border-radius: 6px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: 0.25s;
+}
+
+/* Bouton principal */
+.assistant-btn.primary {
+    background: #003b8e;
+    color: white;
+}
+
+.assistant-btn.primary:hover {
+    background: #002a66;
+}
+
+/* Bouton secondaire */
+.assistant-btn.secondary {
+    background: rgba(0,59,142,0.1);
+    border: 1px solid rgba(0,59,142,0.3);
+    color: #003b8e;
+}
+
+.assistant-btn.secondary:hover {
+    background: rgba(0,59,142,0.2);
+}

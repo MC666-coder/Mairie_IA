@@ -1,6 +1,35 @@
-/* ---------------------------------------------------------
-   BASE
---------------------------------------------------------- */
+/* ================================================================
+   Page Gérer une demande (agent)
+   Utilisé par : Agent-prenium/gestion_demande.php
+
+   SOMMAIRE — cherchez « == 03 » (Ctrl+F) pour aller à la section 3
+   01. Base
+   02. Titres
+   03. Sections
+   04. Info demande
+   05. Badges statut
+   06. Formulaires
+   07. Timeline (historique)
+   08. Bouton retour
+   09. Ajustements divers
+   10. Navigation
+   11. Alertes
+   12. Pièces jointes
+   13. Messagerie : conteneur général
+   14. Toolbar : filtres + recherche
+   15. Timeline des messages
+   16. Bulles de messages
+   17. Barre d’envoi (input)
+   18. Messagerie : bouton Envoyer
+   19. Bouton d’ouverture
+   20. Documents du dossier : trois cases
+   21. Historique et notes : boutons Afficher tout / Réduire
+   22. Animations (@keyframes)
+   23. Petits écrans et accessibilité (@media)
+   ================================================================ */
+
+/* == 01. Base ============================================== */
+
 body {
     background: #f4f6fa;
     font-family: "Inter", "Segoe UI", Roboto, sans-serif;
@@ -15,9 +44,8 @@ body {
     padding: 30px;
 }
 
-/* ---------------------------------------------------------
-   TITRES
---------------------------------------------------------- */
+/* == 02. Titres ============================================ */
+
 h1, h2 {
     font-weight: 800;
     color: #003b8e;
@@ -28,9 +56,8 @@ h2 {
     font-size: 22px;
 }
 
-/* ---------------------------------------------------------
-   SECTIONS
---------------------------------------------------------- */
+/* == 03. Sections ========================================== */
+
 section {
     background: white;
     padding: 25px;
@@ -44,9 +71,8 @@ section:hover {
     box-shadow: 0 6px 20px rgba(0,0,0,0.12);
 }
 
-/* ---------------------------------------------------------
-   INFO DEMANDE
---------------------------------------------------------- */
+/* == 04. Info demande ====================================== */
+
 .demande-info p {
     margin-bottom: 12px;
     font-size: 16px;
@@ -56,9 +82,8 @@ section:hover {
     color: #003b8e;
 }
 
-/* ---------------------------------------------------------
-   BADGES STATUT
---------------------------------------------------------- */
+/* == 05. Badges statut ===================================== */
+
 .statut {
     padding: 6px 12px;
     border-radius: 20px;
@@ -67,15 +92,29 @@ section:hover {
     font-size: 14px;
 }
 
-.statut-nouvelle { background: linear-gradient(135deg, #1e3c72, #2a5298); }
-.statut-analyse_ia { background: linear-gradient(135deg, #0bbcd6, #0694a8); }
-.statut-en_cours { background: linear-gradient(135deg, #ffcf33, #e6b400); color: #333; }
-.statut-resolue { background: linear-gradient(135deg, #28a745, #1e7e34); }
-.statut-cloturee { background: linear-gradient(135deg, #3a3f47, #2c3036); }
+.statut-nouvelle {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+}
 
-/* ---------------------------------------------------------
-   FORMULAIRES
---------------------------------------------------------- */
+.statut-analyse_ia {
+    background: linear-gradient(135deg, #0bbcd6, #0694a8);
+}
+
+.statut-en_cours {
+    background: linear-gradient(135deg, #ffcf33, #e6b400);
+    color: #333;
+}
+
+.statut-resolue {
+    background: linear-gradient(135deg, #28a745, #1e7e34);
+}
+
+.statut-cloturee {
+    background: linear-gradient(135deg, #3a3f47, #2c3036);
+}
+
+/* == 06. Formulaires ======================================= */
+
 form label {
     font-weight: 600;
     color: #003b8e;
@@ -83,9 +122,7 @@ form label {
     margin-bottom: 6px;
 }
 
-form select,
-form textarea,
-form input[type="file"] {
+form select, form textarea, form input[type="file"] {
     width: 100%;
     padding: 12px;
     border-radius: 10px;
@@ -110,53 +147,8 @@ button:hover {
     background: #002d6b;
 }
 
-/* ---------------------------------------------------------
-   NOTES INTERNES
---------------------------------------------------------- */
-.note-card {
-    background: #f9fbff;
-    border-left: 4px solid #003b8e;
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 15px;
-}
+/* == 07. Timeline (historique) ============================= */
 
-.note-meta {
-    font-size: 13px;
-    color: #555;
-    margin-top: 8px;
-}
-
-/* ---------------------------------------------------------
-   PIÈCES JOINTES
---------------------------------------------------------- */
-.pj-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #eef3ff;
-    padding: 12px;
-    border-radius: 10px;
-    margin-bottom: 10px;
-}
-
-.pj-item a {
-    text-decoration: none;
-    color: #003b8e;
-    font-weight: 600;
-}
-
-.btn-delete {
-    background: #dc3545;
-}
-
-.btn-delete:hover {
-    background: #b02a37;
-}
-
-/* ---------------------------------------------------------
-   TIMELINE (HISTORIQUE)
---------------------------------------------------------- */
 .timeline {
     position: relative;
     margin-left: 20px;
@@ -172,43 +164,8 @@ button:hover {
     background: #cfd6e4;
 }
 
-.timeline-item {
-    position: relative;
-    margin-bottom: 25px;
-    padding-left: 40px;
-}
+/* == 08. Bouton retour ===================================== */
 
-.timeline-dot {
-    width: 14px;
-    height: 14px;
-    background: #003b8e;
-    border-radius: 50%;
-    position: absolute;
-    left: 4px;
-    top: 4px;
-}
-
-.timeline-content {
-    background: #f9fbff;
-    padding: 15px;
-    border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-}
-
-.action-title {
-    font-weight: 700;
-    margin-bottom: 5px;
-}
-
-.action-meta {
-    font-size: 13px;
-    color: #555;
-    margin-top: 10px;
-}
-
-/* ---------------------------------------------------------
-   BOUTON RETOUR
---------------------------------------------------------- */
 .btn-retour {
     display: inline-block;
     margin-top: 20px;
@@ -224,18 +181,7 @@ button:hover {
     background: #d5d9e2;
 }
 
-/* ---------------------------------------------------------
-   RESPONSIVE
---------------------------------------------------------- */
-@media (max-width: 900px) {
-    .page-wrapper {
-        padding: 15px;
-    }
-
-    section {
-        padding: 20px;
-    }
-}
+/* == 09. Ajustements divers ================================ */
 
 /* Header de la page de gestion d’une demande */
 #bulle-connexion-agent {
@@ -245,12 +191,14 @@ button:hover {
     font-size: 14px;
     border-left: 4px solid #003b8e;
 }
+
 #header-agent {
     background: white;
     border-bottom: 3px solid #003b8e;
     padding-bottom: 10px;
     box-shadow: 0 2px 6px rgba(0,0,0,0.08);
 }
+
 .rf-banner {
     background: #003b8e;
     color: white;
@@ -259,6 +207,7 @@ button:hover {
     display: flex;
     justify-content: space-between;
 }
+
 .header-main {
     display: flex;
     justify-content: space-between;
@@ -266,10 +215,8 @@ button:hover {
     padding: 15px 25px;
 }
 
+/* == 10. Navigation ======================================== */
 
-/* ---------------------------------------------------------
-   NAVIGATION
---------------------------------------------------------- */
 #nav-agent a {
     margin-right: 20px;
     text-decoration: none;
@@ -303,9 +250,7 @@ button:hover {
     background: #002a63;
 }
 
-/* ============================================================
-   ALERTES PREMIUM — STYLE TOP 1%
-============================================================ */
+/* == 11. Alertes =========================================== */
 
 #alert-container {
     position: fixed;
@@ -325,119 +270,15 @@ button:hover {
     font-size: 0.95rem;
     border: none !important;
     opacity: 1 !important;
-    color: #fff !important; /* Texte blanc forcé */
-    background: #28a745 !important; /* Fond vert par défaut */
+    color: #fff !important;
+    background: #28a745 !important;
     box-shadow: 0 4px 14px rgba(0,0,0,0.15) !important;
     animation: slideIn 0.4s ease, fadeOut 0.4s ease 3.5s forwards;
-}
-
-/* Succès (vert premium) */
-.alert-success {
-    background: linear-gradient(135deg, #28a745, #1e7e34) !important;
-}
-
-/* Erreur (rouge premium) */
-.alert-error {
-    background: linear-gradient(135deg, #d9534f, #c9302c) !important;
-}
-
-/* Info (bleu premium) */
-.alert-info {
-    background: linear-gradient(135deg, #17a2b8, #117a8b) !important;
-}
-
-/* Animations */
-@keyframes slideIn {
-    from { transform: translateX(50px); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-}
-
-@keyframes fadeOut {
-    to { opacity: 0; transform: translateX(50px); }
 }
 
 /* Liste des notes de manière prenium top %1 mondial */
 .notes-internes {
     margin-top: 30px;
-}
-
-.notes-timeline {
-    position: relative;
-    margin-top: 20px;
-    padding-left: 24px;
-    border-left: 2px solid #e3e6ef;
-}
-
-.notes-empty {
-    color: #888;
-    font-size: 0.95rem;
-}
-
-.note-item {
-    position: relative;
-    margin-bottom: 18px;
-}
-
-.note-timeline-dot {
-    position: absolute;
-    left: -10px;
-    top: 10px;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: #4f46e5;
-    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
-}
-
-.note-content {
-    background: #fff;
-    border-radius: 10px;
-    padding: 10px 12px;
-    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.06);
-    border: 1px solid #e5e7eb;
-}
-
-.note-header {
-    display: flex;
-    align-items: center;
-    margin-bottom: 6px;
-}
-
-.note-avatar {
-    width: 28px;
-    height: 28px;
-    border-radius: 999px;
-    background: #4f46e5;
-    color: #fff;
-    font-size: 0.8rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-right: 8px;
-}
-
-.note-meta-main {
-    display: flex;
-    flex-direction: column;
-}
-
-.note-author {
-    font-weight: 600;
-    font-size: 0.9rem;
-    color: #111827;
-}
-
-.note-date {
-    font-size: 0.78rem;
-    color: #6b7280;
-}
-
-.note-body {
-    font-size: 0.9rem;
-    color: #374151;
-    line-height: 1.4;
-    margin-top: 4px;
 }
 
 .notes-timeline {
@@ -662,10 +503,21 @@ button:hover {
     border-radius: 50%;
 }
 
-.history-dot-status { background: #2563eb; }
-.history-dot-assignation { background: #059669; }
-.history-dot-notes { background: #7c3aed; }
-.history-dot-other { background: #6b7280; }
+.history-dot-status {
+    background: #2563eb;
+}
+
+.history-dot-assignation {
+    background: #059669;
+}
+
+.history-dot-notes {
+    background: #7c3aed;
+}
+
+.history-dot-other {
+    background: #6b7280;
+}
 
 .history-content {
     background: white;
@@ -707,14 +559,25 @@ button:hover {
     color: white;
 }
 
-.history-tag-status { background: #2563eb; }
-.history-tag-assignation { background: #059669; }
-.history-tag-notes { background: #7c3aed; }
-.history-tag-other { background: #6b7280; }
+.history-tag-status {
+    background: #2563eb;
+}
 
-/* ---------------------------------------------------------
-   PIÈCES JOINTES*/
-   /* Badge compteur */
+.history-tag-assignation {
+    background: #059669;
+}
+
+.history-tag-notes {
+    background: #7c3aed;
+}
+
+.history-tag-other {
+    background: #6b7280;
+}
+
+/* == 12. Pièces jointes ==================================== */
+
+/* Badge compteur */
 .pj-count-badge {
     background: #4a6cf7;
     color: white;
@@ -731,17 +594,6 @@ button:hover {
     display: flex;
     flex-direction: column;
     gap: 10px;
-}
-
-.pj-item {
-    background: #f8f9fc;
-    border: 1px solid #e3e6f0;
-    padding: 12px 15px;
-    border-radius: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    transition: 0.2s;
 }
 
 .pj-item:hover {
@@ -773,17 +625,6 @@ button:hover {
 .btn-delete:hover {
     background: #d93636;
 }
-/* Style pour les pièces jointes et rapport aussi */
-.pj-date-group {
-    margin-top: 20px;
-}
-
-.pj-date-title {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #4a6cf7;
-    margin-bottom: 10px;
-}
 
 .pj-item {
     background: #f8f9fc;
@@ -797,40 +638,18 @@ button:hover {
     margin-bottom: 8px;
 }
 
-.pj-left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.pj-thumb {
-    width: 40px;
-    height: 40px;
-    object-fit: cover;
-    border-radius: 6px;
-    border: 1px solid #ddd;
-}
-
-.pj-pdf {
-    font-size: 32px;
-    color: #d9534f;
-}
 /* style pour la recherche de pièces jointes */
 .pj-search {
     width: 30%;
     padding: 12px 16px;
-
     background: #f9fafb;
     border: 1px solid #e5e7eb;
     border-radius: 10px;
-
     font-size: 15px;
     font-weight: 500;
     color: #111827;
-
     box-shadow: 0 1px 2px rgba(0,0,0,0.04);
     transition: all 0.25s ease;
-
     outline: none;
 }
 
@@ -838,8 +657,7 @@ button:hover {
 .pj-search:focus {
     background: #ffffff;
     border-color: #3b82f6;
-    box-shadow:
-        0 0 0 3px rgba(59,130,246,0.15),
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.15),
         0 4px 10px rgba(0,0,0,0.06);
 }
 
@@ -855,9 +673,8 @@ button:hover {
     border-color: #d1d5db;
 }
 
-/* ============================================================
-   CONTAINER GLOBAL — STYLE PREMIUM
-============================================================ */
+/* == 13. Messagerie : conteneur général ==================== */
+
 .conversation-section {
     display: flex;
     flex-direction: column;
@@ -871,9 +688,8 @@ button:hover {
     position: relative;
 }
 
-/* ============================================================
-   TOOLBAR : FILTRES + RECHERCHE
-============================================================ */
+/* == 14. Toolbar : filtres + recherche ===================== */
+
 .messages-toolbar {
     display: flex;
     align-items: center;
@@ -927,9 +743,8 @@ button:hover {
     box-shadow: 0 0 0 3px rgba(0,120,212,0.15);
 }
 
-/* ============================================================
-   TIMELINE DES MESSAGES
-============================================================ */
+/* == 15. Timeline des messages ============================= */
+
 .messages-timeline {
     flex: 1;
     overflow-y: auto;
@@ -945,10 +760,12 @@ button:hover {
 .messages-timeline::-webkit-scrollbar {
     width: 8px;
 }
+
 .messages-timeline::-webkit-scrollbar-thumb {
     background: #c7ced8;
     border-radius: 10px;
 }
+
 .messages-timeline::-webkit-scrollbar-thumb:hover {
     background: #b3bbc7;
 }
@@ -968,9 +785,8 @@ button:hover {
     font-weight: 500;
 }
 
-/* ============================================================
-   BULLES DE MESSAGES
-============================================================ */
+/* == 16. Bulles de messages ================================ */
+
 .message-item {
     display: flex;
     align-items: flex-start;
@@ -1049,15 +865,8 @@ button:hover {
     color: inherit;
 }
 
-/* Animation */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
-}
+/* == 17. Barre d’envoi (input) ============================= */
 
-/* ============================================================
-   BARRE D’ENVOI (INPUT)
-============================================================ */
 .message-input-bar {
     display: flex;
     flex-direction: column;
@@ -1066,7 +875,6 @@ button:hover {
     border-top: 1px solid #e3e7ef;
     gap: 10px;
     box-shadow: 0 -2px 6px rgba(0,0,0,0.04);
-
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
@@ -1112,7 +920,6 @@ button:hover {
     fill: none;
 }
 
-
 /* Zone de texte */
 .message-input-bar textarea {
     flex: 1;
@@ -1126,7 +933,6 @@ button:hover {
     overflow-y: auto;
     transition: 0.25s;
     background: #f9fbff;
-
     width: 100%;
     box-sizing: border-box;
 }
@@ -1138,9 +944,8 @@ button:hover {
     box-shadow: 0 0 0 3px rgba(0,120,212,0.15);
 }
 
-/* ============================================================
-   BOUTON ENVOYER — VERSION PREMIUM
-============================================================ */
+/* == 18. Messagerie : bouton Envoyer ======================= */
+
 .send-btn {
     background: #0078d4;
     color: white;
@@ -1152,15 +957,13 @@ button:hover {
     font-size: 15px;
     transition: 0.25s ease;
     align-self: flex-end;
-
-    /* 🔥 Ombre premium */
     box-shadow: 0 4px 14px rgba(0,120,212,0.25);
 }
 
 .send-btn:hover {
-    background: #0069bd; /*  Légèrement plus sombre */
-    transform: translateY(-2px); /*  Effet "lift" */
-    box-shadow: 0 8px 22px rgba(0,120,212,0.35); /*  Ombre plus large */
+    background: #0069bd;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(0,120,212,0.35);
 }
 
 .send-btn:active {
@@ -1168,119 +971,7 @@ button:hover {
     box-shadow: 0 4px 14px rgba(0,120,212,0.25);
 }
 
-
-/* ===========================
-   OVERLAY FLOUTÉ
-=========================== */
-.conversation-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.45);
-    backdrop-filter: blur(10px);
-    opacity: 0;
-    pointer-events: none;
-    transition: 0.35s ease;
-    z-index: 900;
-}
-
-/* ===========================
-   MODAL DE CONVERSATION
-=========================== */
-.conversation-modal {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(.92);
-    width: 900px;
-    max-width: 95%;
-    height: 700px;
-    background: #ffffff;
-    border-radius: 20px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.25);
-    opacity: 0;
-    pointer-events: none;
-    transition: 0.35s ease;
-    z-index: 999;
-    overflow: hidden;
-}
-
-/* Apparition */
-.conversation-modal.active,
-.conversation-overlay.active {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.conversation-modal.active {
-    transform: translate(-50%, -50%) scale(1);
-}
-
-/* ===========================
-   BOUTON D’OUVERTURE
-=========================== */
-.open-conv-btn {
-    padding: 12px 20px;
-    background: #0078d4;
-    color: white;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: 600;
-    transition: 0.25s;
-}
-
-.open-conv-btn:hover {
-    background: #005fa3;
-}
-
-.close-conv-btn {
-    position: absolute;
-    top: 14px;
-    right: 14px;
-    width: 48px;   /*  plus grand */
-    height: 48px;  /*  plus grand */
-    border-radius: 50%;
-    border: none;
-    background: #ff4d4f;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: 0.25s ease;
-    z-index: 1000;
-    font-size: 0;
-    line-height: 0;
-}
-
-.close-conv-btn svg {
-    width: 28px;   /*  taille idéale */
-    height: 28px;
-    stroke: black;
-    stroke-width: 2.6;
-    fill: none;
-    display: block;
-}
-
-
-
-
-
-
-/* Bouton d’ouverture */
-.open-conv-btn {
-    padding: 12px 20px;
-    background: #0078d4;
-    color: white;
-    border: none;
-    border-radius: 12px;
-    cursor: pointer;
-    font-size: 16px;
-    font-weight: 600;
-    transition: 0.25s;
-    display: inline-block;
-    margin-bottom: 20px;
-}
+/* == 19. Bouton d’ouverture ================================ */
 
 .open-conv-btn:hover {
     background: #005fa3;
@@ -1316,15 +1007,15 @@ button:hover {
     z-index: 999;
     overflow: hidden;
 }
+
 .modal-inner {
-    position : relative;
+    position: relative;
     height: 80px;
     padding: 0 20px;
 }
 
 /* Activation */
-.conversation-modal.active,
-.conversation-overlay.active {
+.conversation-modal.active, .conversation-overlay.active {
     opacity: 1;
     pointer-events: auto;
 }
@@ -1332,6 +1023,7 @@ button:hover {
 .conversation-modal.active {
     transform: translate(-50%, -50%) scale(1);
 }
+
 .conversation-modal .modal-inner {
     transform: scale(.92);
     transition: 0.35s ease;
@@ -1341,30 +1033,25 @@ button:hover {
     transform: scale(1);
 }
 
-
 /* Bouton de fermeture */
 .close-conv-btn {
+    right: 14px;
+    z-index: 1000;
     position: absolute;
     top: 15px;
     left: 50%;
     transform: translateX(-50%);
-
     width: 52px;
     height: 52px;
     border-radius: 50%;
     border: none;
-
     background: #e53935;
     cursor: pointer;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
-    /* 🔥 Supprime tout comportement textuel */
     font-size: 0;
     line-height: 0;
-
     box-shadow: 0 4px 12px rgba(229, 57, 53, 0.35);
     transition: 0.25s ease;
 }
@@ -1383,7 +1070,18 @@ button:hover {
     display: block;
 }
 
+/* Bouton d’ouverture */
 .open-conv-btn {
+    padding: 12px 20px;
+    background: #0078d4;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: 0.25s;
+    margin-bottom: 20px;
     display: inline-block;
     margin: 0 auto 20px auto;
     position: relative;
@@ -1391,14 +1089,6 @@ button:hover {
     transform: translateX(-50%);
 }
 
-
-
-
-/* Animation */
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(4px); }
-    to { opacity: 1; transform: translateY(0); }
-}
 /* Bagde "Nouveaux" pour les messages non lus */
 .badge-nouveaux {
     display: none;
@@ -1419,7 +1109,6 @@ button:hover {
     opacity: 1;
     transform: scale(1);
 }
-/*Fin Bagde "Nouveaux" pour les messages non lus */
 
 /* Style boutons historiques (affichage totale) */
 .history-expand-btn {
@@ -1442,10 +1131,6 @@ button:hover {
     box-shadow: 0 6px 16px rgba(0, 120, 212, 0.35);
     transform: translateY(-1px);
 }
-.hidden-item {
-    display: none !important;
-}
-/* Fin Style boutons historiques (affichage totale) */
 
 /* --- Historique et notes : l'attribut hidden l'emporte toujours ---
    (sinon un display: flex/grid de la feuille de style le neutralise) */
@@ -1456,22 +1141,12 @@ button:hover {
 .history-expand-btn[hidden] {
     display: none !important;
 }
+
 /* Compteur « 5 actions affichées sur 23 » */
 .liste-compteur {
     margin: 4px 0 8px;
     font-size: 0.9rem;
     color: #555;
-}
-
-/* Pièce jointe déposée par le citoyen depuis son portail */
-.pj-origine-citoyen {
-    margin-left: 8px;
-    padding: 1px 8px;
-    border-radius: 10px;
-    background: #d9fdd3;
-    color: #1f5f30;
-    font-size: 0.8rem;
-    font-weight: bold;
 }
 
 /* Conversation : document joint à un message, champ « document pour le citoyen » */
@@ -1485,7 +1160,11 @@ button:hover {
     font-weight: bold;
     text-decoration: none;
 }
-.message-piece-jointe:hover { text-decoration: underline; }
+
+.message-piece-jointe:hover {
+    text-decoration: underline;
+}
+
 .joindre-document-citoyen {
     display: flex;
     flex-direction: column;
@@ -1493,6 +1172,7 @@ button:hover {
     font-size: 0.85rem;
     color: #333;
 }
+
 .conversation-verrou {
     margin: 0;
     padding: 10px 12px;
@@ -1502,26 +1182,35 @@ button:hover {
     font-size: 0.9rem;
 }
 
-/* =========================================================
-   Documents du dossier : trois cases
-   (reçus du citoyen, envoyés au citoyen, internes à la mairie)
-   ========================================================= */
-.pj-aide { margin: 4px 0 12px; color: #444; font-size: 0.92rem; }
+/* == 20. Documents du dossier : trois cases ================ */
+
+.pj-aide {
+    margin: 4px 0 12px;
+    color: #444;
+    font-size: 0.92rem;
+}
+
 .documents-dossier {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 14px;
     margin-top: 12px;
 }
+
 .case-dossier {
     background: #fff;
     border: 1px solid #d0d0d0;
     border-radius: 10px;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
     padding: 12px;
-    min-width: 0;                    /* évite qu'un long nom de fichier élargisse la case */
+    min-width: 0;
 }
-.case-dossier.case-interne { border-top: 4px solid #b34700; background: #fffaf5; }
+
+.case-dossier.case-interne {
+    border-top: 4px solid #b34700;
+    background: #fffaf5;
+}
+
 .case-dossier-titre {
     display: flex;
     align-items: center;
@@ -1530,8 +1219,19 @@ button:hover {
     font-size: 1rem;
     color: #000091;
 }
-.case-interne .case-dossier-titre { color: #8a3600; }
-.liste-dossier { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+
+.case-interne .case-dossier-titre {
+    color: #8a3600;
+}
+
+.liste-dossier {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+}
+
 .liste-dossier .document-dossier {
     display: block;
     padding: 8px 10px;
@@ -1539,11 +1239,37 @@ button:hover {
     border-radius: 6px;
     background: #fafafa;
 }
-.liste-dossier .document-dossier[hidden] { display: none; }
-.document-nom { display: block; color: #000091; font-weight: bold; overflow-wrap: anywhere; text-decoration: none; }
-.document-nom:hover { text-decoration: underline; }
-.liste-dossier .document-infos { display: block; color: #555; font-size: 0.82rem; margin-top: 2px; }
-.document-actions { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+
+.liste-dossier .document-dossier[hidden] {
+    display: none;
+}
+
+.document-nom {
+    display: block;
+    color: #000091;
+    font-weight: bold;
+    overflow-wrap: anywhere;
+    text-decoration: none;
+}
+
+.document-nom:hover {
+    text-decoration: underline;
+}
+
+.liste-dossier .document-infos {
+    display: block;
+    color: #555;
+    font-size: 0.82rem;
+    margin-top: 2px;
+}
+
+.document-actions {
+    display: flex;
+    gap: 6px;
+    margin-top: 6px;
+    flex-wrap: wrap;
+}
+
 .btn-voir-message {
     padding: 3px 10px;
     border: 1px solid #000091;
@@ -1553,22 +1279,36 @@ button:hover {
     font-size: 0.82rem;
     cursor: pointer;
 }
-.document-actions .btn-delete { padding: 3px 10px; font-size: 0.82rem; }
-.dossier-vide { color: #666; font-size: 0.88rem; padding: 6px 2px; }
+
+.document-actions .btn-delete {
+    padding: 3px 10px;
+    font-size: 0.82rem;
+}
+
+.dossier-vide {
+    color: #666;
+    font-size: 0.88rem;
+    padding: 6px 2px;
+}
+
 /* Message mis en évidence quand on clique sur « Voir le message » */
-.message-item.message-surligne { outline: 3px solid #000091; outline-offset: 2px; border-radius: 8px; }
+.message-item.message-surligne {
+    outline: 3px solid #000091;
+    outline-offset: 2px;
+    border-radius: 8px;
+}
+
 /* Texte réservé aux lecteurs d'écran */
 .visually-hidden {
     position: absolute !important;
-    width: 1px; height: 1px;
-    margin: -1px; padding: 0;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
     overflow: hidden;
     clip: rect(0 0 0 0);
     white-space: nowrap;
     border: 0;
-}
-@media (max-width: 1000px) {
-    .documents-dossier { grid-template-columns: 1fr; }
 }
 
 /* Document interne -> envoi au citoyen depuis la conversation */
@@ -1581,7 +1321,11 @@ button:hover {
     font-size: 0.82rem;
     cursor: pointer;
 }
-.btn-envoyer-citoyen:hover { background: #1212ff; }
+
+.btn-envoyer-citoyen:hover {
+    background: #1212ff;
+}
+
 .document-dossier-pret {
     display: flex;
     align-items: center;
@@ -1596,7 +1340,12 @@ button:hover {
     font-size: 0.88rem;
     overflow-wrap: anywhere;
 }
-.document-dossier-pret[hidden], .joindre-document-citoyen[hidden] { display: none; }
+
+.document-dossier-pret[hidden],
+.joindre-document-citoyen[hidden] {
+    display: none;
+}
+
 .document-dossier-pret button {
     border: none;
     background: transparent;
@@ -1605,10 +1354,8 @@ button:hover {
     cursor: pointer;
 }
 
-/* =========================================================
-   Historique et notes : bouton sous la liste, « Réduire » en haut,
-   cadre déroulant quand la liste est longue
-   ========================================================= */
+/* == 21. Historique et notes : boutons Afficher tout / Réduire ==== */
+
 .history-timeline.liste-deroulante,
 .notes-timeline.liste-deroulante {
     max-height: 520px;
@@ -1618,6 +1365,7 @@ button:hover {
     border-radius: 8px;
     scroll-behavior: smooth;
 }
+
 .history-expand-btn:disabled {
     background: #eef0f3;
     color: #555;
@@ -1625,8 +1373,13 @@ button:hover {
     cursor: default;
     transform: none;
 }
+
 .history-expand-btn:focus-visible,
-.btn-reduire:focus-visible { outline: 3px solid #0a76f6; outline-offset: 2px; }
+.btn-reduire:focus-visible {
+    outline: 3px solid #0a76f6;
+    outline-offset: 2px;
+}
+
 .btn-reduire {
     display: inline-block;
     margin: 0 0 8px;
@@ -1638,7 +1391,10 @@ button:hover {
     font-weight: bold;
     cursor: pointer;
 }
-.btn-reduire[hidden] { display: none; }
+
+.btn-reduire[hidden] {
+    display: none;
+}
 
 /* Filtre « Mois » des notes : un bouton par mois contenant des notes */
 .notes-mois {
@@ -1647,7 +1403,11 @@ button:hover {
     gap: 8px;
     margin: 4px 0 10px;
 }
-.notes-mois[hidden] { display: none; }
+
+.notes-mois[hidden] {
+    display: none;
+}
+
 .mois-btn {
     padding: 6px 14px;
     border: 1px solid #c9c9e8;
@@ -1657,6 +1417,52 @@ button:hover {
     font-weight: 600;
     cursor: pointer;
 }
-.mois-btn:hover { background: #f1f1fb; }
-.mois-btn.active { background: #4f46e5; border-color: #4f46e5; color: #fff; }
-.mois-btn:focus-visible { outline: 3px solid #0a76f6; outline-offset: 2px; }
+
+.mois-btn:hover {
+    background: #f1f1fb;
+}
+
+.mois-btn.active {
+    background: #4f46e5;
+    border-color: #4f46e5;
+    color: #fff;
+}
+
+.mois-btn:focus-visible {
+    outline: 3px solid #0a76f6;
+    outline-offset: 2px;
+}
+
+/* == 22. Animations (@keyframes) ============================== */
+
+@keyframes slideIn {
+    from { transform: translateX(50px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeOut {
+    to { opacity: 0; transform: translateX(50px); }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* == 23. Petits écrans et accessibilité (@media) ============== */
+
+@media (max-width: 1000px) {
+    .documents-dossier {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 900px) {
+    .page-wrapper {
+        padding: 15px;
+    }
+
+    section {
+        padding: 20px;
+    }
+}

@@ -23,7 +23,7 @@ unset($_SESSION['reset_submit_attempts']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mot de passe réinitialisé - Portail Agent</title>
-    <link rel="stylesheet" href="assets/css/style.css"/>
+    <link rel="stylesheet" href="../Frontend/assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/css/style.css') ?>"/>
 
     <!-- Content Security Policy stricte -->
     <meta http-equiv="Content-Security-Policy"

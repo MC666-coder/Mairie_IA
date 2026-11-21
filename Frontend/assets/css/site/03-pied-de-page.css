@@ -1,0 +1,148 @@
+/* ================================================================
+   03-pied-de-page.css
+   Pied de page et bande tricolore
+   ================================================================ */
+
+/* Segments tricolores */
+.bande-tricolore .bleu {
+    background-color: #0055A4;
+    flex: 1;
+    background: #0055A4;
+}
+
+.bande-tricolore .blanc {
+    background-color: #FFFFFF;
+    flex: 1;
+    background: #FFFFFF;
+}
+
+.bande-tricolore .rouge {
+    background-color: #EF4135;
+    flex: 1;
+    background: #EF4135;
+}
+
+/* Footer */
+footer {
+    background-color: #f8f8f8;
+    padding: 25px;
+    text-align: center;
+    font-size: 14px;
+    color: #333;
+    border-top: 1px solid #ccc;
+    width: 100%;
+}
+
+/* Bande tricolore */
+.bande-tricolore {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 4px 4px 0 0;
+    overflow: hidden;
+    display: flex;
+    height: 14px;
+    margin-top: 50px;
+}
+
+.bleu {
+    background: #002654;
+    flex: 1;
+}
+
+.blanc {
+    background: #ffffff;
+    flex: 1;
+}
+
+.rouge {
+    background: #ce1126;
+    flex: 1;
+}
+
+#footer {
+    background: #111;
+    color: white;
+    text-align: center;
+    padding: 35px 0;
+    margin-top: 60px;
+}
+
+#footer p {
+    margin: 6px 0;
+}
+
+#slogan {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+#footer-premium {
+    background: #0d1b2a;
+    color: #ffffff;
+    padding: 50px 20px 0;
+    margin-top: 60px;
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 40px;
+    padding-bottom: 40px;
+}
+
+.footer-title {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 10px;
+}
+
+.footer-slogan {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #dce3ea;
+}
+
+.footer-col h4 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: #e5edf5;
+}
+
+.footer-links {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-links li {
+    margin-bottom: 8px;
+}
+
+.footer-links li a {
+    color: #cfd8e3;
+    text-decoration: none;
+    transition: 0.25s;
+}
+
+.footer-links li a:hover {
+    color: #ffffff;
+    text-decoration: underline;
+}
+
+.footer-col p {
+    margin: 6px 0;
+    color: #cfd8e3;
+}
+
+/* Bandeau final */
+.footer-bottom {
+    background: #0a1623;
+    text-align: center;
+    padding: 15px 10px;
+    font-size: 14px;
+    color: #b8c4d1;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}

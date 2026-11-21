@@ -1,0 +1,105 @@
+/* ================================================================
+   11-responsive.css
+   Adaptation aux petits écrans et préférences d'accessibilité (@media)
+   ================================================================ */
+
+@media (max-width: 900px) {
+    #header-agent {
+        flex-direction: column;
+        gap: 15px;
+        padding: 20px;
+    }
+
+    #nav-agent {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    #content_portail_citoyen {
+        padding: 35px 25px;
+    }
+
+    h1 {
+        font-size: 32px;
+    }
+
+    .agenda-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .agenda-calendar {
+        margin-bottom: 20px;
+    }
+}
+
+@media (max-width: 768px) {
+    .actu-title {
+        font-size: 19px;
+    }
+
+    .actu-extrait {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 700px) {
+    .messagerie-citoyen {
+        margin: 16px 0;
+    }
+
+    .documents-citoyen {
+        grid-template-columns: 1fr;
+    }
+
+    .bulle {
+        max-width: 90%;
+    }
+}
+
+@media (max-width: 600px) {
+    #logo-agent {
+        text-align: center;
+    }
+
+    .actu-flash {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
+    }
+
+    .actu-items {
+        animation: none;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .evenement-infos {
+        grid-template-columns: 1fr;
+    }
+
+    .evenement-infos dd {
+        margin-bottom: 8px;
+    }
+}
+
+@media (max-width: 520px) {
+    .carte-auth {
+        padding: 28px 18px 22px;
+        border-radius: 12px;
+    }
+
+    .champs-auth-duo {
+        grid-template-columns: 1fr;
+    }
+
+    .regles-mot-de-passe {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .request-card.carte-nouvelle {
+        animation: none;
+        outline: 3px solid #000091;
+    }
+}

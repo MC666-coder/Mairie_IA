@@ -1,0 +1,427 @@
+/* ================================================================
+   09-espace-citoyen.css
+   Espace citoyen : tableau de bord, demandes, messagerie avec la mairie, documents
+   ================================================================ */
+
+.stats-agent {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 32px;
+}
+
+.stat-card {
+    background: #fff;
+    padding: 16px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    flex: 1 1 200px;
+    text-align: center;
+}
+
+.stat-card h2 {
+    font-size: 16px;
+    margin-bottom: 8px;
+    color: #004b8d;
+}
+
+.stat-card p {
+    font-size: 24px;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.request-card .status {
+    font-weight: bold;
+    color: #28a745;
+}
+
+/* dernières demandes - barre de scroll personnalisée */
+.last-requette {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 10px;
+    margin-top: 30px;
+}
+
+.last-requests-container {
+    max-height: 350px;
+    overflow-y: auto;
+    padding-right: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+}
+
+.request-card {
+    margin-bottom: 16px;
+    background: white;
+    border-left: 4px solid #007bff;
+    margin: 12px;
+    padding: 12px 16px;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.request-card p {
+    margin: 4px 0;
+    font-size: 14px;
+}
+
+/* Conteneur scrollable */
+.demandes-container {
+    max-height: 500px;
+    overflow-y: auto;
+    padding-right: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background: #fafafa;
+}
+
+/* Carte d'une demande */
+.demande-card {
+    background: white;
+    border-left: 4px solid #007bff;
+    margin: 12px;
+    padding: 15px;
+    border-radius: 6px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+
+.demande-card h3 {
+    margin-top: 0;
+    font-size: 18px;
+}
+
+/* Message si aucune demande */
+.no-data {
+    padding: 20px;
+    text-align: center;
+    color: #666;
+    font-style: italic;
+}
+
+.demande-details p {
+    font-size: 16px;
+    margin: 10px 0;
+    line-height: 1.5;
+}
+
+.demande-details h2 {
+    margin-top: 30px;
+    font-size: 20px;
+    color: #333;
+}
+
+/* Style pour la page de détails d'une demande */
+.demande-details {
+    max-width: 750px;
+    margin: 40px auto;
+    border-left: 6px solid #ccc;
+    transition: 0.3s ease;
+    position: relative;
+    background: #ffffff;
+    border: 2px solid #002395;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+/* Demande qui vient d'apparaître : surlignage qui s'estompe */
+.request-card.carte-nouvelle {
+    animation: carte-nouvelle 4s ease-out;
+}
+
+/* --- Tableau de bord citoyen : badge « Nouveau message de la mairie » --- */
+.request-card.a-un-message {
+    border-left: 5px solid #000091;
+}
+
+.badge-message-mairie {
+    display: inline-block;
+    margin-bottom: 8px;
+    padding: 4px 12px;
+    border-radius: 14px;
+    background: #000091;
+    color: #fff;
+    font-weight: bold;
+    font-size: 0.9rem;
+    text-decoration: none;
+}
+
+.badge-message-mairie:hover,
+.badge-message-mairie:focus-visible {
+    background: #1212ff;
+    outline: 3px solid #0a76f6;
+    outline-offset: 2px;
+}
+
+.messagerie-citoyen {
+    max-width: 900px;
+    margin: 32px auto;
+    text-align: left;
+}
+
+.messagerie-citoyen h2 {
+    text-align: center;
+    margin-bottom: 8px;
+}
+
+.messagerie-aide {
+    text-align: center;
+    color: #555;
+    margin: 0 0 16px;
+}
+
+/* Case commune */
+.case-messagerie {
+    background: #fff;
+    border: 1px solid #d0d0d0;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+.case-titre {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 12px;
+    font-size: 1.05rem;
+    color: #000091;
+}
+
+/* Case 1 : la conversation */
+.fil-messages {
+    height: 360px;
+    overflow-y: auto;
+    padding: 12px;
+    background: #efeae2;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.fil-vide {
+    color: #555;
+    text-align: center;
+    margin: auto;
+    max-width: 420px;
+}
+
+.fil-jour {
+    align-self: center;
+    background: #fff;
+    color: #555;
+    font-size: 0.8rem;
+    padding: 3px 10px;
+    border-radius: 10px;
+    margin: 6px 0;
+}
+
+.bulle {
+    max-width: 75%;
+    padding: 8px 12px 6px;
+    border-radius: 10px;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.12);
+    color: #161616;
+}
+
+.bulle-citoyen {
+    align-self: flex-end;
+    background: #d9fdd3;
+    border-top-right-radius: 2px;
+}
+
+.bulle-agent {
+    align-self: flex-start;
+    background: #fff;
+    border-top-left-radius: 2px;
+}
+
+.bulle-auteur {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: bold;
+    color: #000091;
+}
+
+.bulle-citoyen .bulle-auteur {
+    color: #1f7a3a;
+}
+
+.bulle-texte {
+    margin: 2px 0;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.bulle-heure {
+    display: block;
+    text-align: right;
+    font-size: 0.75rem;
+    color: #666;
+}
+
+.bulle-document {
+    display: inline-block;
+    margin: 4px 0;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(0, 0, 145, 0.08);
+    color: #000091;
+    font-weight: bold;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+}
+
+.bulle-document:hover {
+    text-decoration: underline;
+}
+
+/* Case 2 : la réponse du citoyen (ou pourquoi il ne peut pas encore répondre) */
+.reponse-indisponible {
+    margin: 0;
+    padding: 12px 14px;
+    border-left: 4px solid #000091;
+    background: #f5f5fe;
+    border-radius: 6px;
+    color: #333;
+}
+
+.saisie-message {
+    display: grid;
+    gap: 6px;
+}
+
+.etiquette-champ {
+    font-weight: bold;
+}
+
+.saisie-message input[type="file"] {
+    padding: 8px;
+    border: 1px dashed #929292;
+    border-radius: 6px;
+    background: #fafafa;
+}
+
+.saisie-message textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px;
+    font: inherit;
+    border: 1px solid #929292;
+    border-radius: 6px;
+    resize: vertical;
+}
+
+.aide-champ {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #555;
+}
+
+.saisie-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.compteur-caracteres {
+    font-size: 0.85rem;
+    color: #555;
+}
+
+#envoyer-message {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    background: #000091;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#envoyer-message:hover {
+    background: #1212ff;
+}
+
+#envoyer-message:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.messagerie-statut {
+    min-height: 1.2em;
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.messagerie-statut[data-type="erreur"] {
+    color: #b30000;
+}
+
+.messagerie-statut[data-type="succes"] {
+    color: #1f7a3a;
+}
+
+/* Case 3 : les documents, en deux cases côte à côte */
+.documents-citoyen {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.documents-citoyen .case-messagerie {
+    margin-bottom: 0;
+}
+
+.compteur-documents {
+    display: inline-block;
+    min-width: 1.6em;
+    padding: 1px 8px;
+    border-radius: 12px;
+    background: #000091;
+    color: #fff;
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.liste-documents {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 8px;
+}
+
+.liste-documents li {
+    padding: 8px 10px;
+    border: 1px solid #e3e3e3;
+    border-radius: 6px;
+    background: #fafafa;
+}
+
+.liste-documents a {
+    color: #000091;
+    font-weight: bold;
+    overflow-wrap: anywhere;
+}
+
+.document-infos {
+    display: block;
+    color: #555;
+    font-size: 0.85rem;
+    margin-top: 2px;
+}
+
+.liste-documents li.documents-vide {
+    border-style: dashed;
+    background: transparent;
+    color: #666;
+    font-size: 0.9rem;
+}

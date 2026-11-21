@@ -1,6 +1,8 @@
 <?php
 session_start();
 require_once __DIR__ . '/../Backend/Config/db.php';
+require_once __DIR__ . '/../Backend/Fonctions/formulaire_auth.php';
+require_once __DIR__ . '/../Backend/Fonctions/regles_mot_de_passe.php';
 
 /* ---------------------------------------------------------
    0) Sécurité HTTP renforcée
@@ -62,7 +64,7 @@ if (empty($_SESSION['csrf_token_activation'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Activation du compte agent</title>
-    <link rel="stylesheet" href="assets/css/style.css"/>
+    <link rel="stylesheet" href="../Frontend/assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/css/style.css') ?>"/>
 
     <!-- Content Security Policy stricte -->
     <meta http-equiv="Content-Security-Policy"
@@ -91,42 +93,30 @@ if (empty($_SESSION['csrf_token_activation'])) {
     <main id="content_portail_citoyen">
 
         <section class="connexion-section">
-            <h2 class="section-title">Définir votre mot de passe</h2>
+            <div class="carte-auth">
+                <?= retourAuth('connexion_agent.php', 'Retour à la connexion') ?>
+                <?= enteteAuth('cadenas', 'Activez votre compte', 'Choisissez votre mot de passe pour accéder à l’espace agent') ?>
 
-            <div class="form-card">
                 <form action="traitement_activation.php" method="POST" autocomplete="off">
-
-                    <!-- CSRF -->
                     <input type="hidden" name="csrf_token_activation"
                            value="<?= htmlspecialchars($_SESSION['csrf_token_activation'], ENT_QUOTES, 'UTF-8') ?>">
-
-                    <!-- Token -->
                     <input type="hidden" name="token" value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>">
 
-                    <label for="password">Nouveau mot de passe</label>
-                    <input type="password" id="password" name="password" required minlength="10">
-
-                    <label for="password_confirm">Confirmer le mot de passe</label>
-                    <input type="password" id="password_confirm" name="password_confirm" required minlength="10">
-
-                    <p style="font-size:14px;color:#666;margin-top:10px;">
-                        Le mot de passe doit contenir :
-                        <br>• 10 caractères minimum
-                        <br>• 1 majuscule
-                        <br>• 1 minuscule
-                        <br>• 1 chiffre
-                        <br>• 1 caractère spécial
-                    </p>
+                    <?= champAuth('password', 'Mot de passe', 'password', 'cadenas', '', '',
+                                  'Votre mot de passe doit contenir :', listeReglesMotDePasse('password')) ?>
+                    <?= champAuth('password_confirm', 'Confirmer le mot de passe', 'password', 'cadenas', '', '', '',
+                                  '<p class="champ-auth-erreur" id="message-confirmation" hidden>Les deux mots de passe ne correspondent pas.</p>') ?>
 
                     <button type="submit" class="btn-submit">Activer mon compte</button>
                 </form>
             </div>
-
         </section>
 
     </main>
 
 </div>
 
+<script src="../Frontend/assets/js/mot_de_passe_visible.js?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/js/mot_de_passe_visible.js') ?>"></script>
+<script src="../Frontend/assets/js/regles_mot_de_passe.js?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/js/regles_mot_de_passe.js') ?>"></script>
 </body>
 </html>

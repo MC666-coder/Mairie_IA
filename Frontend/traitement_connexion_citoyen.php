@@ -49,7 +49,7 @@ if ($_SESSION['login_attempts_citoyen'] >= 5) {
 
 // Requête SQL sécurisée
 $stmt = $pdo->prepare("
-    SELECT id, nom_citoyen, prenom_citoyen, email_citoyen, password
+    SELECT id, nom_citoyen, prenom_citoyen, email_citoyen, password, email_verifie
     FROM citoyens
     WHERE email_citoyen = ?
     LIMIT 1
@@ -59,6 +59,14 @@ $citoyen = $stmt->fetch(PDO::FETCH_ASSOC);
 
 // Vérification du mot de passe
 if ($citoyen && password_verify($password, $citoyen['password'])) {
+
+    // Compte pas encore confirmé : il faut d'abord cliquer sur le bouton reçu par e-mail
+    if ((int) $citoyen['email_verifie'] !== 1) {
+        $_SESSION['login_error'] = "Votre adresse e-mail n'est pas encore confirmée. "
+            . "Cliquez sur le bouton « Confirmer mon adresse e-mail » reçu après votre inscription.";
+        header("Location: connexion_citoyen.php");
+        exit;
+    }
 
     // Reset bruteforce
     $_SESSION['login_attempts_citoyen'] = 0;

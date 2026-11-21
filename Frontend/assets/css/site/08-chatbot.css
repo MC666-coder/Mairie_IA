@@ -1,0 +1,317 @@
+/* ================================================================
+   08-chatbot.css
+   Assistant IA citoyen (chatbot) : fenêtre, messages, bouton flottant, brouillon de demande
+   ================================================================ */
+
+/* Message utilisateur */
+.user {
+    background: #dce6ff;
+    color: #1A2E5A;
+    align-self: flex-end;
+    border-left: 4px solid #002395;
+}
+
+/* Message IA */
+.bot {
+    background: #ffffff;
+    color: #333;
+    align-self: flex-start;
+    border-left: 4px solid #ED2939;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+#message {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 15px;
+}
+
+#send {
+    margin-left: 10px;
+    padding: 12px 18px;
+    background: #002395;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+#send:hover {
+    background: #ED2939;
+}
+
+/* --- Messages --- */
+.message {
+    max-width: 80%;
+    padding: 10px 14px;
+    margin-bottom: 10px;
+    border-radius: 12px;
+    line-height: 1.4;
+    font-size: 14px;
+    animation: fadeIn 0.2s ease-in-out;
+}
+
+.user-message {
+    background: #d9eaff;
+    align-self: flex-end;
+    border-bottom-right-radius: 2px;
+}
+
+.bot-message {
+    background: #ffffff;
+    border: 1px solid #dcdcdc;
+    align-self: flex-start;
+    border-bottom-left-radius: 2px;
+}
+
+#chat-input button:hover {
+    background: #00408f;
+}
+
+/* loading de l'ia */
+#ia-loading {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    color: #444;
+    font-size: 14px;
+    font-style: italic;
+}
+
+.loader {
+    width: 16px;
+    height: 16px;
+    border: 3px solid #ccc;
+    border-top-color: #0078ff;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+}
+
+/* --- BOUTON FLOTTANT IA --- */
+.ia-floating-btn {
+    position: fixed;
+    bottom: 25px;
+    right: 25px;
+    background: #003b8e;
+    border: none;
+    border-radius: 50%;
+    width: 65px;
+    height: 65px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    transition: 0.3s ease;
+    z-index: 9999;
+}
+
+.ia-floating-btn:hover {
+    background: #002d6b;
+    transform: scale(1.05);
+}
+
+/* Tooltip IA */
+.ia-floating-btn::after {
+    content: "Assistant IA";
+    position: absolute;
+    right: 75px;
+    bottom: 18px;
+    background: #003b8e;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    opacity: 0;
+    pointer-events: none;
+    white-space: nowrap;
+    transition: opacity 0.25s ease;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+}
+
+.ia-floating-btn:hover::after {
+    opacity: 1;
+}
+
+/* --- CHATBOT PREMIUM SLIDE-IN --- */
+#chatbot {
+    margin: 40px auto;
+    border: 2px solid #1A2E5A;
+    margin-top: 40px;
+    border-radius: 12px;
+    overflow: hidden;
+    font-family: "Segoe UI", sans-serif;
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    width: 380px;
+    height: 520px;
+    background: white;
+    border-left: 3px solid #003b8e;
+    border-top: 3px solid #003b8e;
+    box-shadow: -4px 0 12px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.35s ease;
+    z-index: 9998;
+}
+
+.chatbot-hidden {
+    transform: translateX(110%);
+}
+
+.chatbot-visible {
+    transform: translateX(0);
+}
+
+/* --- En-tête du chatbot --- */
+#chatbot-header {
+    letter-spacing: 1px;
+    border-radius: 8px 8px 0 0;
+    font-size: 16px;
+    background: #003b8e;
+    color: white;
+    padding: 12px;
+    font-weight: bold;
+    text-align: center;
+    border-bottom: 2px solid #002d6b;
+}
+
+/* --- Fenêtre de chat --- */
+#chat-window {
+    height: 250px;
+    border: 1px solid #ccc;
+    background: #f5f7fa;
+    flex: 1;
+    padding: 10px;
+    overflow-y: auto;
+}
+
+/* --- Zone d'entrée --- */
+#chat-input {
+    gap: 10px;
+    margin-top: 10px;
+    padding: 10px;
+    background: #ffffff;
+    display: flex;
+    border-top: 1px solid #ddd;
+}
+
+#chat-input input {
+    border-radius: 8px;
+    outline: none;
+    flex: 1;
+    padding: 10px;
+    border: none;
+}
+
+#chat-input button {
+    margin-left: 8px;
+    border-radius: 8px;
+    font-weight: bold;
+    background: #003b8e;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+}
+
+/* --- Chatbot : carte de confirmation d'une demande préparée par l'IA --- */
+.brouillon-demande {
+    margin: 8px 0;
+    padding: 12px;
+    border: 2px solid #000091;
+    border-radius: 8px;
+    background: #f5f5fe;
+    color: #161616;
+    font-size: 0.95rem;
+}
+
+.brouillon-demande .brouillon-infos {
+    margin: 6px 0;
+    color: #3a3a3a;
+}
+
+.brouillon-demande textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px;
+    font: inherit;
+    border: 1px solid #929292;
+    border-radius: 4px;
+    resize: vertical;
+}
+
+.brouillon-demande .brouillon-aide {
+    margin: 6px 0;
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.brouillon-demande .brouillon-boutons {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.brouillon-demande button {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 4px;
+    background: #000091;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.brouillon-demande button.secondaire {
+    background: #fff;
+    color: #000091;
+    border: 1px solid #000091;
+}
+
+.brouillon-demande button:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+/* --- Chatbot : choix « préparée par l'assistant » ou « je la fais moi-même » --- */
+.choix-demande {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 8px 0;
+}
+
+.choix-demande button {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 4px;
+    background: #000091;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.choix-demande button.secondaire {
+    background: #fff;
+    color: #000091;
+    border: 1px solid #000091;
+}
+
+.choix-demande button:focus-visible,
+.brouillon-demande button:focus-visible {
+    outline: 3px solid #0a76f6;
+    outline-offset: 2px;
+}
+
+.bot-message a.lien-creer-demande {
+    color: #000091;
+    font-weight: bold;
+    text-decoration: underline;
+}

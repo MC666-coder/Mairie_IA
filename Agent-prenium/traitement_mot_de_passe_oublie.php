@@ -61,7 +61,7 @@ $sql->execute([$email]);
 $agent = $sql->fetch();
 
 /* ---------------------------------------------------------
-   6) Si l’email n’existe pas → même comportement
+   6) Si l’email n’existe pas → message d’erreur rouge sur le formulaire
 --------------------------------------------------------- */
 if (!$agent) {
     $_SESSION['error_forgot'] = "L’adresse email n’existe pas dans notre système.";

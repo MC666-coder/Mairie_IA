@@ -8,6 +8,7 @@ if (session_status() === PHP_SESSION_ACTIVE) {
     ]);
 }
 session_start();
+require_once __DIR__ . '/../Backend/Fonctions/formulaire_auth.php';
 
 // Renforcer la sécurité de la session (à mettre idéalement dans un fichier commun)
 
@@ -96,40 +97,18 @@ session_start();
     <main id="content_portail_citoyen">
 
         <section class="connexion-section">
-            <h2 class="section-title">Choisissez votre profil</h2>
-            <p class="section-subtitle">Accédez à votre espace personnel en fonction de votre rôle.</p>
+            <div class="carte-auth carte-auth-large">
+                <?= retourAuth('index.php', 'Accueil') ?>
+                <?= enteteAuth('connexion', 'Choisissez votre profil', 'Accédez à votre espace personnel en fonction de votre rôle') ?>
 
-            <div class="connexion-card">
+                <nav class="choix-profils" aria-label="Choix du profil de connexion">
+                    <?= choixProfil('connexion_citoyen.php', 'utilisateur', 'Je suis un citoyen',
+                                    'Suivez vos démarches et échangez avec la mairie', 'citoyen') ?>
+                    <?= choixProfil('../Agent-prenium/connexion_agent.php', 'mallette', 'Je suis agent de la mairie',
+                                    'Traitez les demandes des citoyens', 'agent') ?>
+                </nav>
 
-                <div class="connexion-buttons">
-
-                    <!-- Connexion Citoyen -->
-                    <a href="connexion_citoyen.php" class="btn-connexion">
-                        <span class="nav-icon">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-                                 stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="8" r="4"/>
-                                <path d="M6 20v-1a6 6 0 0 1 12 0v1"/>
-                            </svg>
-                        </span>
-                        <span class="btn-connexion-label">Connexion Citoyen</span>
-                    </a>
-
-                    <!-- Connexion Agent : portail agent officiel (Agent-prenium) -->
-                    <a href="../Agent-prenium/connexion_agent.php" class="btn-connexion">
-                        <span class="nav-icon">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-                                 stroke="#0a7c2f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M3 10l9-7 9 7"/>
-                                <path d="M4 10h16v10H4z"/>
-                                <path d="M9 21V12h6v9"/>
-                            </svg>
-                        </span>
-                        <span class="btn-connexion-label">Connexion Agent</span>
-                    </a>
-
-                </div>
-
+                <p class="carte-auth-pied">Pas encore de compte ? <a href="inscriptions_citoyen.php">Créer un compte citoyen</a></p>
             </div>
         </section>
 

@@ -7,6 +7,7 @@ if (session_status() === PHP_SESSION_ACTIVE) {
     ]);
 }
 session_start();
+require_once __DIR__ . '/../Backend/Fonctions/formulaire_auth.php';
 
 
 
@@ -91,17 +92,13 @@ session_start();
     <main id="content_portail_citoyen">
 
         <section class="connexion-section">
-            <h2 class="section-title">Espace Citoyen</h2>
-            <p class="section-subtitle">Veuillez entrer vos identifiants pour accéder à vos services personnalisés.</p>
+            <div class="carte-auth">
+                <?= retourAuth('choix_connexion.php', 'Retour') ?>
+                <?= enteteAuth('utilisateur', 'Bon retour', 'Connectez-vous à votre espace citoyen') ?>
 
-            <?php if (!empty($_SESSION['login_error'])): ?>
-            <div class="error-message">
-                <?= htmlspecialchars($_SESSION['login_error']) ?>
-            </div>
-            <?php unset($_SESSION['login_error']); ?>
-            <?php endif; ?>
+                <?= messageAuth('login_success', 'success') ?>
+                <?= messageAuth('login_error') ?>
 
-            <div class="form-card">
                 <form action="traitement_connexion_citoyen.php" method="POST" autocomplete="off">
 
                     <!-- Protection CSRF -->
@@ -112,14 +109,14 @@ session_start();
                     ?>
                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($_SESSION['csrf_token']) ?>">
 
-                    <label for="email_citoyen">Adresse email</label>
-                    <input type="email" id="email_citoyen" name="email_citoyen" required>
-
-                    <label for="password">Mot de passe</label>
-                    <input type="password" id="password" name="password" required>
+                    <?= champAuth('email_citoyen', 'Adresse e-mail', 'email', 'courrier') ?>
+                    <?= champAuth('password', 'Mot de passe', 'password', 'cadenas') ?>
+                    <a class="lien-auth-discret" href="mot_de_passe_oublie_citoyen.php">Mot de passe oublié ?</a>
 
                     <button type="submit" class="btn-submit">Se connecter</button>
                 </form>
+
+                <p class="carte-auth-pied">Pas encore de compte ? <a href="inscriptions_citoyen.php">Créer un compte</a></p>
             </div>
 
         </section>
@@ -178,5 +175,6 @@ session_start();
 
 </footer>
 
+<script src="assets/js/mot_de_passe_visible.js?v=<?= @filemtime(__DIR__ . '/assets/js/mot_de_passe_visible.js') ?>"></script>
 </body>
 </html>

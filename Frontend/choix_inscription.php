@@ -7,6 +7,7 @@ if (session_status() === PHP_SESSION_ACTIVE) {
     ]);
 }
 session_start();
+require_once __DIR__ . '/../Backend/Fonctions/formulaire_auth.php';
 
 // Sécurisation renforcée des cookies de session
 
@@ -95,40 +96,18 @@ session_start();
     <main id="content_portail_citoyen">
 
         <section class="connexion-section">
-            <h2 class="section-title">Choisissez votre profil</h2>
-            <p class="section-subtitle">Sélectionnez le type de compte que vous souhaitez créer.</p>
+            <div class="carte-auth carte-auth-large">
+                <?= retourAuth('index.php', 'Accueil') ?>
+                <?= enteteAuth('inscription', 'Choisissez votre profil', 'Sélectionnez le type de compte que vous souhaitez créer') ?>
 
-            <div class="connexion-card">
+                <nav class="choix-profils" aria-label="Choix du type de compte">
+                    <?= choixProfil('inscriptions_citoyen.php', 'utilisateur', 'Créer un compte citoyen',
+                                    'Faites vos démarches en ligne, 24h/24', 'citoyen') ?>
+                    <?= choixProfil('../Agent-prenium/connexion_agent.php', 'mallette', 'Espace agent',
+                                    'Votre compte est créé par la mairie : connectez-vous directement', 'agent') ?>
+                </nav>
 
-                <div class="connexion-buttons">
-
-                    <!-- Inscription Citoyen -->
-                    <a href="inscriptions_citoyen.php" class="btn-connexion">
-                        <span class="nav-icon">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-                                 stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="8" r="4"/>
-                                <path d="M6 20v-1a6 6 0 0 1 12 0v1"/>
-                            </svg>
-                        </span>
-                        <span class="btn-connexion-label">Inscription Citoyen</span>
-                    </a>
-
-                    <!-- Espace Agent : les comptes agents sont créés par un manager/admin, pas d'inscription publique -->
-                    <a href="../Agent-prenium/connexion_agent.php" class="btn-connexion">
-                        <span class="nav-icon">
-                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none"
-                                 stroke="#0a7c2f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M3 10l9-7 9 7"/>
-                                <path d="M4 10h16v10H4z"/>
-                                <path d="M9 21V12h6v9"/>
-                            </svg>
-                        </span>
-                        <span class="btn-connexion-label">Espace Agent (connexion)</span>
-                    </a>
-
-                </div>
-
+                <p class="carte-auth-pied">Déjà inscrit ? <a href="connexion_citoyen.php">Se connecter</a></p>
             </div>
         </section>
 

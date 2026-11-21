@@ -1,158 +1,26 @@
-/* ================================
-   MENU LATÉRAL PREMIUM
-================================ */
+/* ================================================================
+   Tableau de bord agent
+   Utilisé par : Agent-prenium/dashboard_agent.php
 
-#sidebar-premium {
-    width: 260px;
-    background: #003b8e; /* Bleu République Française */
-    color: white;
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    padding-top: 20px;
-    box-shadow: 3px 0 10px rgba(0,0,0,0.2);
-    z-index: 1000;
-}
+   SOMMAIRE — cherchez « == 03 » (Ctrl+F) pour aller à la section 3
+   01. Cartes demandes
+   02. Reset & base
+   03. Page wrapper
+   04. Header
+   05. Navigation
+   06. Bulle agent
+   07. Hero section
+   08. Titres
+   09. Statistiques
+   10. Demandes
+   11. Statut badges
+   12. Bouton gestion demande
+   13. Bande tricolore
+   14. Ajustements divers
+   15. Petits écrans et accessibilité (@media)
+   ================================================================ */
 
-#sidebar-premium h2 {
-    text-align: center;
-    margin-bottom: 25px;
-    font-size: 22px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-}
-
-/* Liens du menu */
-.sidebar-link {
-    display: flex;
-    align-items: center;
-    padding: 14px 20px;
-    color: white;
-    text-decoration: none;
-    font-size: 16px;
-    transition: 0.2s;
-}
-
-.sidebar-link:hover,
-.sidebar-link.active {
-    background: #002a63; /* Bleu plus foncé */
-}
-
-.sidebar-link svg {
-    margin-right: 12px;
-}
-
-/* Bouton déconnexion */
-.sidebar-link.logout {
-    background: #b30000;
-    margin-top: 40px;
-}
-
-.sidebar-link.logout:hover {
-    background: #7a0000;
-}
-
-/* Décalage du contenu principal */
-.page-wrapper {
-    margin-left: 260px;
-}
-
-/* ================================
-   BULLE D’INFORMATION AGENT
-================================ */
-
-#bulle-connexion-agent {
-    background: #f5f5f5;
-    padding: 15px;
-    border-radius: 8px;
-    margin: 20px;
-    color: #003b8e;
-    font-size: 14px;
-    line-height: 1.5;
-    border-left: 4px solid #003b8e;
-}
-
-/* ================================
-   RESPONSIVE
-================================ */
-
-@media (max-width: 900px) {
-
-    #sidebar-premium {
-        width: 220px;
-    }
-
-    .page-wrapper {
-        margin-left: 220px;
-    }
-}
-
-@media (max-width: 700px) {
-
-    #sidebar-premium {
-        position: fixed;
-        width: 200px;
-        transform: translateX(-200px);
-        transition: 0.3s ease;
-    }
-
-    #sidebar-premium.open {
-        transform: translateX(0);
-    }
-
-    .page-wrapper {
-        margin-left: 0;
-    }
-}
-
-/* ================================
-   CARTES DEMANDES PREMIUM
-================================ */
-
-.demande-card {
-    background: #ffffff;
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-    border-left: 6px solid #003b8e;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.demande-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-}
-
-/* Header de la carte */
-.demande-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-}
-
-.demande-id {
-    font-weight: bold;
-    font-size: 18px;
-    color: #003b8e;
-}
-
-/* Statuts premium */
-.statut {
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: bold;
-    color: white;
-}
-
-.statut-nouvelle { background: linear-gradient(135deg, #1e3c72, #2a5298); }
-.statut-analyse_ia { background: linear-gradient(135deg, #0bbcd6, #0694a8); }
-.statut-en_cours { background: linear-gradient(135deg, #ffcf33, #e6b400); color: #333; }
-.statut-resolue { background: linear-gradient(135deg, #28a745, #1e7e34); }
-.statut-cloturee { background: linear-gradient(135deg, #3a3f47, #2c3036); }
+/* == 01. Cartes demandes =================================== */
 
 /* Icônes */
 .demande-icon {
@@ -162,17 +30,8 @@
     vertical-align: middle;
 }
 
-/* Grille responsive */
-.demandes-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 20px;
-}
+/* == 02. Reset & base ====================================== */
 
-
-/* ---------------------------------------------------------
-   RESET & BASE
---------------------------------------------------------- */
 * {
     margin: 0;
     padding: 0;
@@ -186,18 +45,18 @@ body {
     line-height: 1.6;
 }
 
-/* ---------------------------------------------------------
-   PAGE WRAPPER
---------------------------------------------------------- */
+/* == 03. Page wrapper ====================================== */
+
+/* Décalage du contenu principal */
 .page-wrapper {
+    margin-left: 260px;
     max-width: 1400px;
     margin: auto;
     padding-bottom: 50px;
 }
 
-/* ---------------------------------------------------------
-   HEADER PREMIUM
---------------------------------------------------------- */
+/* == 04. Header ============================================ */
+
 #header-agent {
     background: white;
     border-bottom: 3px solid #003b8e;
@@ -221,9 +80,8 @@ body {
     padding: 15px 25px;
 }
 
-/* ---------------------------------------------------------
-   NAVIGATION
---------------------------------------------------------- */
+/* == 05. Navigation ======================================== */
+
 #nav-agent a {
     margin-right: 20px;
     text-decoration: none;
@@ -257,10 +115,12 @@ body {
     background: #002a63;
 }
 
-/* ---------------------------------------------------------
-   BULLE AGENT
---------------------------------------------------------- */
+/* == 06. Bulle agent ======================================= */
+
 #bulle-connexion-agent {
+    margin: 20px;
+    color: #003b8e;
+    line-height: 1.5;
     background: #eef3fa;
     padding: 12px 18px;
     border-radius: 8px;
@@ -268,13 +128,11 @@ body {
     border-left: 4px solid #003b8e;
 }
 
-/* ---------------------------------------------------------
-   HERO SECTION
---------------------------------------------------------- */
+/* == 07. Hero section ====================================== */
+
 .hero-page {
     position: relative;
     height: 180px;
-    /*background: url('../img/hero-agent.jpg') center/cover no-repeat;*/
     margin-bottom: 30px;
 }
 
@@ -296,9 +154,8 @@ body {
     margin-bottom: 10px;
 }
 
-/* ---------------------------------------------------------
-   TITRES
---------------------------------------------------------- */
+/* == 08. Titres ============================================ */
+
 .section-title {
     font-size: 26px;
     margin: 20px 0;
@@ -306,9 +163,8 @@ body {
     font-weight: 700;
 }
 
-/* ---------------------------------------------------------
-   STATISTIQUES
---------------------------------------------------------- */
+/* == 09. Statistiques ====================================== */
+
 .stats-agent {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -340,9 +196,9 @@ body {
     font-weight: bold;
 }
 
-/* ---------------------------------------------------------
-   DEMANDES PREMIUM
---------------------------------------------------------- */
+/* == 10. Demandes ========================================== */
+
+/* Grille responsive */
 .demandes-container {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -350,6 +206,8 @@ body {
 }
 
 .demande-card {
+    margin-bottom: 20px;
+    border-left: 6px solid #003b8e;
     background: white;
     padding: 20px;
     border-radius: 12px;
@@ -362,13 +220,16 @@ body {
     box-shadow: 0 6px 14px rgba(0,0,0,0.12);
 }
 
+/* Header de la carte */
 .demande-header {
+    align-items: center;
     display: flex;
     justify-content: space-between;
     margin-bottom: 12px;
 }
 
 .demande-id {
+    font-size: 18px;
     font-weight: bold;
     color: #003b8e;
     display: flex;
@@ -376,9 +237,9 @@ body {
     gap: 6px;
 }
 
-/* ---------------------------------------------------------
-   STATUT BADGES
---------------------------------------------------------- */
+/* == 11. Statut badges ===================================== */
+
+/* Statuts premium */
 .statut {
     padding: 4px 10px;
     border-radius: 6px;
@@ -387,15 +248,29 @@ body {
     color: white;
 }
 
-.statut-nouvelle { background: #007bff; }
-.statut-analyse_ia { background: #6f42c1; }
-.statut-en_cours { background: #ffc107; color: #333; }
-.statut-resolue { background: #28a745; }
-.statut-cloturee { background: #6c757d; }
+.statut-nouvelle {
+    background: #007bff;
+}
 
-/* ---------------------------------------------------------
-   BOUTON GESTION DEMANDE
---------------------------------------------------------- */
+.statut-analyse_ia {
+    background: #6f42c1;
+}
+
+.statut-en_cours {
+    background: #ffc107;
+    color: #333;
+}
+
+.statut-resolue {
+    background: #28a745;
+}
+
+.statut-cloturee {
+    background: #6c757d;
+}
+
+/* == 12. Bouton gestion demande ============================ */
+
 .btn-gestion {
     display: inline-block;
     margin-top: 15px;
@@ -412,31 +287,30 @@ body {
     background: #002a63;
 }
 
-/* ---------------------------------------------------------
-   BANDE TRICOLORE
---------------------------------------------------------- */
+/* == 13. Bande tricolore =================================== */
+
 .bande-tricolore {
     display: flex;
     height: 6px;
     margin-top: 40px;
 }
 
-.bande-tricolore .bleu { flex: 1; background: #003b8e; }
-.bande-tricolore .blanc { flex: 1; background: white; }
-.bande-tricolore .rouge { flex: 1; background: #e1000f; }
-
-/* ---------------------------------------------------------
-   RESPONSIVE
---------------------------------------------------------- */
-@media (max-width: 900px) {
-    .stats-agent {
-        grid-template-columns: repeat(2, 1fr);
-    }
-
-    .demandes-container {
-        grid-template-columns: 1fr;
-    }
+.bande-tricolore .bleu {
+    flex: 1;
+    background: #003b8e;
 }
+
+.bande-tricolore .blanc {
+    flex: 1;
+    background: white;
+}
+
+.bande-tricolore .rouge {
+    flex: 1;
+    background: #e1000f;
+}
+
+/* == 14. Ajustements divers ================================ */
 
 .notes-internes {
     margin-top: 40px;
@@ -458,20 +332,6 @@ body {
     margin-top: 20px;
 }
 
-.note-card {
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 15px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-}
-
-.note-meta {
-    font-size: 13px;
-    color: #555;
-    margin-top: 8px;
-}
-
 .historique-actions {
     margin-top: 40px;
     padding: 20px;
@@ -484,44 +344,6 @@ body {
     margin-top: 20px;
     border-left: 3px solid #003b8e;
     padding-left: 20px;
-}
-
-.timeline-item {
-    position: relative;
-    margin-bottom: 25px;
-}
-
-.timeline-dot {
-    width: 14px;
-    height: 14px;
-    background: #003b8e;
-    border-radius: 50%;
-    position: absolute;
-    left: -30px;
-    top: 4px;
-}
-
-.timeline-content {
-    background: white;
-    padding: 12px 15px;
-    border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
-}
-
-.action-title {
-    font-size: 16px;
-    margin-bottom: 5px;
-}
-
-.action-details {
-    font-size: 14px;
-    color: #444;
-    margin-bottom: 8px;
-}
-
-.action-meta {
-    font-size: 12px;
-    color: #666;
 }
 
 .pieces-jointes {
@@ -552,4 +374,26 @@ body {
     text-decoration: none;
     color: #003b8e;
     font-weight: bold;
+}
+
+/* == 15. Petits écrans et accessibilité (@media) ============== */
+
+@media (max-width: 900px) {
+    .page-wrapper {
+        margin-left: 220px;
+    }
+
+    .stats-agent {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .demandes-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 700px) {
+    .page-wrapper {
+        margin-left: 0;
+    }
 }

@@ -1,0 +1,177 @@
+/* ================================================================
+   02-entete.css
+   En-tête et navigation (bandeau République française, menu, boutons Connexion/Inscription)
+   ================================================================ */
+
+.logo-agent {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* Bulle de connexion */
+header {
+    position: relative;
+    background: #f8f9fa;
+    padding: 20px 30px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Bulle de connexion */
+#bulle-connexion-agent {
+    font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+    background: #ffffff;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #333;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    border: 1px solid #e5e5e5;
+    min-width: 180px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+#bulle-connexion-agent strong {
+    font-weight: 600;
+}
+
+#header-agent {
+    color: #fff;
+    padding: 20px 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    border-bottom: 2px solid #111;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+/* Bandeau République Française (plus fin) */
+.rf-banner {
+    background: #f4f4f4;
+    padding: 4px 18px;
+    font-size: 11px;
+    border-bottom: 1px solid #ddd;
+}
+
+.rf-title {
+    font-weight: 700;
+    text-transform: uppercase;
+    color: #111;
+}
+
+.rf-subtitle {
+    color: #666;
+    margin-left: 6px;
+}
+
+/* Ligne principale du header (compactée) */
+.header-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 24px;
+    background: #ffffff;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    box-sizing: border-box;
+}
+
+/* Logo plus petit */
+#logo-agent {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #111;
+    max-width: 260px;
+    line-height: 1.1;
+}
+
+/* Navigation plus compacte */
+#nav-agent {
+    display: flex;
+    gap: 24px;
+}
+
+#nav-agent a {
+    text-decoration: none;
+    font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: #003b8e;
+    padding: 8px 12px;
+    border-radius: 6px;
+    transition: background 0.2s ease, color 0.2s ease;
+}
+
+#nav-agent a:hover {
+    color: white;
+    background: rgba(0, 59, 142, 0.08);
+}
+
+#nav-agent a.active {
+    background: #003b8e;
+    color: white;
+}
+
+/* Boutons connexion/inscription plus petits */
+.nav-btn {
+    border-radius: 4px;
+    background: #e8e8e8;
+    border: 1px solid #ccc;
+    font-size: 13px;
+    padding: 5px 10px;
+}
+
+.nav-btn:hover {
+    background: #dcdcdc;
+}
+
+/* Icônes dans la navigation */
+#nav-agent .nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-weight: 600;
+    transition: 0.25s;
+}
+
+#nav-agent .nav-btn:hover {
+    background: rgba(0,59,142,0.1);
+}
+
+#nav-agent .nav-icon svg {
+    width: 20px;
+    height: 20px;
+    transition: 0.25s;
+}
+
+#nav-agent .nav-btn:hover .nav-icon svg {
+    transform: scale(1.12);
+}
+
+/* Survol de Connexion / Inscription : fond bleu, texte et icône en blanc
+   (la propriété CSS stroke passe avant l'attribut stroke="#003b8e" du SVG) */
+#nav-agent .nav-btn:hover, #nav-agent .nav-btn:focus-visible {
+    background: #003b8e;
+    color: #ffffff;
+}
+
+/* Icône blanche dès que le fond du bouton est bleu : survol, clic, clavier, page en cours */
+#nav-agent .nav-btn:hover svg,
+#nav-agent .nav-btn:active svg,
+#nav-agent .nav-btn:focus-visible svg,
+#nav-agent .nav-btn.active svg {
+    stroke: #ffffff;
+}
