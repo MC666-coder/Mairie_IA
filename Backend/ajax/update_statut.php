@@ -11,7 +11,7 @@ header('Content-Type: application/json; charset=utf-8');
 require_once __DIR__ . '/../Config/db.php';
 /*/ ajout : fonction notification
 require_once __DIR__ . '/../Fonctions/pushnotification.php';
-require_once __DIR__ . '/../Fonctions/getCitoyenIdFromDemande.php';
+require_once __DIR__ . '/../Fonctions/getCitoyenFromDemande.php'; // contient getCitoyenIdFromDemande()
 require_once __DIR__ . '/../Fonctions/getEmailCitoyen.php';
 require_once __DIR__ . '/../Fonctions/sendMail.php';*/
 
