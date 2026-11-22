@@ -10,6 +10,7 @@ session_start();
 require_once __DIR__ . '/../Backend/Config/db.php';
 require_once __DIR__ . '/../Backend/Fonctions/gabarit_public.php';
 require_once __DIR__ . '/../Backend/Fonctions/icones.php';
+require_once __DIR__ . '/../Backend/Fonctions/synonymes_services.php'; // mots des citoyens (« mort » → État civil)
 
 /* ---------------------------------------
    Services présentés (les mots-clés servent à la recherche en direct)
@@ -63,10 +64,12 @@ function lienDemande(string $nom, array $ids): string
     return isset($ids[$nom]) ? 'nouvelle_demande.php?service=' . $ids[$nom] : 'nouvelle_demande.php';
 }
 
-/** Texte cherché par le filtre : nom + description + mots-clés, en minuscules. */
+/** Texte cherché par le filtre : nom + description + mots-clés + synonymes (non affichés), en minuscules. */
 function texteRecherche(array $service): string
 {
-    return mb_strtolower($service['nom'] . ' ' . $service['description'] . ' ' . implode(' ', $service['mots']), 'UTF-8');
+    $synonymes = SYNONYMES_SERVICES[$service['nom']] ?? [];
+    return mb_strtolower($service['nom'] . ' ' . $service['description'] . ' '
+        . implode(' ', $service['mots']) . ' ' . implode(' ', $synonymes), 'UTF-8');
 }
 
 function e(?string $texte): string
