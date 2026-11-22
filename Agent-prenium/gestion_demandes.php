@@ -209,6 +209,12 @@ function classeFiltre(bool $actif): string
         <p class="mt-1 text-sm text-encre-500">Recherchez, filtrez et ouvrez une demande pour la traiter.</p>
     </div>
 
+    <?php if (($_GET['erreur'] ?? '') === 'demande-introuvable'): ?>
+        <div class="mt-4 flex items-start gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-800 ring-1 ring-red-600/20" role="alert">
+            <?= icone('croix', 'mt-0.5') ?> Cette demande est introuvable. Voici la liste des demandes.
+        </div>
+    <?php endif; ?>
+
     <!-- ONGLETS DE STATUT (un clic = filtre appliqué) -->
     <nav class="-mx-4 mt-6 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0" aria-label="Filtrer par statut">
         <?php
@@ -339,7 +345,7 @@ function classeFiltre(bool $actif): string
                             <div class="hidden xl:block"><?= pastilleStatut($d['statut']) ?></div>
                             <div class="text-xs text-encre-600">
                                 <?php if ($assigne !== ''): ?>
-                                    <span class="inline-flex items-center gap-1.5"><span class="grid size-6 place-items-center rounded-full bg-marque-100 text-[10px] font-bold text-marque-800"><?= eAgent(initialesAgent(['prenom_agent' => $d['prenom_agent'], 'nom_agent' => $d['nom_agent']])) ?></span> <?= eAgent($assigne) ?></span>
+                                    <span class="inline-flex items-center gap-1.5"><span class="grid size-6 place-items-center rounded-full bg-marque-100 text-[10px] font-bold text-marque-800"><?= eAgent(initialesProfilAgent(['prenom_agent' => $d['prenom_agent'], 'nom_agent' => $d['nom_agent']])) ?></span> <?= eAgent($assigne) ?></span>
                                 <?php else: ?>
                                     <span class="inline-flex items-center gap-1 text-encre-400"><?= icone('utilisateur') ?> Non assignée</span>
                                 <?php endif; ?>

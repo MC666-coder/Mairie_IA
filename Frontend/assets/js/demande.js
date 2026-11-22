@@ -41,6 +41,12 @@ function showAlert(type, message) {
     setTimeout(() => container.innerHTML = "", 4000);
 }
 
+/* « 2026-11-22 04:26:33 » → « 22/11/2026 à 04h26 » (même format que la page) */
+function dateLisible(date) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/.exec(String(date || ""));
+    return m ? `${m[3]}/${m[2]}/${m[1]} à ${m[4]}h${m[5]}` : String(date || "");
+}
+
 function showSuccess(msg) { showAlert("success", msg); }
 function showError(msg) { showAlert("error", msg); }
 
@@ -350,13 +356,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     const badge = document.querySelector(".statut");
                     if (badge) {
-                        badge.textContent = newStatut;
+                        // Libellé lisible (« En cours ») : texte de l'option choisie, pas le code (« en_cours »)
+                        const choix = document.getElementById("statut").selectedOptions[0];
+                        badge.textContent = choix ? choix.textContent.trim() : newStatut;
                         badge.className = "statut statut-" + newStatut;
                     }
 
                     if (result.date_mise_a_jour) {
                         const dateSpan = document.getElementById("date-mise-a-jour");
-                        if (dateSpan) dateSpan.textContent = result.date_mise_a_jour;
+                        if (dateSpan) dateSpan.textContent = dateLisible(result.date_mise_a_jour);
                     }
 
                     rafraichirHistorique();
@@ -387,9 +395,15 @@ document.addEventListener("DOMContentLoaded", () => {
                     const agentSpan = document.getElementById("agent-actuel");
                     if (agentSpan) agentSpan.textContent = result.agent_nom;
 
+                    // L'agent s'est assigné la demande : on recharge pour lui ouvrir
+                    // la zone d'écriture au citoyen (réservée à l'agent assigné)
+                    if (this.dataset.moi && formData.get("agent_id") === this.dataset.moi) {
+                        setTimeout(() => window.location.reload(), 900);
+                    }
+
                     if (result.date_mise_a_jour) {
                         const dateSpan = document.getElementById("date-mise-a-jour");
-                        if (dateSpan) dateSpan.textContent = result.date_mise_a_jour;
+                        if (dateSpan) dateSpan.textContent = dateLisible(result.date_mise_a_jour);
                     }
 
                     rafraichirHistorique();
@@ -499,6 +513,7 @@ document.addEventListener("DOMContentLoaded", () => {
             lien.textContent = " " + f.nom;
             lien.prepend(iconeElement(iconeDocument(f.type)));
             lien.className = "document-nom";
+            lien.title = f.nom; // nom complet au survol (il peut être coupé à l'écran)
 
             const infos = document.createElement("span");
             infos.className = "document-infos";

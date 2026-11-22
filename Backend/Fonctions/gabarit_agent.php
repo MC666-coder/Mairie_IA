@@ -85,7 +85,7 @@ function textePriorite(?string $priorite): string
 }
 
 /** Initiales de l'agent pour l'avatar : « Marie Durand » → « MD ». */
-function initialesAgent(array $agent): string
+function initialesProfilAgent(array $agent): string
 {
     $p = mb_substr((string) ($agent['prenom_agent'] ?? ''), 0, 1, 'UTF-8');
     $n = mb_substr((string) ($agent['nom_agent'] ?? ''), 0, 1, 'UTF-8');
@@ -147,7 +147,7 @@ function debutPageAgent(string $actif, array $agent): string
     <!-- Profil connecté et déconnexion -->
     <div class="m-3 rounded-2xl bg-white/5 p-3 ring-1 ring-white/10">
         <div class="flex items-center gap-3">
-            <span class="grid size-10 shrink-0 place-items-center rounded-full bg-marque-600 text-sm font-bold text-white">{$e(initialesAgent($agent))}</span>
+            <span class="grid size-10 shrink-0 place-items-center rounded-full bg-marque-600 text-sm font-bold text-white">{$e(initialesProfilAgent($agent))}</span>
             <div class="min-w-0">
                 <p class="truncate text-sm font-semibold text-white">{$e($nom)}</p>
                 <p class="truncate text-xs text-encre-400">{$e($niveau)}{$e($service !== '' ? ' · ' . $service : '')}</p>
@@ -164,7 +164,7 @@ function debutPageAgent(string $actif, array $agent): string
     <header class="sticky top-0 z-20 flex items-center gap-3 border-b border-encre-200 bg-white/80 px-4 py-3 backdrop-blur lg:hidden">
         <button type="button" id="ouvrir-menu-agent" class="grid size-10 place-items-center rounded-xl text-encre-700 ring-1 ring-encre-200 hover:bg-encre-100" aria-label="Ouvrir le menu" aria-controls="menu-agent" aria-expanded="false">{$icone('menu', 'text-xl')}</button>
         <p class="text-sm font-bold text-encre-900">Espace agent</p>
-        <span class="ml-auto grid size-9 place-items-center rounded-full bg-marque-600 text-xs font-bold text-white">{$e(initialesAgent($agent))}</span>
+        <span class="ml-auto grid size-9 place-items-center rounded-full bg-marque-600 text-xs font-bold text-white">{$e(initialesProfilAgent($agent))}</span>
     </header>
 HTML;
 }

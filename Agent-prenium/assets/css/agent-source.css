@@ -168,3 +168,150 @@
 #ia-loader.hidden {
     display: none;
 }
+
+/* ================================================================
+   Composants communs des pages agent
+   ================================================================ */
+@layer components {
+    .carte-agent { @apply rounded-2xl bg-white p-5 shadow-sm ring-1 ring-encre-900/5 sm:p-6; }
+    .titre-carte { @apply flex items-center gap-2 text-base font-bold text-encre-900; }
+    .titre-carte .icone { @apply text-marque-600; }
+    .etiquette-agent { @apply text-xs font-semibold uppercase tracking-wider text-encre-500; }
+    .champ-agent {
+        @apply rounded-xl border border-encre-200 bg-encre-50 px-3 py-2.5 text-sm text-encre-900 outline-none transition placeholder:text-encre-400 focus:border-marque-500 focus:bg-white focus:ring-4 focus:ring-marque-500/15;
+    }
+    .bouton-agent {
+        @apply inline-flex shrink-0 cursor-pointer items-center justify-center gap-2 rounded-xl bg-marque-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-marque-700 disabled:cursor-wait disabled:opacity-60;
+    }
+
+    /* Pilules de filtre (notes, historique, mois) */
+    .filtres-pilules { @apply flex flex-wrap gap-1.5; }
+    .filtres-pilules button,
+    .filter-btn {
+        @apply cursor-pointer rounded-lg px-3 py-1.5 text-xs font-semibold text-encre-600 transition hover:bg-encre-100 hover:text-encre-900;
+    }
+    .filtres-pilules button { @apply bg-encre-50 ring-1 ring-encre-900/5; }
+    .filtres-pilules button.active { @apply bg-marque-600 text-white ring-0; }
+    .filter-btn.active { @apply bg-white text-encre-900 shadow-sm; }
+
+    /* Pastille de statut (.statut-<code>, mise à jour par demande.js) */
+    .statut { @apply inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold ring-1; }
+    .statut-nouvelle   { @apply bg-sky-50 text-sky-700 ring-sky-600/20; }
+    .statut-analyse_ia { @apply bg-violet-50 text-violet-700 ring-violet-600/20; }
+    .statut-en_cours   { @apply bg-amber-50 text-amber-700 ring-amber-600/20; }
+    .statut-en_attente { @apply bg-orange-50 text-orange-700 ring-orange-600/20; }
+    .statut-resolue    { @apply bg-marque-50 text-marque-700 ring-marque-600/20; }
+    .statut-cloturee   { @apply bg-encre-100 text-encre-600 ring-encre-500/20; }
+
+    /* Messages de réussite et d’erreur (demande.js : .alert.success / .alert.error) */
+    .alert { @apply flex items-start gap-2 rounded-xl px-4 py-3 text-sm font-medium ring-1; }
+    .alert .icone { @apply mt-0.5 shrink-0; }
+    .alert.success { @apply bg-marque-50 text-marque-800 ring-marque-600/20; }
+    .alert.error   { @apply bg-red-50 text-red-800 ring-red-600/20; }
+
+    .pj-count-badge { @apply ml-1 inline-grid min-w-6 place-items-center rounded-full bg-encre-100 px-1.5 py-0.5 text-xs font-bold text-encre-600; }
+    .badge-nouveaux { @apply hidden; }
+    .badge-nouveaux.show { @apply inline-flex rounded-full bg-red-500 px-2.5 py-0.5 text-xs font-bold text-white; }
+
+    .liste-compteur { @apply mt-3 text-xs text-encre-500; }
+    .liste-compteur:empty { @apply hidden; }
+    .btn-reduire,
+    .history-expand-btn {
+        @apply mt-3 inline-flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-xl bg-encre-50 px-3 py-2 text-xs font-semibold text-encre-600 ring-1 ring-encre-900/5 hover:bg-encre-100 disabled:cursor-default disabled:opacity-60;
+    }
+    .history-expand-btn:empty { @apply hidden; }
+    /* Liste dépliée : elle défile au lieu d’allonger la page */
+    .liste-deroulante { @apply max-h-[28rem] overflow-y-auto pr-1; }
+}
+
+/* ================================================================
+   Page « détail d’une demande » : conversation, documents, notes, historique
+   (éléments créés par Frontend/assets/js/demande.js et
+    Backend/Fonctions/historique_demande.php)
+   ================================================================ */
+@layer components {
+    /* --- Conversation --- */
+    .messages-timeline {
+        @apply flex h-[26rem] flex-col gap-3 overflow-y-auto rounded-xl bg-encre-50 p-4 ring-1 ring-encre-900/5;
+    }
+    .messages-timeline > p { @apply m-auto text-sm text-encre-500; }
+    .messages-date-separator { @apply my-1 self-center; }
+    .messages-date-separator span { @apply rounded-full bg-white px-3 py-1 text-[11px] font-semibold text-encre-500 ring-1 ring-encre-900/5; }
+    .message-item { @apply flex max-w-[85%] items-end gap-2; }
+    .message-item.citoyen { @apply self-start; }
+    .message-item.agent { @apply flex-row-reverse self-end; }
+    .message-avatar { @apply grid size-8 shrink-0 place-items-center rounded-full bg-encre-200 text-xs font-bold text-encre-700; }
+    .message-item.agent .message-avatar { @apply bg-marque-100 text-marque-800; }
+    .message-content { @apply min-w-0 rounded-2xl px-4 py-2.5 text-sm shadow-sm; }
+    .message-item.citoyen .message-content { @apply rounded-bl-md bg-white text-encre-800 ring-1 ring-encre-900/5; }
+    .message-item.agent .message-content { @apply rounded-br-md bg-marque-600 text-white; }
+    .message-header { @apply mb-0.5 flex flex-wrap items-baseline gap-x-2 text-xs; }
+    .message-author { @apply font-bold; }
+    .message-date { @apply opacity-70; }
+    .message-body { @apply leading-relaxed break-words; }
+    .message-piece-jointe { @apply mt-2 inline-flex items-center gap-1.5 rounded-lg bg-encre-100 px-2.5 py-1.5 text-xs font-semibold text-encre-800 hover:bg-encre-200; }
+    .message-item.agent .message-piece-jointe { @apply bg-white/15 text-white hover:bg-white/25; }
+    .message-surligne .message-content { @apply ring-4 ring-amber-400; }
+    .reply-preview { @apply mb-2 flex items-center justify-between gap-2 rounded-lg bg-encre-50 px-3 py-2 text-sm; }
+
+    /* --- Documents du dossier --- */
+    /* min-w-0 + colonne minmax(0,1fr) : un nom de fichier long ne fait plus déborder la case */
+    .case-dossier { @apply min-w-0 rounded-xl bg-encre-50 p-3 ring-1 ring-encre-900/5; }
+    .case-interne { @apply bg-amber-50/60 ring-amber-600/15; }
+    .case-dossier-titre { @apply flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-encre-600; }
+    .case-dossier-titre .pj-count-badge { @apply ml-auto; }
+    .liste-dossier { @apply mt-2 grid grid-cols-[minmax(0,1fr)] gap-2; }
+    .dossier-vide { @apply text-xs text-encre-400; }
+    .pj-item { @apply min-w-0 overflow-hidden rounded-lg bg-white p-2.5 ring-1 ring-encre-900/5; }
+    /* Nom long : coupé avec « … » sur une ligne (nom complet au survol : attribut title) */
+    .document-nom { @apply block truncate text-sm font-semibold text-marque-700 hover:underline; }
+    .document-infos { @apply mt-0.5 block text-xs break-words text-encre-500; }
+    .document-actions { @apply mt-2 flex flex-wrap gap-1.5; }
+    .document-actions button,
+    .document-actions a {
+        @apply cursor-pointer rounded-md px-2 py-1 text-xs font-semibold ring-1 transition;
+    }
+    .btn-voir-message { @apply text-encre-700 ring-encre-200 hover:bg-encre-100; }
+    .btn-envoyer-citoyen { @apply bg-marque-50 text-marque-700 ring-marque-600/20 hover:bg-marque-100; }
+    .btn-delete { @apply text-red-700 ring-red-600/20 hover:bg-red-50; }
+
+    /* --- Notes internes --- */
+    .notes-timeline,
+    .history-timeline { @apply mt-3 grid gap-3; }
+    .notes-date-separator,
+    .history-date-separator { @apply mb-2 text-[11px] font-bold uppercase tracking-wider text-encre-400; }
+    .notes-date-group,
+    .history-date-group { @apply grid gap-2; }
+    .note-item { @apply relative rounded-xl bg-amber-50/70 p-3 ring-1 ring-amber-600/15; }
+    .note-timeline-dot { @apply hidden; }
+    .note-header,
+    .history-header { @apply flex items-center gap-2; }
+    .note-meta-main { @apply flex min-w-0 flex-1 items-center gap-2; }
+    .note-avatar,
+    .history-avatar { @apply grid size-7 shrink-0 place-items-center rounded-full bg-marque-100 text-[10px] font-bold text-marque-800; }
+    .note-author,
+    .history-author { @apply text-xs font-bold break-words text-encre-900; }
+    .note-meta-main { @apply flex-wrap gap-y-0.5; }
+    .note-date,
+    .history-time { @apply text-[11px] text-encre-500; }
+    .note-body { @apply mt-2 text-sm whitespace-pre-line text-encre-800; }
+    .note-tags { @apply mt-2 flex flex-wrap gap-1; }
+    .note-tag { @apply rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold text-amber-800 ring-1 ring-amber-600/20; }
+    .notes-empty,
+    .history-empty { @apply text-sm text-encre-400; }
+
+    /* --- Historique --- */
+    .history-item { @apply relative border-l-2 border-encre-200 pl-4; }
+    .history-dot { @apply absolute top-2 -left-[5px] size-2 rounded-full bg-encre-400; }
+    .history-dot-status { @apply bg-sky-500; }
+    .history-dot-assignation { @apply bg-violet-500; }
+    .history-dot-notes { @apply bg-amber-500; }
+    .history-meta { @apply flex min-w-0 flex-1 flex-col; }
+    .history-tag { @apply ml-auto shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold ring-1; }
+    .history-tag-status { @apply bg-sky-50 text-sky-700 ring-sky-600/20; }
+    .history-tag-assignation { @apply bg-violet-50 text-violet-700 ring-violet-600/20; }
+    .history-tag-notes { @apply bg-amber-50 text-amber-700 ring-amber-600/20; }
+    .history-tag-other { @apply bg-encre-100 text-encre-600 ring-encre-500/20; }
+    .history-body { @apply mt-1.5 text-sm text-encre-700; }
+    .history-body strong { @apply font-semibold text-encre-900; }
+}

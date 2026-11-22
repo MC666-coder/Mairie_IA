@@ -1,7 +1,7 @@
 <?php
 /* session_init.php : initialisation de la session pour les agents */
 require_once __DIR__ . '/../Backend/Config/session_init.php';
-require_once __DIR__ . '/../Backend/Fonctions/carte_profil.php';
+require_once __DIR__ . '/../Backend/Fonctions/gabarit_agent.php'; // barre latérale, pastilles, assistant IA, agent.css
 require_once __DIR__ . '/../Backend/Middleware/auth.php';
 
 /* ---------------------------------------------------------
@@ -102,7 +102,9 @@ if (!$erreur) {
    STOP SI ERREUR
 --------------------------------------------------------- */
 if ($erreur) {
-    echo "<p style='color:red;font-weight:bold;'>$erreur</p>";
+    // Pas de page blanche : retour à la liste avec un message rouge
+    error_log('gestion_demande : ' . $erreur);
+    header('Location: gestion_demandes.php?erreur=demande-introuvable');
     exit;
 }
 
@@ -176,408 +178,304 @@ if (!$erreur) {
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Jeton CSRF lu par demande.js et envoyé avec chaque action (en-tête X-CSRF-Token) -->
     <meta name="csrf-token" content="<?= htmlspecialchars(jeton_csrf(), ENT_QUOTES, 'UTF-8') ?>">
-    <title>Détail de la demande</title>
-    <link rel="stylesheet" href="../Frontend/assets/css/gestion_demande.css?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/css/gestion_demande.css') ?>">
-    <link rel="stylesheet" href="../Frontend/assets/css/carte_profil.css?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/css/carte_profil.css') ?>">
+    <title>DEM-<?= (int) $demande['id'] ?> - Espace agent</title>
+    <?= feuillesAgent() ?>
+
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self';
+                   img-src 'self' data:;
+                   style-src 'self' 'unsafe-inline';
+                   script-src 'self';
+                   object-src 'none';
+                   base-uri 'self';
+                   connect-src 'self' https://generativelanguage.googleapis.com;">
 </head>
 
 <body>
 
-<div class="page-wrapper">
-    <header id="header-agent">
-
-        <div class="rf-banner">
-            <span class="rf-title">République Française</span>
-            <span class="rf-subtitle">Liberté • Égalité • Fraternité</span>
-        </div>
-
-        <div class="header-main">
-
-            <nav id="nav-agent">
-                <a href="dashboard_agent.php" >Tableau de Bord</a>
-                <a href="gestion_demandes.php" class="active">Gestion des demandes</a>
-
-                <a href="logout.php" class="nav-btn">
-                    <span class="nav-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                             stroke="#eef0f2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-                            <polyline points="10 17 15 12 10 7"/>
-                            <line x1="15" y1="12" x2="3" y2="12"/>
-                        </svg>
-                    </span>
-                    Déconnexion
-                </a>
-            </nav>
-
-            <?= carteProfilAgent($agent) ?>
-
-        </div>
-    </header>
-    
-
-
-    <h1>Détail de la demande DEM-<?= htmlspecialchars($demande['id']) ?></h1>
-
-    <!-- affiche des erreurs ou des messages de succès avec AJAX -->
-     <div id="alert-container"></div>
-
-    <!-- Informations principales -->
-    <section class="demande-info">
-
-        <p><strong>Type :</strong> <?= htmlspecialchars($demande['type_libelle'] ?? 'Non renseigné') ?></p>
-
-        <p><strong>Message :</strong><br>
-            <?= nl2br(htmlspecialchars($demande['message'])) ?>
-        </p>
-
-        <p><strong>Résumé IA :</strong><br>
-            <?= nl2br(htmlspecialchars($demande['resume_ia'] ?? 'Non renseigné')) ?>
-        </p>
-
-        <p><strong>Priorité :</strong> <?= htmlspecialchars($demande['priorite']) ?></p>
-
-        <p><strong>Statut actuel :</strong> 
-            <span class="statut statut-<?= htmlspecialchars($demande['statut']) ?>">
-                <?= htmlspecialchars($demande['statut']) ?>
-            </span>
-        </p>
-
-        <p><strong>Service concerné :</strong> <?= htmlspecialchars($demande['nom_service']) ?></p>
-
-        <p><strong>Agent assigné :</strong> 
-            <?php if ($demande['agent_id']): ?>
-                <?= htmlspecialchars($demande['agent_prenom'] . ' ' . $demande['agent_nom']) ?>
-            <?php else: ?>
-                <em>Aucun agent assigné</em>
-            <?php endif; ?>
-        </p>
-
-        <p><strong>Citoyen :</strong>
-            <?= htmlspecialchars($demande['prenom_citoyen'] . ' ' . $demande['nom_citoyen']) ?>
-        </p>
-
-        <p><strong>Email :</strong> <?= htmlspecialchars($demande['email_citoyen']) ?></p>
-        <p><strong>Téléphone :</strong> <?= htmlspecialchars($demande['telephone_citoyen']) ?></p>
-
-        <p><strong>Soumise le :</strong> <?= htmlspecialchars($demande['created_at']) ?></p>
-
-        <p><strong>Dernière mise à jour :</strong> 
-            <span id="date-mise-a-jour"><?= htmlspecialchars($demande['date_mise_a_jour'] ?? 'Non renseigné') ?></span>
-        </p>
-
-        <p><strong>Pièces jointes citoyen :</strong>
-            <span class="pj-count-badge" id="pj-citoyen-count"><?= (int) $nb_pj_citoyen ?></span>
-        </p>
-
-        <div class="demande-card" data-demande-id="<?= $demande['id'] ?>">
-            <h3><?= htmlspecialchars($demande['titre']?? 'Suivi des nouveaux messages') ?></h3>
-            <span class="badge-nouveaux" id="badge-nouveaux-<?= $demande['id'] ?>"></span>
-        </div>
-
-
-    </section>
-
-
-    <!-- Bouton d’ouverture -->
-    <div class="open-conv-container">
-        <button id="open-conversation" data-demande-id="<?= $demande['id'] ?>"class="open-conv-btn">
-            Voir les Conversations
-        </button>
-    </div>
-
-    <!-- Fond flouté -->
-    <div id="conversation-overlay" class="conversation-overlay"></div>
-
-    <!-- Fenêtre modale -->
-    <div id="conversation-modal" class="conversation-modal">
-        <div class="modal-inner">
-            <!-- Bouton de fermeture -->
-            <button id="close-conversation" class="close-conv-btn">
-                <svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M9 6H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h4" />
-                    <polyline points="16 17 21 12 16 7" />
-                    <line x1="21" y1="12" x2="9" y2="12" />
-                </svg>
-            </button>
-
-
-
-
-
-
-            <!--  INTERFACE EXACTE -->
-            <div class="conversation-section elegant-conversation">
-
-                <!-- Timeline des messages + Conversation agent/citoyen -->
-                <div class="conversation-section elegant-conversation">
-
-                    <!-- Toolbar : Filtres + Recherche -->
-                    <div class="messages-toolbar">
-                        <button class="filter-btn active" data-filter="all">Tous</button>
-                        <button class="filter-btn" data-filter="citoyen">Citoyen</button>
-                        <button class="filter-btn" data-filter="agent">Agent</button>
-
-                        <input type="text" id="messages-search-input" class="messages-search-input" placeholder="Rechercher...">
-                    </div>
-
-                    <!-- Zone de messages -->
-                    <div id="messages-timeline"
-                        class="messages-timeline whatsapp-thread"
-                        data-demande-id="<?= $demande_id ?>">
-                    </div>
-
-                    <!-- Formulaire d’envoi -->
-                    <form id="form-message-agent"
-                        class="message-input-bar"
-                        data-demande-id="<?= $demande_id ?>">
-
-                        <!-- Aperçu réponse ciblée -->
-                        <div id="reply-preview" class="reply-preview" style="display:none;">
-                            <div class="reply-preview-text"></div>
-                            <button type="button" id="cancel-reply" class="cancel-reply-btn">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M9 6H5a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h4" />
-                                    <polyline points="16 17 21 12 16 7" />
-                                    <line x1="21" y1="12" x2="9" y2="12" />
-                                </svg>
-                            </button>
-
-                        </div>
-
-                        <?php $estAssigne = (int) $demande['agent_id'] === (int) $agent_id; ?>
-                        <?php if (!$estAssigne): ?>
-                            <!-- Règle de la mairie : seul l'agent assigné écrit au citoyen -->
-                            <p class="conversation-verrou">
-                                Seul l’agent assigné à cette demande peut écrire au citoyen.
-                                Assignez-vous la demande pour lui envoyer un message ou un document.
-                            </p>
-                        <?php else: ?>
-                        <textarea id="message-agent"
-                                name="message"
-                                placeholder="Écrire au citoyen (ex. merci de fournir un justificatif de domicile)…"
-                                required></textarea>
-
-                        <!-- Document envoyé au citoyen (attestation...), visible dans sa conversation -->
-                        <label class="joindre-document-citoyen" id="joindre-nouveau-fichier">
-                            <?= icone('trombone') ?> Joindre un document pour le citoyen
-                            <input type="file" name="fichier" id="fichier-pour-citoyen" accept=".pdf,.jpg,.jpeg,.png,.docx,.xlsx">
-                        </label>
-
-                        <!-- Document du dossier prêt à partir (bouton « Envoyer au citoyen » d'un document interne) -->
-                        <input type="hidden" name="fichier_id" id="fichier-dossier-id" value="">
-                        <div class="document-dossier-pret" id="document-dossier-pret" hidden>
-                            <span id="document-dossier-nom"></span>
-                            <button type="button" id="annuler-document-dossier" aria-label="Ne pas joindre ce document"><?= icone('fermer') ?></button>
-                        </div>
-
-                        <button type="submit" class="send-btn">
-                            <span>Envoyer</span>
-                        </button>
-                        <?php endif; ?>
-                    </form>
-
-                </div>
-            </div>
-
-        </div>
-
-            
-        
-
-    </div>
-
-
-
-    
-
-
-    <!-- Formulaire de changement de statut -->
-    <section class="update-statut">
-        <h2>Modifier le statut</h2>
-
-        <form  method="POST" id="form-statut" data-demande-id="<?= $demande_id ?>">
-            <label for="statut">Nouveau statut :</label>
-            <select name="statut" id="statut" required>
-                <option value="nouvelle" <?= $demande['statut'] === 'nouvelle' ? 'selected' : '' ?>>Nouvelle</option>
-                <option value="analyse_ia" <?= $demande['statut'] === 'analyse_ia' ? 'selected' : '' ?>>Analyse IA</option>
-                <option value="en_cours" <?= $demande['statut'] === 'en_cours' ? 'selected' : '' ?>>En cours</option>
-                <option value="resolue" <?= $demande['statut'] === 'resolue' ? 'selected' : '' ?>>Résolue</option>
-                <option value="cloturee" <?= $demande['statut'] === 'cloturee' ? 'selected' : '' ?>>Clôturée</option>
-            </select>
-
-            <button type="submit" id="btn-update-statut">Mettre à jour</button>
-        </form>
-    </section>
-
-    <!-- Assignation d'un agent -->
-    <section class="assignation-agent">
-        <h2>Assigner la demande à un agent</h2>
-
-        <p><strong>Agent actuellement assigné :</strong>
-            <span id="agent-actuel">
-                <?php if ($demande['agent_id']): ?>
-                    <?php
-                        $agentNom = $pdo->prepare("SELECT prenom, nom FROM agents WHERE id = ?");
-                        $agentNom->execute([$demande['agent_id']]);
-                        $agentInfo = $agentNom->fetch();
-                    ?>
-                    <?= htmlspecialchars($agentInfo['prenom'] . ' ' . $agentInfo['nom']) ?>
-                <?php else: ?>
-                    <em>Aucun agent assigné</em>
-                <?php endif; ?>
-            </span>
-        </p>
-
-        <form method="POST" id="form-assignation" data-demande-id="<?= $demande_id ?>">
-            <label for="agent_id">Assigner à :</label>
-            <select name="agent_id" id="agent_id" required>
-                <option value="">-- Sélectionner un agent --</option>
-                <?php foreach ($listeAgents as $ag): ?>
-                    <option value="<?= $ag['id'] ?>">
-                        <?= htmlspecialchars($ag['prenom'] . ' ' . $ag['nom']) ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-
-            <button type="submit" name="assigner_agent">Assigner</button>
-        </form>
-    </section>
-
-    <!-- Notes internes -->
-    <section class="notes-internes">
-        <h2>Notes internes</h2>
-
-        <form method="POST" class="form-note" id="form-note" data-demande-id="<?= $demande_id ?>">
-            <label for="note">Ajouter une note :</label>
-            <textarea name="note" id="note" rows="4" required></textarea>
-
-            <button type="submit" name="ajouter_note">Ajouter la note</button>
-        </form>
-
-        <!-- Barre de filtres / recherche -->
-        <div class="notes-toolbar">
-            <div class="notes-filters">
-                <button class="notes-filter-btn active" data-filter="all">Tous</button>
-                <button class="notes-filter-btn" data-filter="month">Mois</button>
-                <button class="notes-filter-btn" data-filter="24h">24h</button>
-                <button class="notes-filter-btn" data-filter="week">Cette semaine</button>
-            </div>
-            <div class="notes-search">
-                <input type="text" id="notes-search-input" placeholder="Rechercher une note...">
-            </div>
-        </div>
-
-        <!-- Filtre « Mois » : les mois qui contiennent des notes (historique_notes.js) -->
-        <div class="notes-mois" id="notes-mois" role="group" aria-label="Choisir le mois des notes" hidden></div>
-
-        <!-- Compteur (« 5 notes affichées sur 12 »), mis à jour par historique_notes.js -->
-        <p class="liste-compteur" id="notes-compteur" aria-live="polite"></p>
-
-        <!-- « Réduire » en haut : visible seulement quand toutes les notes sont dépliées -->
-        <button type="button" class="btn-reduire" id="reduire-notes-haut" hidden><?= icone('chevron-haut') ?> Réduire les notes</button>
-
-        <!-- Timeline : toutes les notes (gabarit Backend/Fonctions/historique_demande.php) -->
-        <div class="notes-timeline" id="liste-notes" data-demande-id="<?= (int) $demande_id ?>">
-            <?= htmlNotes($notes ?? []) ?>
-        </div>
-
-        <!-- Sous la liste : « Afficher toutes les notes (N) » / « Réduire » / « Tout est affiché » -->
-        <button type="button" id="show-full-notes" class="history-expand-btn"></button>
-    </section>
-
-
-        
-
-        <!-- Pièces jointes -->
-        <!-- DOCUMENTS DU DOSSIER : trois cases (remplies par demande.js via get_pj.php) -->
-        <section class="pieces-jointes">
-            <h2>
-                Documents du dossier
-                <span id="pj-count" class="pj-count-badge">0</span>
-            </h2>
-            <p class="pj-aide">
-                Pour envoyer un document au citoyen (attestation…), utilisez la conversation.
-                Le formulaire ci-dessous ajoute un document <strong>interne</strong>, jamais visible par le citoyen.
+<?= debutPageAgent('demandes', $agent) ?>
+
+<?php
+$estAssigne = (int) $demande['agent_id'] === (int) $agent_id;
+$citoyen    = trim(($demande['prenom_citoyen'] ?? '') . ' ' . ($demande['nom_citoyen'] ?? '')) ?: 'Citoyen inconnu';
+$assigne    = $demande['agent_id'] ? trim(($demande['agent_prenom'] ?? '') . ' ' . ($demande['agent_nom'] ?? '')) : '';
+?>
+
+<main class="page-detail-agent mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-10 lg:py-8">
+
+    <!-- Retour à la liste -->
+    <a href="gestion_demandes.php" class="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 -ml-2 text-sm font-semibold text-encre-500 transition hover:bg-white hover:text-encre-900">
+        <?= icone('fleche-gauche') ?> Gestion des demandes
+    </a>
+
+    <!-- EN-TÊTE DE LA DEMANDE -->
+    <div class="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <div class="min-w-0">
+            <p class="font-mono text-sm font-bold text-encre-500">DEM-<?= (int) $demande['id'] ?></p>
+            <h1 class="mt-1 text-2xl font-extrabold tracking-tight text-encre-900 sm:text-3xl">
+                <?= eAgent($demande['type_libelle'] ?? 'Demande') ?>
+                <span class="font-semibold text-encre-400">·</span>
+                <span class="font-semibold text-encre-600"><?= eAgent($demande['nom_service'] ?? 'Service non attribué') ?></span>
+            </h1>
+            <p class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-encre-500">
+                <span class="inline-flex items-center gap-1.5"><?= icone('horloge') ?> Reçue le <?= eAgent(dateAgent($demande['created_at'])) ?></span>
+                <span class="inline-flex items-center gap-1.5"><?= icone('stylo') ?> Mise à jour : <span id="date-mise-a-jour"><?= eAgent($demande['date_mise_a_jour'] ? dateAgent($demande['date_mise_a_jour']) : '—') ?></span></span>
             </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+            <!-- .statut : mise à jour par demande.js après un changement de statut -->
+            <span class="statut statut-<?= eAgent($demande['statut']) ?>"><?= eAgent(STATUTS_AGENT[$demande['statut']][0] ?? $demande['statut']) ?></span>
+            <span class="rounded-full bg-white px-3 py-1 text-sm ring-1 ring-encre-900/5"><?= textePriorite($demande['priorite']) ?></span>
+        </div>
+    </div>
 
-            <!-- Ajout d'un document INTERNE (AJAX, upload_pj.php) -->
-            <form enctype="multipart/form-data" class="form-upload" data-demande-id="<?= (int) $demande['id'] ?>">
-                <label for="fichier"><?= icone('cadenas') ?> Ajouter un document interne (non visible par le citoyen) :</label>
-                <input type="file" name="fichier" id="fichier" accept=".pdf,.jpg,.jpeg,.png,.docx,.xlsx" required>
-                <button type="submit">Ajouter au dossier</button>
-            </form>
+    <!-- Messages de réussite / d'erreur des actions (demande.js) -->
+    <div id="alert-container" class="mt-4" aria-live="polite"></div>
 
-            <label for="pj-search" class="visually-hidden">Rechercher un document</label>
-            <input type="text" id="pj-search" placeholder="Rechercher un document..." class="pj-search">
+    <div class="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
 
-            <div class="liste-pj documents-dossier" id="liste-pj" data-demande-id="<?= (int) $demande['id'] ?>">
-                <div class="case-dossier">
-                    <h3 class="case-dossier-titre"><?= icone('boite-reception') ?> Reçus du citoyen <span class="pj-count-badge" id="pj-count-recus">0</span></h3>
-                    <ul class="liste-dossier" id="pj-recus"><li class="dossier-vide">Chargement…</li></ul>
+        <!-- ============ COLONNE PRINCIPALE : le dossier ============ -->
+        <div class="flex min-w-0 flex-col gap-6">
+
+            <!-- Message du citoyen et résumé IA -->
+            <section class="carte-agent" aria-labelledby="titre-message">
+                <h2 id="titre-message" class="titre-carte"><?= icone('conversation') ?> Message du citoyen</h2>
+                <p class="mt-3 text-sm leading-relaxed whitespace-pre-line text-encre-800"><?= eAgent($demande['message']) ?></p>
+                <?php if (!empty($demande['resume_ia'])): ?>
+                    <div class="mt-4 rounded-xl bg-violet-50 p-4 ring-1 ring-violet-600/10">
+                        <p class="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-violet-700"><?= icone('assistant') ?> Résumé de l’IA</p>
+                        <p class="mt-1.5 text-sm whitespace-pre-line text-violet-950"><?= eAgent($demande['resume_ia']) ?></p>
+                    </div>
+                <?php endif; ?>
+            </section>
+
+            <!-- CONVERSATION (dans la page : demande.js charge et envoie les messages) -->
+            <section id="conversation" class="carte-agent conversation-agent" aria-labelledby="titre-conversation">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <h2 id="titre-conversation" class="titre-carte"><?= icone('courrier') ?> Conversation avec le citoyen</h2>
+                    <!-- Badge « N nouveau(x) » (demande.js) -->
+                    <div class="demande-card" data-demande-id="<?= (int) $demande['id'] ?>">
+                        <h3 class="sr-only">Nouveaux messages</h3>
+                        <span class="badge-nouveaux" id="badge-nouveaux-<?= (int) $demande['id'] ?>"></span>
+                    </div>
                 </div>
-                <div class="case-dossier">
-                    <h3 class="case-dossier-titre"><?= icone('envoyer') ?> Envoyés au citoyen <span class="pj-count-badge" id="pj-count-envoyes">0</span></h3>
-                    <ul class="liste-dossier" id="pj-envoyes"><li class="dossier-vide">Chargement…</li></ul>
+
+                <!-- Filtres + recherche -->
+                <div class="mt-3 flex flex-wrap items-center gap-2">
+                    <div class="flex gap-1 rounded-xl bg-encre-100 p-1">
+                        <button type="button" class="filter-btn active" data-filter="all">Tous</button>
+                        <button type="button" class="filter-btn" data-filter="citoyen">Citoyen</button>
+                        <button type="button" class="filter-btn" data-filter="agent">Agent</button>
+                    </div>
+                    <label for="messages-search-input" class="sr-only">Rechercher dans la conversation</label>
+                    <input type="search" id="messages-search-input" class="champ-agent min-w-0 flex-1" placeholder="Rechercher dans la conversation…">
                 </div>
-                <div class="case-dossier case-interne">
-                    <h3 class="case-dossier-titre"><?= icone('cadenas') ?> Internes à la mairie <span class="pj-count-badge" id="pj-count-internes">0</span></h3>
-                    <ul class="liste-dossier" id="pj-internes"><li class="dossier-vide">Chargement…</li></ul>
+
+                <!-- Fil des messages -->
+                <div id="messages-timeline" class="messages-timeline mt-3" data-demande-id="<?= (int) $demande_id ?>" role="log" aria-label="Messages"></div>
+
+                <!-- Bouton caché : demande.js « ouvre » la conversation par lui (messages lus, document à envoyer…) -->
+                <button type="button" id="open-conversation" data-demande-id="<?= (int) $demande['id'] ?>" hidden>Conversation</button>
+
+                <!-- Envoi d'un message -->
+                <form id="form-message-agent" class="mt-3" data-demande-id="<?= (int) $demande_id ?>">
+                    <div id="reply-preview" class="reply-preview" style="display:none;">
+                        <div class="reply-preview-text"></div>
+                        <button type="button" id="cancel-reply" class="cancel-reply-btn" aria-label="Annuler la réponse"><?= icone('fermer') ?></button>
+                    </div>
+
+                    <?php if (!$estAssigne): ?>
+                        <!-- Règle de la mairie : seul l'agent assigné écrit au citoyen -->
+                        <p class="flex items-start gap-2 rounded-xl bg-amber-50 p-3 text-sm text-amber-900 ring-1 ring-amber-600/20">
+                            <?= icone('cadenas', 'mt-0.5 shrink-0') ?>
+                            <span>Seul l’agent assigné à cette demande peut écrire au citoyen. Assignez-vous la demande (colonne de droite) pour lui envoyer un message ou un document.</span>
+                        </p>
+                    <?php else: ?>
+                        <div class="rounded-2xl border border-encre-200 bg-white transition focus-within:border-marque-500 focus-within:ring-4 focus-within:ring-marque-500/15">
+                            <label for="message-agent" class="sr-only">Votre message au citoyen</label>
+                            <textarea id="message-agent" name="message" rows="3" required
+                                      placeholder="Écrire au citoyen (ex. merci de fournir un justificatif de domicile)…"
+                                      class="block w-full resize-y rounded-t-2xl border-0 bg-transparent px-4 py-3 text-sm outline-none"></textarea>
+
+                            <!-- Document du dossier prêt à partir (bouton « Envoyer au citoyen » d'un document interne) -->
+                            <input type="hidden" name="fichier_id" id="fichier-dossier-id" value="">
+                            <div class="mx-3 mb-2 flex items-center justify-between gap-2 rounded-lg bg-marque-50 px-3 py-2 text-sm text-marque-800" id="document-dossier-pret" hidden>
+                                <span class="inline-flex min-w-0 items-center gap-1.5"><?= icone('trombone') ?> <span id="document-dossier-nom" class="truncate"></span></span>
+                                <button type="button" id="annuler-document-dossier" class="grid size-7 place-items-center rounded-full hover:bg-marque-100" aria-label="Ne pas joindre ce document"><?= icone('fermer') ?></button>
+                            </div>
+
+                            <div class="flex flex-wrap items-center justify-between gap-2 border-t border-encre-100 px-3 py-2">
+                                <!-- Document envoyé au citoyen (attestation...), visible dans sa conversation -->
+                                <label class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg px-2 py-1.5 text-sm font-medium text-encre-600 hover:bg-encre-100" id="joindre-nouveau-fichier">
+                                    <?= icone('trombone') ?> <span>Joindre un document</span>
+                                    <input type="file" name="fichier" id="fichier-pour-citoyen" accept=".pdf,.jpg,.jpeg,.png,.docx,.xlsx" class="max-w-40 text-xs file:hidden">
+                                </label>
+                                <button type="submit" class="send-btn inline-flex cursor-pointer items-center gap-2 rounded-xl bg-marque-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-marque-700">
+                                    <?= icone('envoyer') ?> <span>Envoyer au citoyen</span>
+                                </button>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                </form>
+            </section>
+
+            <!-- DOCUMENTS DU DOSSIER : trois cases (remplies par demande.js via get_pj.php) -->
+            <section class="carte-agent pieces-jointes" aria-labelledby="titre-documents">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <h2 id="titre-documents" class="titre-carte"><?= icone('trombone') ?> Documents du dossier <span id="pj-count" class="pj-count-badge">0</span></h2>
+                    <label for="pj-search" class="sr-only">Rechercher un document</label>
+                    <input type="search" id="pj-search" placeholder="Rechercher un document…" class="champ-agent w-full sm:w-56">
                 </div>
-            </div>
-        </section>
 
+                <div class="liste-pj documents-dossier mt-4 grid gap-3 lg:grid-cols-3" id="liste-pj" data-demande-id="<?= (int) $demande['id'] ?>">
+                    <div class="case-dossier">
+                        <h3 class="case-dossier-titre"><?= icone('boite-reception') ?> Reçus du citoyen <span class="pj-count-badge" id="pj-count-recus">0</span></h3>
+                        <ul class="liste-dossier" id="pj-recus"><li class="dossier-vide">Chargement…</li></ul>
+                    </div>
+                    <div class="case-dossier">
+                        <h3 class="case-dossier-titre"><?= icone('envoyer') ?> Envoyés au citoyen <span class="pj-count-badge" id="pj-count-envoyes">0</span></h3>
+                        <ul class="liste-dossier" id="pj-envoyes"><li class="dossier-vide">Chargement…</li></ul>
+                    </div>
+                    <div class="case-dossier case-interne">
+                        <h3 class="case-dossier-titre"><?= icone('cadenas') ?> Internes à la mairie <span class="pj-count-badge" id="pj-count-internes">0</span></h3>
+                        <ul class="liste-dossier" id="pj-internes"><li class="dossier-vide">Chargement…</li></ul>
+                    </div>
+                </div>
 
-
-    <!-- Historique des actions -->
-    <section class="historique-actions">
-        <h2>Historique des actions</h2>
-
-        <!-- Barre de filtres -->
-        <div class="history-toolbar">
-            <div class="history-filters">
-                <button class="history-filter-btn active" data-filter="all">Toutes</button>
-                <button class="history-filter-btn" data-filter="status">Statuts</button>
-                <button class="history-filter-btn" data-filter="assignation">Assignations</button>
-                <button class="history-filter-btn" data-filter="notes">Notes internes</button>
-            </div>
-
-            <div class="history-search">
-                <input type="text" id="history-search-input" placeholder="Rechercher une action...">
-            </div>
+                <!-- Ajout d'un document INTERNE (AJAX, upload_pj.php) -->
+                <form enctype="multipart/form-data" class="form-upload mt-4 flex flex-col gap-2 rounded-xl border border-dashed border-encre-300 bg-encre-50 p-3 sm:flex-row sm:items-center" data-demande-id="<?= (int) $demande['id'] ?>">
+                    <label for="fichier" class="flex items-center gap-1.5 text-sm font-medium text-encre-700"><?= icone('cadenas') ?> Document interne :</label>
+                    <input type="file" name="fichier" id="fichier" accept=".pdf,.jpg,.jpeg,.png,.docx,.xlsx" required
+                           class="min-w-0 flex-1 text-sm text-encre-600 file:mr-3 file:cursor-pointer file:rounded-lg file:border-0 file:bg-white file:px-3 file:py-1.5 file:text-sm file:font-semibold file:text-encre-700 file:ring-1 file:ring-encre-200">
+                    <button type="submit" class="cursor-pointer rounded-xl bg-encre-900 px-4 py-2 text-sm font-semibold text-white hover:bg-encre-800">Ajouter au dossier</button>
+                </form>
+                <p class="mt-2 text-xs text-encre-500">
+                    Un document interne n’est jamais visible par le citoyen. Pour lui envoyer un document (attestation…), passez par la conversation.
+                </p>
+            </section>
         </div>
 
-        <!-- Compteur (« 15 actions affichées sur 48 »), mis à jour par historique_notes.js -->
-        <p class="liste-compteur" id="history-compteur" aria-live="polite"></p>
+        <!-- ============ COLONNE DE DROITE : traitement ============ -->
+        <aside class="flex min-w-0 flex-col gap-6" aria-label="Traitement de la demande">
 
-        <!-- « Réduire » en haut : visible seulement quand tout l'historique est déplié -->
-        <button type="button" class="btn-reduire" id="reduire-historique-haut" hidden><?= icone('chevron-haut') ?> Réduire l’historique</button>
+            <!-- Statut et assignation -->
+            <section class="carte-agent" aria-labelledby="titre-traitement">
+                <h2 id="titre-traitement" class="titre-carte"><?= icone('valide') ?> Traitement</h2>
 
-        <!-- Timeline : TOUT l'historique (gabarit Backend/Fonctions/historique_demande.php).
-             Par défaut, historique_notes.js n'en montre que les 5 dernières actions
-             (« Toutes ») ou les 5 dernières du type filtré. -->
-        <div class="history-timeline" id="history-timeline" data-demande-id="<?= (int) $demande_id ?>">
-            <?= htmlHistorique($historique ?? []) ?>
-        </div>
+                <form id="form-statut" class="mt-4" data-demande-id="<?= (int) $demande_id ?>">
+                    <label for="statut" class="etiquette-agent">Statut</label>
+                    <div class="mt-1 flex gap-2">
+                        <select name="statut" id="statut" required class="champ-agent min-w-0 flex-1">
+                            <?php foreach (STATUTS_AGENT as $cle => [$libelle]): ?>
+                                <option value="<?= $cle ?>" <?= $demande['statut'] === $cle ? 'selected' : '' ?>><?= eAgent($libelle) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                        <button type="submit" id="btn-update-statut" class="bouton-agent">Mettre à jour</button>
+                    </div>
+                </form>
 
-        <!-- Sous la liste : « Afficher tout l'historique (N) » / « Réduire » / « Tout est affiché » -->
-        <button type="button" id="show-full-history" class="history-expand-btn"></button>
-    </section>
+                <div class="mt-5 border-t border-encre-100 pt-4">
+                    <p class="etiquette-agent">Agent assigné</p>
+                    <p class="mt-1 flex items-center gap-2 text-sm font-medium text-encre-900">
+                        <?= icone('utilisateur', 'text-encre-400') ?>
+                        <span id="agent-actuel"><?= $assigne !== '' ? eAgent($assigne) : '<em class="font-normal text-encre-400">Aucun agent assigné</em>' ?></span>
+                    </p>
+                    <form id="form-assignation" class="mt-3" data-demande-id="<?= (int) $demande_id ?>" data-moi="<?= (int) $agent_id ?>">
+                        <label for="agent_id" class="sr-only">Assigner à</label>
+                        <div class="flex gap-2">
+                            <select name="agent_id" id="agent_id" required class="champ-agent min-w-0 flex-1">
+                                <option value="">Choisir un agent…</option>
+                                <?php foreach ($listeAgents as $ag): ?>
+                                    <option value="<?= (int) $ag['id'] ?>"><?= (int) $ag['id'] === (int) $agent_id ? 'Moi (' . eAgent($ag['prenom'] . ' ' . $ag['nom']) . ')' : eAgent($ag['prenom'] . ' ' . $ag['nom']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <button type="submit" name="assigner_agent" class="bouton-agent">Assigner</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
 
+            <!-- Citoyen -->
+            <section class="carte-agent" aria-labelledby="titre-citoyen">
+                <h2 id="titre-citoyen" class="titre-carte"><?= icone('utilisateur') ?> Citoyen</h2>
+                <p class="mt-3 text-sm font-semibold text-encre-900"><?= eAgent($citoyen) ?></p>
+                <ul class="mt-2 grid gap-1.5 text-sm text-encre-600">
+                    <?php if (!empty($demande['email_citoyen'])): ?>
+                        <li><a href="mailto:<?= eAgent($demande['email_citoyen']) ?>" class="inline-flex items-center gap-1.5 break-all text-marque-700 hover:underline"><?= icone('courrier') ?> <?= eAgent($demande['email_citoyen']) ?></a></li>
+                    <?php endif; ?>
+                    <?php if (!empty($demande['telephone_citoyen'])): ?>
+                        <li class="inline-flex items-center gap-1.5"><?= icone('telephone') ?> <?= eAgent($demande['telephone_citoyen']) ?></li>
+                    <?php endif; ?>
+                    <li class="inline-flex items-center gap-1.5"><?= icone('trombone') ?> Pièces jointes envoyées : <span class="pj-count-badge" id="pj-citoyen-count"><?= (int) $nb_pj_citoyen ?></span></li>
+                </ul>
+            </section>
 
-    <a href="dashboard_agent.php" class="btn-retour"><?= icone('fleche-gauche') ?> Retour au tableau de bord</a>
+            <!-- Notes internes (historique_notes.js) -->
+            <section class="carte-agent notes-internes" aria-labelledby="titre-notes">
+                <h2 id="titre-notes" class="titre-carte"><?= icone('stylo') ?> Notes internes</h2>
 
-</div>
-<script>
-    window.CURRENT_AGENT_ID = <?= (int)$_SESSION['agent_id'] ?>;
-</script>
-<script src="../Frontend/assets/js/icones.js?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/js/icones.js') ?>"></script>
-<script src="../Frontend/assets/js/historique_notes.js?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/js/historique_notes.js') ?>"></script>
-<script src="../Frontend/assets/js/ouvrir_conv.js?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/js/ouvrir_conv.js') ?>"></script>
-<script src="../Frontend/assets/js/demande.js?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/js/demande.js') ?>"></script>
+                <form class="form-note mt-3" id="form-note" data-demande-id="<?= (int) $demande_id ?>">
+                    <label for="note" class="sr-only">Ajouter une note</label>
+                    <textarea name="note" id="note" rows="3" required placeholder="Ajouter une note pour les agents…" class="champ-agent w-full resize-y"></textarea>
+                    <button type="submit" name="ajouter_note" class="bouton-agent mt-2 w-full">Ajouter la note</button>
+                </form>
 
+                <div class="notes-toolbar mt-4 grid gap-2">
+                    <div class="notes-filters filtres-pilules">
+                        <button type="button" class="notes-filter-btn active" data-filter="all">Tous</button>
+                        <button type="button" class="notes-filter-btn" data-filter="month">Mois</button>
+                        <button type="button" class="notes-filter-btn" data-filter="24h">24h</button>
+                        <button type="button" class="notes-filter-btn" data-filter="week">Semaine</button>
+                    </div>
+                    <label for="notes-search-input" class="sr-only">Rechercher une note</label>
+                    <input type="search" id="notes-search-input" placeholder="Rechercher une note…" class="champ-agent w-full">
+                </div>
+
+                <div class="notes-mois filtres-pilules mt-2" id="notes-mois" role="group" aria-label="Choisir le mois des notes" hidden></div>
+                <p class="liste-compteur" id="notes-compteur" aria-live="polite"></p>
+                <button type="button" class="btn-reduire" id="reduire-notes-haut" hidden><?= icone('chevron-haut') ?> Réduire les notes</button>
+
+                <div class="notes-timeline" id="liste-notes" data-demande-id="<?= (int) $demande_id ?>">
+                    <?= htmlNotes($notes ?? []) ?>
+                </div>
+                <button type="button" id="show-full-notes" class="history-expand-btn"></button>
+            </section>
+
+            <!-- Historique des actions (historique_notes.js) -->
+            <section class="carte-agent historique-actions" aria-labelledby="titre-historique">
+                <h2 id="titre-historique" class="titre-carte"><?= icone('horloge') ?> Historique</h2>
+
+                <div class="history-toolbar mt-3 grid gap-2">
+                    <div class="history-filters filtres-pilules">
+                        <button type="button" class="history-filter-btn active" data-filter="all">Toutes</button>
+                        <button type="button" class="history-filter-btn" data-filter="status">Statuts</button>
+                        <button type="button" class="history-filter-btn" data-filter="assignation">Assignations</button>
+                        <button type="button" class="history-filter-btn" data-filter="notes">Notes</button>
+                    </div>
+                    <label for="history-search-input" class="sr-only">Rechercher une action</label>
+                    <input type="search" id="history-search-input" placeholder="Rechercher une action…" class="champ-agent w-full">
+                </div>
+
+                <p class="liste-compteur" id="history-compteur" aria-live="polite"></p>
+                <button type="button" class="btn-reduire" id="reduire-historique-haut" hidden><?= icone('chevron-haut') ?> Réduire l’historique</button>
+
+                <div class="history-timeline" id="history-timeline" data-demande-id="<?= (int) $demande_id ?>">
+                    <?= htmlHistorique($historique ?? []) ?>
+                </div>
+                <button type="button" id="show-full-history" class="history-expand-btn"></button>
+            </section>
+        </aside>
+    </div>
+</main>
+
+<?= finPageAgent() ?>
+
+<script src="../Frontend/assets/js/historique_notes.js?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/js/historique_notes.js') ?>" defer></script>
+<script src="../Frontend/assets/js/demande.js?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/js/demande.js') ?>" defer></script>
+<script src="assets/js/detail_demande.js?v=<?= @filemtime(__DIR__ . '/assets/js/detail_demande.js') ?>" defer></script>
 
 </body>
 </html>
