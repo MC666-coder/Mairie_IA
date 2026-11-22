@@ -1,6 +1,8 @@
 <?php
 require_once __DIR__ . '/../Backend/Fonctions/gabarit_public.php';
 require_once __DIR__ . '/../Backend/Fonctions/icones.php';
+require_once __DIR__ . '/../Backend/Config/app.php';                // coordonnées (.env)
+require_once __DIR__ . '/../Backend/Fonctions/horaires_mairie.php'; // horaires et « Ouvert / Fermé »
 
 /* ---------------------------------------
    Services présentés sur la page (une carte par service)
@@ -18,59 +20,11 @@ $services = [
     ['nom' => 'Ressources humaines',  'description' => 'Recrutement, gestion du personnel municipal.',               'icone' => 'groupe'],
 ];
 
-/* ---------------------------------------
-   Horaires d'ouverture (du lundi au vendredi)
-   Heures au format « HH:MM » : comparer deux chaînes de ce format
-   revient à comparer les heures ("08:30" < "12:00").
----------------------------------------- */
-const JOURS_OUVERTS = [1, 2, 3, 4, 5]; // 1 = lundi … 7 = dimanche
-const CRENEAUX = [['08:30', '12:00'], ['13:30', '17:00']];
-
-/** "08:30" → "8h30" */
-function heureLisible(string $heure): string
-{
-    return ltrim(str_replace(':', 'h', $heure), '0');
-}
-
-/**
- * Indique si la mairie est ouverte maintenant, et sinon quand elle rouvre.
- * L'heure est prise à Paris : le serveur peut être réglé sur un autre fuseau (ex. UTC).
- */
-function etatOuverture(?DateTimeImmutable $maintenant = null): array
-{
-    $maintenant ??= new DateTimeImmutable('now', new DateTimeZone('Europe/Paris'));
-    $jour  = (int) $maintenant->format('N');
-    $heure = $maintenant->format('H:i');
-
-    if (in_array($jour, JOURS_OUVERTS, true)) {
-        foreach (CRENEAUX as [$debut, $fin]) {
-            if ($heure >= $debut && $heure < $fin) {
-                return ['ouvert' => true, 'texte' => 'Ouvert maintenant', 'detail' => 'Ferme à ' . heureLisible($fin)];
-            }
-            if ($heure < $debut) {
-                return ['ouvert' => false, 'texte' => 'Fermé', 'detail' => 'Ouvre à ' . heureLisible($debut)];
-            }
-        }
-    }
-
-    // Après la fermeture ou le week-end : prochain jour ouvert
-    $noms = [1 => 'lundi', 2 => 'mardi', 3 => 'mercredi', 4 => 'jeudi', 5 => 'vendredi', 6 => 'samedi', 7 => 'dimanche'];
-    $suivant = $maintenant;
-    do {
-        $suivant = $suivant->modify('+1 day');
-    } while (!in_array((int) $suivant->format('N'), JOURS_OUVERTS, true));
-    $quand = $suivant->format('Y-m-d') === $maintenant->modify('+1 day')->format('Y-m-d')
-        ? 'demain'
-        : $noms[(int) $suivant->format('N')];
-
-    return ['ouvert' => false, 'texte' => 'Fermé', 'detail' => 'Ouvre ' . $quand . ' à ' . heureLisible(CRENEAUX[0][0])];
-}
-
 $etat = etatOuverture();
 
-/* Coordonnées de la mairie (fictives : à remplacer par les vraies) */
-$telephone = '02 51 00 00 00';
-$email     = 'contact@mairie-exemple.fr';
+/* Coordonnées de la mairie : MAIRIE_TELEPHONE et MAIRIE_EMAIL dans .env (Backend/Config/app.php) */
+$telephone = MAIRIE_TELEPHONE;
+$email     = MAIRIE_EMAIL;
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -129,22 +83,15 @@ $email     = 'contact@mairie-exemple.fr';
                         <h2 class="m-0 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-slate-500">
                             <?= icone('horloge') ?> Horaires
                         </h2>
-                        <p class="m-0 mt-3 flex flex-wrap items-center gap-2">
-                            <?php if ($etat['ouvert']): ?>
-                                <span class="inline-flex items-center gap-1.5 rounded-full bg-green-50 px-3 py-1 text-sm font-semibold text-green-700 ring-1 ring-green-600/20">
-                                    <span class="size-2 rounded-full bg-green-500"></span> <?= $etat['texte'] ?>
-                                </span>
-                            <?php else: ?>
-                                <span class="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700 ring-1 ring-slate-500/20">
-                                    <span class="size-2 rounded-full bg-slate-400"></span> <?= $etat['texte'] ?>
-                                </span>
-                            <?php endif; ?>
-                            <span class="text-sm text-slate-500"><?= $etat['detail'] ?></span>
-                        </p>
+                        <p class="m-0 mt-3 flex flex-wrap items-center gap-2"><?= pastilleOuverture($etat) ?></p>
                         <dl class="m-0 mt-4 grid gap-2 border-t border-slate-100 pt-4 text-sm">
                             <div class="flex justify-between gap-3">
                                 <dt class="text-slate-500">Lundi – vendredi</dt>
-                                <dd class="m-0 text-right font-medium text-slate-800">8h30 – 12h00<br>13h30 – 17h00</dd>
+                                <dd class="m-0 text-right font-medium text-slate-800">
+                                    <?php foreach (CRENEAUX as $i => [$debut, $fin]): ?>
+                                        <?= $i > 0 ? '<br>' : '' ?><?= heureLisible($debut) ?> – <?= heureLisible($fin) ?>
+                                    <?php endforeach; ?>
+                                </dd>
                             </div>
                             <div class="flex justify-between gap-3">
                                 <dt class="text-slate-500">Samedi, dimanche</dt>

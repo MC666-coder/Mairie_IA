@@ -19,6 +19,12 @@ define('MAIL_FROM',      $_ENV['MAIL_FROM'] ?? 'no-reply@localhost');
 define('MAIL_FROM_NAME', $_ENV['MAIL_FROM_NAME'] ?? 'Mairie');
 define('NOM_COMMUNE',    $_ENV['NOM_COMMUNE'] ?? 'Ma Commune');
 
+// Coordonnées affichées au public (pages « La mairie » et « Contacts »).
+// Valeurs fictives par défaut : à renseigner dans .env.
+define('MAIRIE_TELEPHONE', $_ENV['MAIRIE_TELEPHONE'] ?? '02 51 00 00 00');
+define('MAIRIE_EMAIL',     $_ENV['MAIRIE_EMAIL'] ?? 'contact@mairie-exemple.fr');
+define('MAIRIE_ADRESSE',   $_ENV['MAIRIE_ADRESSE'] ?? 'Place de la Mairie, 85220 L’Aiguillon-sur-Vie');
+
 /**
  * URL absolue vers une page du site (pour les liens envoyés par email).
  */
