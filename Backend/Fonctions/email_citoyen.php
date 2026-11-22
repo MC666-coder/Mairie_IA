@@ -81,6 +81,24 @@ function envoyerEmailReinitialisation(string $email, string $prenom, string $jet
     return envoyerEmailCitoyen($email, 'Nouveau mot de passe - Mairie de ' . NOM_COMMUNE, $html);
 }
 
+/**
+ * E-mail « Vous avez déjà un compte » : envoyé quand quelqu'un s'inscrit avec une adresse
+ * qui a déjà un compte. La page d'inscription répond comme pour une nouvelle inscription
+ * (« Vérifiez votre boîte mail ») : seul le propriétaire de l'adresse apprend qu'un compte existe.
+ */
+function envoyerEmailCompteExistant(string $email, string $prenom): bool
+{
+    $html = gabaritEmailBouton(
+        $prenom,
+        'Vous avez déjà un espace citoyen',
+        'Une inscription vient d’être demandée avec votre adresse e-mail, mais vous avez déjà un compte. Connectez-vous avec votre mot de passe habituel. Si vous l’avez oublié, utilisez « Mot de passe oublié » sur la page de connexion.',
+        'Me connecter',
+        url_app('Frontend/connexion_citoyen.php'),
+        "Si vous n'êtes pas à l'origine de cette demande, ignorez cet e-mail : votre compte n'a pas été modifié."
+    );
+    return envoyerEmailCitoyen($email, 'Votre espace citoyen - Mairie de ' . NOM_COMMUNE, $html);
+}
+
 /** Envoi ; en local sans serveur SMTP, l'échec est journalisé (sans l'adresse : RGPD). */
 function envoyerEmailCitoyen(string $email, string $sujet, string $html): bool
 {

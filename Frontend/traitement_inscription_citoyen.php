@@ -67,7 +67,7 @@ if ($password !== $password_confirm) {
 }
 
 // Adresse déjà utilisée ?
-$checkEmail = $pdo->prepare("SELECT id, email_verifie, verification_expiration FROM citoyens WHERE email_citoyen = ?");
+$checkEmail = $pdo->prepare("SELECT id, prenom_citoyen, email_verifie, verification_expiration FROM citoyens WHERE email_citoyen = ?");
 $checkEmail->execute([$email]);
 $existant = $checkEmail->fetch(PDO::FETCH_ASSOC);
 
@@ -76,8 +76,17 @@ $recreable = $existant
     && (int) $existant['email_verifie'] === 0
     && ($existant['verification_expiration'] === null || strtotime($existant['verification_expiration']) < time());
 
+/* Adresse déjà utilisée : on NE le dit PAS sur la page (sinon n'importe qui pourrait
+   tester des adresses pour savoir qui a un compte). On répond exactement comme pour
+   une nouvelle inscription (« Vérifiez votre boîte mail »), et c'est le propriétaire
+   de l'adresse qui est prévenu par e-mail. Le mot de passe est quand même haché pour
+   que le temps de réponse soit le même qu'une vraie inscription. */
 if ($existant && !$recreable) {
-    retourFormulaire("Cette adresse e-mail est déjà utilisée. Connectez-vous ou utilisez « Mot de passe oublié ».", $saisie);
+    password_hash($password, PASSWORD_DEFAULT);
+    envoyerEmailCompteExistant($email, (string) ($existant['prenom_citoyen'] ?? ''));
+    $_SESSION['inscription_email'] = $email;
+    header("Location: inscription_envoyee.php");
+    exit();
 }
 
 // Hash du mot de passe + jeton de confirmation (seule son empreinte est stockée)

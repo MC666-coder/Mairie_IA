@@ -18,11 +18,13 @@ debutPageAuth('Vérifiez votre boîte mail', 'Inscription Citoyen', 'Plus qu’u
 ?>
             <div class="carte-auth">
                 <?= retourAuth('index.php', 'Accueil') ?>
-                <?= enteteAuth('courrier', 'Vérifiez votre boîte mail', 'Votre compte est créé, il reste à le confirmer') ?>
+                <?= enteteAuth('courrier', 'Vérifiez votre boîte mail', 'Il reste une étape avant d’accéder à votre espace') ?>
 
                 <p class="carte-auth-texte">
+                    <!-- Texte volontairement identique que l'adresse soit nouvelle ou déjà inscrite
+                         (traitement_inscription_citoyen.php) : la page ne révèle pas qui a un compte -->
                     Nous avons envoyé un e-mail à <strong><?= htmlspecialchars($email, ENT_QUOTES, 'UTF-8') ?></strong>.
-                    Cliquez sur le bouton <strong>« Confirmer mon adresse e-mail »</strong> qu’il contient pour activer votre compte.
+                    Suivez les instructions qu’il contient : le bouton de l’e-mail vous mène à votre espace citoyen.
                 </p>
                 <p class="carte-auth-texte carte-auth-texte-discret">
                     Le lien est valable 24 heures. Rien reçu ? Regardez dans vos courriers indésirables (spams).
