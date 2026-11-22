@@ -4,6 +4,7 @@ require_once __DIR__ . '/../Backend/Config/session_init.php';
 
 require_once __DIR__ . '/../Backend/Config/db.php';
 require_once __DIR__ . '/../Backend/Fonctions/formulaire_auth.php';
+require_once __DIR__ . '/../Backend/Fonctions/auth_agent.php'; // gabarit « écran partagé » (agent.css)
 require_once __DIR__ . '/../Backend/Fonctions/regles_mot_de_passe.php';
 
 /* ---------------------------------------------------------
@@ -18,7 +19,8 @@ header("Referrer-Policy: strict-origin-when-cross-origin");
    1) Vérification du token dans l’URL
 --------------------------------------------------------- */
 if (!isset($_GET['token']) || strlen($_GET['token']) !== 64) {
-    die("Lien invalide.");
+    pageMessageAgent('Lien invalide', "Ce lien n’est pas valide ou a déjà été utilisé.
+Vérifiez que vous avez copié l’adresse en entier depuis l’e-mail.", 'connexion_agent.php', 'Retour à la connexion', 'erreur');
 }
 
 $token = $_GET['token'];
@@ -32,7 +34,7 @@ if (!isset($_SESSION['reset_attempts'])) {
 $_SESSION['reset_attempts']++;
 
 if ($_SESSION['reset_attempts'] > 10) {
-    die("Trop de tentatives. Réessayez plus tard.");
+    pageMessageAgent('Trop de tentatives', "Vous avez fait trop d’essais.\nPatientez quelques minutes avant de réessayer.", 'connexion_agent.php', 'Retour à la connexion', 'erreur');
 }
 
 /* ---------------------------------------------------------
@@ -43,14 +45,16 @@ $sql->execute([$token]);
 $agent = $sql->fetch();
 
 if (!$agent) {
-    die("Lien invalide.");
+    pageMessageAgent('Lien invalide', "Ce lien n’est pas valide ou a déjà été utilisé.
+Vérifiez que vous avez copié l’adresse en entier depuis l’e-mail.", 'connexion_agent.php', 'Retour à la connexion', 'erreur');
 }
 
 /* ---------------------------------------------------------
    4) Vérification expiration du token
 --------------------------------------------------------- */
 if (strtotime($agent['reset_expiration']) < time()) {
-    die("Ce lien de réinitialisation a expiré. Veuillez refaire une demande de réinitialisation.");
+    pageMessageAgent('Lien expiré', "Ce lien de réinitialisation a expiré (il est valable 24 heures).
+Refaites une demande pour en recevoir un nouveau.", 'mot_de_passe_oublie.php', 'Refaire une demande', 'erreur');
 }
 
 /* ---------------------------------------------------------
@@ -60,72 +64,23 @@ if (empty($_SESSION['csrf_reset'])) {
     $_SESSION['csrf_reset'] = bin2hex(random_bytes(32));
 }
 ?>
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nouveau mot de passe - Portail Agent</title>
-    <link rel="stylesheet" href="../Frontend/assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/css/style.css') ?>"/>
+<?= debutAuthAgent('Nouveau mot de passe') ?>
 
-    <!-- Content Security Policy stricte -->
-    <meta http-equiv="Content-Security-Policy"
-          content="default-src 'self';
-                   img-src 'self' data:;
-                   style-src 'self' 'unsafe-inline';
-                   script-src 'self';
-                   object-src 'none';
-                   base-uri 'self';
-                   frame-ancestors 'none';">
-</head>
+            <?= retourAuth('connexion_agent.php', 'Retour à la connexion') ?>
+            <?= enteteAuth('cadenas', 'Nouveau mot de passe', 'Il remplacera votre ancien mot de passe.') ?>
+            <?= messageAuth('reset_erreur') ?>
 
-<body>
+            <form action="traitement_reset_password.php" method="POST" autocomplete="off">
+                <input type="hidden" name="csrf_reset"
+                       value="<?= htmlspecialchars($_SESSION['csrf_reset'], ENT_QUOTES, 'UTF-8') ?>">
+                <input type="hidden" name="token" value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>">
 
-<div class="page-wrapper">
+                <?= champAuth('password', 'Mot de passe', 'password', 'cadenas', '', '',
+                              'Votre mot de passe doit contenir :', listeReglesMotDePasse('password')) ?>
+                <?= champAuth('password_confirm', 'Confirmer le mot de passe', 'password', 'cadenas', '', '', '',
+                              '<p class="champ-auth-erreur" id="message-confirmation" hidden>Les deux mots de passe ne correspondent pas.</p>') ?>
 
-    <!-- HERO -->
-    <section class="hero-page">
-        <div class="hero-overlay"></div>
-        <div class="hero-content">
-            <h1>Nouveau mot de passe</h1>
-            <p>Définissez un nouveau mot de passe sécurisé pour accéder à votre espace agent.</p>
-        </div>
-    </section>
+                <button type="submit" class="btn-submit">Enregistrer le mot de passe</button>
+            </form>
 
-    <main id="content_portail_citoyen">
-
-        <section class="connexion-section">
-            <div class="carte-auth">
-                <?= retourAuth('connexion_agent.php', 'Retour à la connexion') ?>
-                <?= enteteAuth('cadenas', 'Nouveau mot de passe', 'Il remplacera votre ancien mot de passe') ?>
-
-                <form action="traitement_reset_password.php" method="POST" autocomplete="off">
-                    <input type="hidden" name="csrf_reset"
-                           value="<?= htmlspecialchars($_SESSION['csrf_reset'], ENT_QUOTES, 'UTF-8') ?>">
-                    <input type="hidden" name="token" value="<?= htmlspecialchars($token, ENT_QUOTES, 'UTF-8') ?>">
-
-                    <?= champAuth('password', 'Mot de passe', 'password', 'cadenas', '', '',
-                                  'Votre mot de passe doit contenir :', listeReglesMotDePasse('password')) ?>
-                    <?= champAuth('password_confirm', 'Confirmer le mot de passe', 'password', 'cadenas', '', '', '',
-                                  '<p class="champ-auth-erreur" id="message-confirmation" hidden>Les deux mots de passe ne correspondent pas.</p>') ?>
-
-                    <button type="submit" class="btn-submit">Enregistrer le mot de passe</button>
-                </form>
-            </div>
-        </section>
-
-    </main>
-
-    <!-- BANDE TRICOLORE -->
-    <div class="bande-tricolore">
-        <div class="bleu"></div>
-        <div class="blanc"></div>
-        <div class="rouge"></div>
-    </div>
-
-</div>
-
-<script src="../Frontend/assets/js/mot_de_passe_visible.js?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/js/mot_de_passe_visible.js') ?>"></script>
-<script src="../Frontend/assets/js/regles_mot_de_passe.js?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/js/regles_mot_de_passe.js') ?>"></script>
-</body>
-</html>
+<?= finAuthAgent(['mot_de_passe_visible.js', 'regles_mot_de_passe.js']) ?>

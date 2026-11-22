@@ -16,6 +16,7 @@
 @source "../../*.php";
 @source "../js/*.js";
 @source "../../../Backend/Fonctions/gabarit_agent.php";
+@source "../../../Backend/Fonctions/auth_agent.php";
 
 @theme {
     /* Couleur de marque : émeraude */
@@ -314,4 +315,95 @@
     .history-tag-other { @apply bg-encre-100 text-encre-600 ring-encre-500/20; }
     .history-body { @apply mt-1.5 text-sm text-encre-700; }
     .history-body strong { @apply font-semibold text-encre-900; }
+}
+
+/* ================================================================
+   Notification flottante (messages de réussite / d’erreur des actions)
+   Toujours visible : en haut à droite de l’écran, même quand on est
+   descendu jusqu’aux notes ou à l’historique.
+   ================================================================ */
+@layer components {
+    .notification-agent {
+        @apply pointer-events-none fixed top-4 right-4 left-4 z-[60] sm:left-auto sm:w-96;
+    }
+    .notification-agent .alert {
+        @apply pointer-events-auto shadow-lg shadow-encre-900/10;
+        animation: notificationArrive 0.25s ease-out;
+    }
+}
+@keyframes notificationArrive {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: none; }
+}
+
+/* ================================================================
+   Pages de connexion du portail agent (Backend/Fonctions/auth_agent.php)
+   Habillage des champs de formulaire_auth.php (champAuth, messageAuth…)
+   et de la liste des règles du mot de passe (regles_mot_de_passe.php).
+   ================================================================ */
+@layer components {
+    .auth-agent .retour-auth {
+        @apply -ml-2 inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-sm font-semibold text-encre-500 no-underline transition hover:bg-encre-100 hover:text-encre-900;
+    }
+    .auth-agent .carte-auth-entete { @apply mt-6 mb-8; }
+    .auth-agent .carte-auth-pastille { @apply grid size-12 place-items-center rounded-2xl bg-marque-50 text-2xl text-marque-600 ring-1 ring-marque-600/20; }
+    .auth-agent .carte-auth-entete h2 { @apply mt-5 text-2xl font-extrabold tracking-tight text-encre-900 sm:text-3xl; }
+    .auth-agent .carte-auth-entete p { @apply mt-2 text-sm text-encre-500; }
+
+    .auth-agent form { @apply grid gap-5; }
+    .auth-agent .champ-auth { @apply grid gap-1.5; }
+    .auth-agent .champ-auth label { @apply text-sm font-semibold text-encre-800; }
+    .auth-agent .champ-auth-aide { @apply text-xs text-encre-500; }
+    .auth-agent .champ-auth-saisie {
+        @apply relative flex items-center rounded-xl border border-encre-200 bg-encre-50 transition focus-within:border-marque-500 focus-within:bg-white focus-within:ring-4 focus-within:ring-marque-500/15;
+    }
+    .auth-agent .champ-auth-icone { @apply pointer-events-none absolute left-3.5 text-encre-400; }
+    .auth-agent .champ-auth-saisie input,
+    .auth-agent .champ-auth-saisie select {
+        @apply w-full min-w-0 appearance-none border-0 bg-transparent py-3 pr-4 pl-11 text-sm text-encre-900 outline-none;
+    }
+    .auth-agent .voir-mot-de-passe {
+        @apply mr-1.5 grid size-9 shrink-0 cursor-pointer place-items-center rounded-lg text-encre-400 transition hover:bg-encre-100 hover:text-encre-700;
+    }
+    .auth-agent .voir-mot-de-passe .icone-masquer { @apply hidden; }
+    .auth-agent .voir-mot-de-passe[aria-pressed="true"] .icone-voir { @apply hidden; }
+    .auth-agent .voir-mot-de-passe[aria-pressed="true"] .icone-masquer { @apply inline; }
+    .auth-agent .champ-auth-erreur { @apply text-xs font-semibold text-red-600; }
+
+    /* Règles du mot de passe : grises, puis vertes quand elles sont respectées */
+    .auth-agent .regles-mot-de-passe { @apply mt-1 grid gap-1 text-xs text-encre-500; }
+    .auth-agent .regles-mot-de-passe li { @apply flex items-center gap-2; }
+    .auth-agent .regles-mot-de-passe li::before {
+        content: "";
+        @apply size-1.5 shrink-0 rounded-full bg-encre-300;
+    }
+    .auth-agent .regles-mot-de-passe li.regle-respectee { @apply text-marque-700; }
+    .auth-agent .regles-mot-de-passe li.regle-respectee::before { @apply bg-marque-500; }
+
+    .auth-agent .lien-auth-discret { @apply -mt-2 justify-self-end text-sm font-semibold text-marque-700 hover:text-marque-800; }
+
+    .auth-agent .btn-submit {
+        @apply inline-flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border-0 bg-marque-600 px-4 py-3 text-sm font-semibold text-white shadow-sm shadow-marque-900/20 transition hover:bg-marque-700 sm:w-auto sm:min-w-48;
+    }
+    .auth-agent form .btn-submit { @apply w-full sm:w-full; }
+
+    /* Messages : erreur (rouge), réussite (vert), information (ardoise) */
+    .auth-agent .error-message,
+    .auth-agent .message-auth-succes,
+    .auth-agent .message-auth-info {
+        @apply mb-5 flex items-start gap-2 rounded-xl px-4 py-3 text-sm font-medium ring-1;
+    }
+    .auth-agent .error-message { @apply bg-red-50 text-red-800 ring-red-600/20; }
+    .auth-agent .error-message::before {
+        content: "";
+        @apply mt-0.5 size-4 shrink-0 bg-red-600;
+        -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='m15 9-6 6'/%3E%3Cpath d='m9 9 6 6'/%3E%3C/svg%3E") center / contain no-repeat;
+        mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpath d='m15 9-6 6'/%3E%3Cpath d='m9 9 6 6'/%3E%3C/svg%3E") center / contain no-repeat;
+    }
+    .auth-agent .message-auth-succes { @apply bg-marque-50 text-marque-800 ring-marque-600/20; }
+    .auth-agent .message-auth-info { @apply bg-encre-50 text-encre-700 ring-encre-500/20; }
+    .auth-agent .message-auth-succes .icone,
+    .auth-agent .message-auth-info .icone { @apply mt-0.5 shrink-0; }
+
+    .auth-agent .visually-hidden { @apply sr-only; }
 }

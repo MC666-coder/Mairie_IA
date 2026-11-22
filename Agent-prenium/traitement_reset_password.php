@@ -1,6 +1,7 @@
 <?php
 /* session_init.php : initialisation de la session pour les agents */
 require_once __DIR__ . '/../Backend/Config/session_init.php';
+require_once __DIR__ . '/../Backend/Fonctions/auth_agent.php'; // gabarit « écran partagé » (agent.css)
 require_once __DIR__ . '/../Backend/Config/db.php';
 
 /* ---------------------------------------------------------
@@ -17,7 +18,7 @@ header("Referrer-Policy: strict-origin-when-cross-origin");
 if (!isset($_POST['csrf_reset']) ||
     !isset($_SESSION['csrf_reset']) ||
     !hash_equals($_SESSION['csrf_reset'], $_POST['csrf_reset'])) {
-    die("Requête non autorisée.");
+    pageMessageAgent('Formulaire expiré', "La page est restée ouverte trop longtemps.\nRouvrez le lien reçu par e-mail pour recommencer.", 'connexion_agent.php', 'Retour à la connexion', 'erreur');
 }
 
 /* ---------------------------------------------------------
@@ -29,14 +30,14 @@ if (!isset($_SESSION['reset_submit_attempts'])) {
 $_SESSION['reset_submit_attempts']++;
 
 if ($_SESSION['reset_submit_attempts'] > 10) {
-    die("Trop de tentatives. Réessayez plus tard.");
+    pageMessageAgent('Trop de tentatives', "Vous avez fait trop d’essais.\nPatientez quelques minutes avant de réessayer.", 'connexion_agent.php', 'Retour à la connexion', 'erreur');
 }
 
 /* ---------------------------------------------------------
    3) Vérification du token
 --------------------------------------------------------- */
 if (!isset($_POST['token']) || strlen($_POST['token']) !== 64) {
-    die("Lien invalide.");
+    pageMessageAgent('Lien invalide', "Ce lien n’est pas valide ou a déjà été utilisé.", 'connexion_agent.php', 'Retour à la connexion', 'erreur');
 }
 
 $token = $_POST['token'];
@@ -49,14 +50,15 @@ $sql->execute([$token]);
 $agent = $sql->fetch();
 
 if (!$agent) {
-    die("Lien invalide.");
+    pageMessageAgent('Lien invalide', "Ce lien n’est pas valide ou a déjà été utilisé.", 'connexion_agent.php', 'Retour à la connexion', 'erreur');
 }
 
 /* ---------------------------------------------------------
    5) Vérification expiration du token
 --------------------------------------------------------- */
 if (strtotime($agent['reset_expiration']) < time()) {
-    die("Ce lien a expiré. Veuillez refaire une demande de réinitialisation.");
+    pageMessageAgent('Lien expiré', "Ce lien de réinitialisation a expiré (il est valable 24 heures).
+Refaites une demande pour en recevoir un nouveau.", 'mot_de_passe_oublie.php', 'Refaire une demande', 'erreur');
 }
 
 
@@ -67,7 +69,9 @@ $password = $_POST['password'] ?? "";
 $password_confirm = $_POST['password_confirm'] ?? "";
 
 if ($password !== $password_confirm) {
-    die("Les mots de passe ne correspondent pas.");
+    $_SESSION['reset_erreur'] = 'Les deux mots de passe ne correspondent pas.';
+    header('Location: reset_password.php?token=' . urlencode($token));
+    exit;
 }
 
 if (
@@ -77,7 +81,9 @@ if (
     !preg_match('/[0-9]/', $password) ||
     !preg_match('/[\W]/', $password)
 ) {
-    die("Mot de passe trop faible.");
+    $_SESSION['reset_erreur'] = 'Le mot de passe ne respecte pas toutes les règles indiquées.';
+    header('Location: reset_password.php?token=' . urlencode($token));
+    exit;
 }
 
 /* ---------------------------------------------------------

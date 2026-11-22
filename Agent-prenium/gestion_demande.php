@@ -233,7 +233,7 @@ $assigne    = $demande['agent_id'] ? trim(($demande['agent_prenom'] ?? '') . ' '
     </div>
 
     <!-- Messages de réussite / d'erreur des actions (demande.js) -->
-    <div id="alert-container" class="mt-4" aria-live="polite"></div>
+    <div id="alert-container" class="notification-agent" aria-live="polite"></div>
 
     <div class="mt-6 grid items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
 

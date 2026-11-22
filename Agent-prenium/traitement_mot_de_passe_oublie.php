@@ -1,6 +1,7 @@
 <?php
 /* session_init.php : initialisation de la session pour les agents */
 require_once __DIR__ . '/../Backend/Config/session_init.php';
+require_once __DIR__ . '/../Backend/Fonctions/auth_agent.php'; // gabarit « écran partagé » (agent.css)
 require_once __DIR__ . '/../Backend/Config/db.php';
 require_once __DIR__ . '/../Backend/Config/app.php'; // APP_URL, MAIL_FROM, NOM_COMMUNE (.env)
 
@@ -18,7 +19,7 @@ header("Referrer-Policy: strict-origin-when-cross-origin");
 if (!isset($_POST['csrf_forgot']) ||
    !isset($_SESSION['csrf_forgot']) ||
    !hash_equals($_SESSION['csrf_forgot'], $_POST['csrf_forgot'])) {
-    die("Requête non autorisée.");
+    pageMessageAgent('Formulaire expiré', "La page est restée ouverte trop longtemps.\nRecommencez la demande.", 'mot_de_passe_oublie.php', 'Refaire la demande', 'erreur');
 }
 
 /* ---------------------------------------------------------
@@ -30,7 +31,7 @@ if (!isset($_SESSION['forgot_attempts'])) {
 $_SESSION['forgot_attempts']++;
 
 if ($_SESSION['forgot_attempts'] > 10) {
-    die("Trop de tentatives. Réessayez plus tard.");
+    pageMessageAgent('Trop de tentatives', "Vous avez fait trop de demandes.\nPatientez quelques minutes avant de réessayer.", 'connexion_agent.php', 'Retour à la connexion', 'erreur');
 }
 
 /* ---------------------------------------------------------
