@@ -26,28 +26,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 require_once __DIR__ . '/../Backend/Config/db.php'; // Connexion PDO (après le contrôle d'accès)
 
 /* ---------------------------------------------------------
-   2) Vérification CSRF
---------------------------------------------------------- */
-if (!isset($_POST['csrf_token']) ||
-    !isset($_SESSION['csrf_token']) || 
-    !hash_equals($_SESSION['csrf_token'], $_POST['csrf_token'])) {
-    die("Requête non autorisée.");
-}
-
-/* ---------------------------------------------------------
-   3) Protection anti-bruteforce
---------------------------------------------------------- */
-if (!isset($_SESSION['creation_attempts'])) {
-    $_SESSION['creation_attempts'] = 0;
-}
-$_SESSION['creation_attempts']++;
-
-if ($_SESSION['creation_attempts'] > 10) {
-    die("Trop de tentatives. Réessayez plus tard.");
-}
-
-/* ---------------------------------------------------------
-   4) Récupération + validation stricte des données
+   2) En cas d'erreur : retour au formulaire avec un message rouge
+      et les champs déjà remplis (au lieu d'une page blanche)
 --------------------------------------------------------- */
 function sanitize($str) {
     // Nettoyage uniquement : on stocke/compare la valeur BRUTE.
@@ -55,29 +35,63 @@ function sanitize($str) {
     return trim((string) $str);
 }
 
-$nom = sanitize($_POST['nom_agent']);
-$prenom = sanitize($_POST['prenom_agent']);
-$email = sanitize($_POST['email_agent']);
-$service_id = intval($_POST['service_id']);
-$role = sanitize($_POST['role']);
-$niveau_acces = sanitize($_POST['niveau_acces']);
+$nom          = sanitize($_POST['nom_agent'] ?? '');
+$prenom       = sanitize($_POST['prenom_agent'] ?? '');
+$email        = sanitize($_POST['email_agent'] ?? '');
+$service_id   = (int) ($_POST['service_id'] ?? 0);
+$role         = sanitize($_POST['role'] ?? '');
+$niveau_acces = sanitize($_POST['niveau_acces'] ?? '');
 
-if (strlen($nom) < 2 || strlen($prenom) < 2) {
-    die("Nom ou prénom invalide.");
+function retourFormulaireAgent(string $erreur): never
+{
+    global $nom, $prenom, $email, $service_id, $role, $niveau_acces;
+    $_SESSION['creation_agent_erreur'] = $erreur;
+    $_SESSION['creation_agent_saisie'] = [
+        'nom_agent' => $nom, 'prenom_agent' => $prenom, 'email_agent' => $email,
+        'service_id' => (string) $service_id, 'role' => $role, 'niveau_acces' => $niveau_acces,
+    ];
+    header('Location: inscription_agent.php');
+    exit;
+}
+
+/* ---------------------------------------------------------
+   3) Vérification CSRF
+--------------------------------------------------------- */
+if (!isset($_POST['csrf_token']) ||
+    !isset($_SESSION['csrf_token']) ||
+    !hash_equals($_SESSION['csrf_token'], (string) $_POST['csrf_token'])) {
+    $_SESSION['csrf_token'] = bin2hex(random_bytes(32)); // nouveau jeton pour le prochain essai
+    retourFormulaireAgent('Le formulaire a expiré. Vérifiez les informations puis recommencez.');
+}
+
+/* ---------------------------------------------------------
+   4) Protection anti-bruteforce (10 essais par session)
+--------------------------------------------------------- */
+$_SESSION['creation_attempts'] = ($_SESSION['creation_attempts'] ?? 0) + 1;
+if ($_SESSION['creation_attempts'] > 10) {
+    retourFormulaireAgent('Trop de tentatives. Reconnectez-vous avant de créer un nouvel agent.');
+}
+
+/* ---------------------------------------------------------
+   5) Validation stricte des données
+--------------------------------------------------------- */
+if (mb_strlen($nom, 'UTF-8') < 2 || mb_strlen($prenom, 'UTF-8') < 2
+    || mb_strlen($nom, 'UTF-8') > 50 || mb_strlen($prenom, 'UTF-8') > 50) {
+    retourFormulaireAgent('Le nom et le prénom doivent contenir entre 2 et 50 caractères.');
 }
 
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-    die("Adresse email invalide.");
+    retourFormulaireAgent('L’adresse e-mail n’est pas valide. Exemple : prenom.nom@mairie.fr');
 }
 
 $roles_valides = ['agent', 'responsable'];
-if (!in_array($role, $roles_valides)) {
-    die("Rôle invalide.");
+if (!in_array($role, $roles_valides, true)) {
+    retourFormulaireAgent('Choisissez un rôle : agent ou responsable.');
 }
 
 $acces_valides = ['agent', 'manager', 'admin'];
 if (!in_array($niveau_acces, $acces_valides, true)) {
-    die("Niveau d'accès invalide.");
+    retourFormulaireAgent('Choisissez un niveau d’accès.');
 }
 
 // Un manager ne peut pas créer d'administrateur (anti-élévation de privilèges)
@@ -86,23 +100,18 @@ if ($niveau_acces === 'admin' && $niveau_createur !== 'admin') {
 }
 
 /* ---------------------------------------------------------
-   5) Vérifier si le service existe
+   6) Vérifier si le service existe, puis si l'e-mail est libre
 --------------------------------------------------------- */
 $check_service = $pdo->prepare("SELECT id FROM services WHERE id = ?");
 $check_service->execute([$service_id]);
-
-if ($check_service->rowCount() === 0) {
-    die("Service inexistant.");
+if ($check_service->fetchColumn() === false) {
+    retourFormulaireAgent('Choisissez le service de l’agent dans la liste.');
 }
 
-/* ---------------------------------------------------------
-   6) Vérifier si l'email existe déjà
---------------------------------------------------------- */
 $check = $pdo->prepare("SELECT id FROM agents WHERE email = ?");
 $check->execute([$email]);
-
-if ($check->rowCount() > 0) {
-    die("Un agent avec cet email existe déjà.");
+if ($check->fetchColumn() !== false) {
+    retourFormulaireAgent('Un agent utilise déjà cette adresse e-mail.');
 }
 
 /* ---------------------------------------------------------
@@ -191,6 +200,6 @@ journal_securite('creation_agents.log', "Agent créé : $email (niveau $niveau_a
 /* ---------------------------------------------------------
    11) Redirection
 --------------------------------------------------------- */
+$_SESSION['creation_attempts'] = 0; // création réussie : le compteur d'essais repart de zéro
 header("Location: confirmation_creation_agent.php");
 exit;
-?>

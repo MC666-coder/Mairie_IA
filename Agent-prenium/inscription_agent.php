@@ -8,7 +8,7 @@ session_set_cookie_params([
 /* session_init.php : initialisation de la session pour les agents */
 require_once __DIR__ . '/../Backend/Config/session_init.php';
 require_once __DIR__ . '/../Backend/Middleware/auth.php';
-require_once __DIR__ . '/../Backend/Fonctions/formulaire_auth.php';
+require_once __DIR__ . '/../Backend/Fonctions/gabarit_agent.php'; // barre latérale, agent.css
 require_once __DIR__ . '/../Backend/Config/db.php';
 
 // Seul un manager ou un admin connecté peut créer un compte agent
@@ -18,16 +18,51 @@ $niveau_createur = exiger_niveau(['manager', 'admin']);
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
+
+/* Agent connecté (barre latérale) */
+$stmt = $pdo->prepare("
+    SELECT a.nom AS nom_agent, a.prenom AS prenom_agent, a.role, a.niveau_acces, s.nom_service AS Nom_service
+    FROM agents a LEFT JOIN services s ON a.service_id = s.id
+    WHERE a.id = ?
+");
+$stmt->execute([(int) $_SESSION['agent_id']]);
+$agent = $stmt->fetch(PDO::FETCH_ASSOC) ?: [];
+
+/* Services, rôles et niveaux proposés */
+$services = [];
+foreach ($pdo->query("SELECT id, nom_service FROM services ORDER BY nom_service") as $service) {
+    $services[(int) $service['id']] = $service['nom_service'];
+}
+$roles = ['agent' => 'Agent', 'responsable' => 'Responsable'];
+
+// Niveau d'accès : ce que la personne pourra faire (Admin seulement si le créateur est admin)
+$niveaux = [
+    'agent'   => ['Agent',   'Traite les demandes de son service et échange avec les citoyens.', 'utilisateur'],
+    'manager' => ['Manager', 'Comme un agent, et peut aussi créer des comptes agents.',          'groupe'],
+];
+if ($niveau_createur === 'admin') {
+    $niveaux['admin'] = ['Administrateur', 'Tous les droits, y compris créer d’autres administrateurs.', 'bouclier'];
+}
+
+/* Erreur renvoyée par le traitement et saisie conservée (affichées une seule fois) */
+$erreur = (string) ($_SESSION['creation_agent_erreur'] ?? '');
+$saisie = array_merge(
+    ['nom_agent' => '', 'prenom_agent' => '', 'email_agent' => '', 'service_id' => '', 'role' => 'agent', 'niveau_acces' => 'agent'],
+    array_map('strval', (array) ($_SESSION['creation_agent_saisie'] ?? []))
+);
+unset($_SESSION['creation_agent_erreur'], $_SESSION['creation_agent_saisie']);
+if (!isset($niveaux[$saisie['niveau_acces']])) {
+    $saisie['niveau_acces'] = 'agent';
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Créer un agent - Portail Agent</title>
-    <link rel="stylesheet" href="../Frontend/assets/css/style.css?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/css/style.css') ?>"/>
+    <title>Créer un agent - Espace agent</title>
+    <?= feuillesAgent() ?>
 
-    <!-- Content Security Policy stricte -->
     <meta http-equiv="Content-Security-Policy"
           content="default-src 'self';
                    img-src 'self' data:;
@@ -35,137 +70,144 @@ if (empty($_SESSION['csrf_token'])) {
                    script-src 'self';
                    object-src 'none';
                    base-uri 'self';
-                   frame-ancestors 'none';">
+                   connect-src 'self' https://generativelanguage.googleapis.com;">
 </head>
 
 <body>
-<div class="page-wrapper">
 
-    <!-- HEADER PREMIUM -->
-    <header id="header-agent">
+<?= debutPageAgent('agents', $agent) ?>
 
-        <div class="rf-banner">
-            <span class="rf-title">République Française</span>
-            <span class="rf-subtitle">Liberté • Égalité • Fraternité</span>
+<main class="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
+
+    <a href="dashboard_agent.php" class="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 -ml-2 text-sm font-semibold text-encre-500 transition hover:bg-white hover:text-encre-900">
+        <?= icone('fleche-gauche') ?> Tableau de bord
+    </a>
+
+    <div class="mt-3">
+        <h1 class="text-2xl font-extrabold tracking-tight text-encre-900 sm:text-3xl">Créer un agent</h1>
+        <p class="mt-1 text-sm text-encre-500">Le nouvel agent recevra un e-mail pour activer son compte et choisir son mot de passe.</p>
+    </div>
+
+    <?php if ($erreur !== ''): ?>
+        <div class="mt-5 flex items-start gap-2 rounded-xl bg-red-50 px-4 py-3 text-sm font-medium text-red-800 ring-1 ring-red-600/20" role="alert">
+            <?= icone('croix', 'mt-0.5') ?> <?= eAgent($erreur) ?>
         </div>
+    <?php endif; ?>
 
-        <div class="header-main">
-            <!-- Page réservée aux managers : pas les onglets du site public, seulement le retour -->
-            <nav id="nav-agent" aria-label="Espace agent">
-                <a href="dashboard_agent.php" class="nav-btn"><?= icone('fleche-gauche') ?> Retour au tableau de bord</a>
-            </nav>
-        </div>
+    <form id="form-creer-agent" action="traitement_création_agent.php" method="POST" autocomplete="off"
+          class="mt-6 grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
 
-    </header>
+        <!-- CSRF -->
+        <input type="hidden" name="csrf_token" value="<?= eAgent($_SESSION['csrf_token']) ?>">
 
-    <!-- HERO SECTION -->
-    <section class="hero-page">
-        <div class="hero-overlay"></div>
-        <div class="hero-content">
-            <h1>Créer un nouvel agent</h1>
-            <p>Ajoutez un agent à votre service. Il recevra un email pour activer son compte.</p>
-        </div>
-    </section>
+        <!-- ============ FORMULAIRE ============ -->
+        <div class="carte-agent grid gap-6">
 
-    <!-- CONTENU PRINCIPAL -->
-    <main id="content_portail_citoyen">
-
-        <section class="connexion-section">
-            <?php
-            $services = [];
-            foreach ($pdo->query("SELECT id, nom_service FROM services ORDER BY nom_service") as $service) {
-                $services[(int) $service['id']] = $service['nom_service'];
-            }
-            $niveaux = ['agent' => 'Agent', 'manager' => 'Manager'];
-            if ($niveau_createur === 'admin') {
-                $niveaux['admin'] = 'Administrateur';
-            }
-            ?>
-            <div class="carte-auth carte-auth-large">
-                <?= retourAuth('dashboard_agent.php', 'Tableau de bord') ?>
-                <?= enteteAuth('inscription', 'Nouvel agent', 'Il recevra un e-mail pour activer son compte et choisir son mot de passe') ?>
-
-                <form action="traitement_création_agent.php" method="POST" autocomplete="off">
-
-                    <!-- CSRF -->
-                    <input type="hidden" name="csrf_token"
-                           value="<?= htmlspecialchars($_SESSION['csrf_token'], ENT_QUOTES, 'UTF-8') ?>">
-
-                    <p class="carte-auth-section">Identité</p>
-                    <div class="champs-auth-duo">
-                        <?= champAuth('nom_agent', 'Nom', 'text', 'utilisateur') ?>
-                        <?= champAuth('prenom_agent', 'Prénom', 'text', 'utilisateur') ?>
+            <!-- Identité -->
+            <section class="grid gap-4" aria-labelledby="titre-identite">
+                <h2 id="titre-identite" class="etiquette-agent">Identité</h2>
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label for="nom_agent" class="text-sm font-semibold text-encre-800">Nom</label>
+                        <input type="text" id="nom_agent" name="nom_agent" required minlength="2" maxlength="50"
+                               value="<?= eAgent($saisie['nom_agent']) ?>" class="champ-agent mt-1 w-full" placeholder="Durand">
                     </div>
-                    <?= champAuth('email_agent', 'Adresse e-mail professionnelle', 'email', 'courrier', '', '',
-                                  'Le lien d’activation sera envoyé à cette adresse.') ?>
-
-                    <p class="carte-auth-section">Affectation et droits</p>
-                    <?= selectAuth('service_id', 'Service', 'mairie', $services) ?>
-                    <div class="champs-auth-duo">
-                        <?= selectAuth('role', 'Rôle', 'mallette', ['agent' => 'Agent', 'responsable' => 'Responsable']) ?>
-                        <?= selectAuth('niveau_acces', 'Niveau d’accès', 'bouclier', $niveaux) ?>
+                    <div>
+                        <label for="prenom_agent" class="text-sm font-semibold text-encre-800">Prénom</label>
+                        <input type="text" id="prenom_agent" name="prenom_agent" required minlength="2" maxlength="50"
+                               value="<?= eAgent($saisie['prenom_agent']) ?>" class="champ-agent mt-1 w-full" placeholder="Marie">
                     </div>
+                </div>
+                <div>
+                    <label for="email_agent" class="text-sm font-semibold text-encre-800">Adresse e-mail professionnelle</label>
+                    <input type="email" id="email_agent" name="email_agent" required maxlength="150"
+                           value="<?= eAgent($saisie['email_agent']) ?>" class="champ-agent mt-1 w-full" placeholder="marie.durand@mairie.fr"
+                           aria-describedby="aide-email">
+                    <p id="aide-email" class="mt-1 text-xs text-encre-500">Le lien d’activation sera envoyé à cette adresse.</p>
+                </div>
+            </section>
 
-                    <button type="submit" class="btn-submit">Créer l’agent</button>
-                </form>
+            <!-- Affectation -->
+            <section class="grid gap-4 border-t border-encre-100 pt-5" aria-labelledby="titre-affectation">
+                <h2 id="titre-affectation" class="etiquette-agent">Affectation</h2>
+                <div class="grid gap-4 sm:grid-cols-2">
+                    <div>
+                        <label for="service_id" class="text-sm font-semibold text-encre-800">Service</label>
+                        <select id="service_id" name="service_id" required class="champ-agent mt-1 w-full">
+                            <option value="">Choisir un service…</option>
+                            <?php foreach ($services as $id => $nom): ?>
+                                <option value="<?= $id ?>" <?= $saisie['service_id'] === (string) $id ? 'selected' : '' ?>><?= eAgent($nom) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="role" class="text-sm font-semibold text-encre-800">Rôle</label>
+                        <select id="role" name="role" required class="champ-agent mt-1 w-full">
+                            <?php foreach ($roles as $cle => $libelle): ?>
+                                <option value="<?= $cle ?>" <?= $saisie['role'] === $cle ? 'selected' : '' ?>><?= $libelle ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                </div>
+            </section>
 
-                <p class="carte-auth-pied"><a href="dashboard_agent.php">Annuler et revenir au tableau de bord</a></p>
+            <!-- Niveau d'accès : cartes qui expliquent les droits -->
+            <fieldset class="m-0 min-w-0 border-0 border-t border-encre-100 p-0 pt-5">
+                <legend class="etiquette-agent float-left mb-3 w-full">Niveau d’accès</legend>
+                <div class="clear-left grid gap-2">
+                    <?php foreach ($niveaux as $cle => [$libelle, $description, $icone]): ?>
+                        <label class="flex cursor-pointer items-start gap-3 rounded-xl bg-encre-50 p-4 ring-1 ring-encre-900/10 transition hover:ring-marque-500/40 has-[:checked]:ring-2 has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-marque-500 <?= $cle === 'admin'
+                                   ? 'has-[:checked]:bg-amber-50 has-[:checked]:ring-amber-500'
+                                   : 'has-[:checked]:bg-marque-50 has-[:checked]:ring-marque-600' ?>">
+                            <input type="radio" name="niveau_acces" value="<?= $cle ?>" class="sr-only" required
+                                   data-libelle="<?= eAgent($libelle) ?>"
+                                   <?= $saisie['niveau_acces'] === $cle ? 'checked' : '' ?>>
+                            <span class="grid size-9 shrink-0 place-items-center rounded-lg bg-white text-base text-marque-700 ring-1 ring-encre-900/5"><?= icone($icone) ?></span>
+                            <span class="min-w-0">
+                                <span class="block text-sm font-bold text-encre-900"><?= eAgent($libelle) ?></span>
+                                <span class="block text-xs text-encre-600"><?= eAgent($description) ?></span>
+                            </span>
+                        </label>
+                    <?php endforeach; ?>
+                </div>
+                <?php if (isset($niveaux['admin'])): ?>
+                    <p class="mt-2 flex items-start gap-1.5 text-xs text-amber-800"><?= icone('alerte', 'mt-0.5 shrink-0') ?> Réservez le niveau Administrateur aux personnes de confiance : il donne tous les droits.</p>
+                <?php endif; ?>
+            </fieldset>
+        </div>
+
+        <!-- ============ APERÇU (rempli en direct par creer_agent.js) ============ -->
+        <aside class="flex flex-col gap-4 lg:sticky lg:top-8" aria-label="Aperçu de la fiche de l’agent">
+            <div class="overflow-hidden rounded-2xl bg-encre-900 p-5 text-white shadow-lg">
+                <p class="text-xs font-semibold uppercase tracking-wider text-encre-400">Aperçu de la fiche</p>
+                <div class="mt-4 flex items-center gap-3">
+                    <span id="apercu-initiales" class="grid size-12 shrink-0 place-items-center rounded-full bg-marque-600 text-base font-bold">?</span>
+                    <div class="min-w-0">
+                        <p id="apercu-nom" class="truncate text-base font-bold" data-vide="Nouvel agent">Nouvel agent</p>
+                        <p id="apercu-email" class="truncate text-xs text-encre-400" data-vide="adresse e-mail">adresse e-mail</p>
+                    </div>
+                </div>
+                <dl class="mt-5 grid gap-2 border-t border-white/10 pt-4 text-sm">
+                    <div class="flex justify-between gap-3"><dt class="text-encre-400">Service</dt><dd id="apercu-service" class="text-right font-medium" data-vide="—">—</dd></div>
+                    <div class="flex justify-between gap-3"><dt class="text-encre-400">Rôle</dt><dd id="apercu-role" class="text-right font-medium" data-vide="—">—</dd></div>
+                    <div class="flex justify-between gap-3"><dt class="text-encre-400">Accès</dt><dd id="apercu-niveau" class="text-right font-medium" data-vide="—">—</dd></div>
+                </dl>
             </div>
-        </section>
 
-    </main>
+            <div class="carte-agent p-4! text-sm text-encre-600">
+                <p class="flex items-start gap-2"><?= icone('courrier', 'mt-0.5 shrink-0 text-marque-600') ?> Un e-mail d’activation, valable 24 heures, sera envoyé à l’agent.</p>
+            </div>
 
-    <!-- BANDE TRICOLORE -->
-    <div class="bande-tricolore">
-        <div class="bleu"></div>
-        <div class="blanc"></div>
-        <div class="rouge"></div>
-    </div>
+            <button type="submit" class="bouton-agent w-full py-3">
+                <?= icone('inscription') ?> Créer l’agent
+            </button>
+            <a href="dashboard_agent.php" class="text-center text-sm font-semibold text-encre-500 hover:text-encre-800">Annuler</a>
+        </aside>
+    </form>
+</main>
 
-</div>
-
-<!-- FOOTER PREMIUM -->
-<footer id="footer-premium">
-
-    <div class="footer-content">
-
-        <div class="footer-col">
-            <h3 class="footer-title">Commune de L’Aiguillon-sur-Vie</h3>
-            <p class="footer-slogan">
-                Vos idées, Notre action,<br>
-                Partageons la réussite de L'Aiguillon-sur-Vie.
-            </p>
-        </div>
-
-        <div class="footer-col">
-            <h4>Informations légales</h4>
-            <ul class="footer-links">
-                <li><a href="mentions-legales.php">Mentions légales</a></li>
-                <li><a href="politique-confidentialite.php">Politique de confidentialité</a></li>
-                <li><a href="accessibilite.php">Accessibilité</a></li>
-                <li><a href="rgpd.php">Données personnelles (RGPD)</a></li>
-            </ul>
-        </div>
-
-        <div class="footer-col">
-            <h4>Coordonnées</h4>
-            <p>Mairie de L’Aiguillon-sur-Vie</p>
-            <p>Adresse : [Ton adresse ici]</p>
-            <p>Téléphone : [Ton numéro]</p>
-            <p>Email : [Ton email]</p>
-
-            <h4 style="margin-top:15px;">Horaires</h4>
-            <p>Lun–Ven : 9h00–12h00 / 14h00–17h00</p>
-            <p>Samedi : 9h00–12h00</p>
-        </div>
-
-    </div>
-
-    <div class="footer-bottom">
-        &copy; 2026 - Commune de L’Aiguillon-sur-Vie — Tous droits réservés
-    </div>
-
-</footer>
+<?= finPageAgent() ?>
+<script src="assets/js/creer_agent.js?v=<?= @filemtime(__DIR__ . '/assets/js/creer_agent.js') ?>" defer></script>
 
 </body>
 </html>
