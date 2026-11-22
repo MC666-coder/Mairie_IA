@@ -62,6 +62,14 @@ $saisie = array_merge(
 );
 unset($_SESSION['erreur_demande'], $_SESSION['saisie_demande']);
 
+// Arrivée depuis la page Services (« Faire une demande ») : service déjà choisi,
+// seulement s'il existe dans la liste (sinon on l'ignore)
+$serviceDemande = (string) ($_GET['service'] ?? '');
+if ($saisie['services_id'] === '' && ctype_digit($serviceDemande)
+    && in_array($serviceDemande, array_map('strval', array_column($listeServices, 'id')), true)) {
+    $saisie['services_id'] = $serviceDemande;
+}
+
 /* ---------------------------------------
    Génération du token CSRF
 ---------------------------------------- */
