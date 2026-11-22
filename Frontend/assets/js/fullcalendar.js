@@ -41,6 +41,10 @@ document.addEventListener("DOMContentLoaded", () => {
         moreLinkText: n => `+ ${n} autre${n > 1 ? "s" : ""}`,
         noEventsText: "Aucun événement sur cette période",
         eventTimeFormat: { hour: "2-digit", minute: "2-digit", hour12: false },
+        // Vue « Mois » : étiquettes pleines à la couleur du service, avec le titre
+        // (l'heure est dans l'infobulle et dans la vue « Liste »)
+        eventDisplay: "block",
+        views: { dayGridMonth: { displayEventTime: false } },
 
         events(info, succes, echec) {
             const params = new URLSearchParams({
