@@ -1,317 +1,517 @@
 /* ================================================================
    08-chatbot.css
-   Assistant IA citoyen (chatbot) : fenêtre, messages, bouton flottant, brouillon de demande
+   Assistant IA citoyen (Frontend/Portail_citoyen.php)
+   - fenêtre flottante AU-DESSUS du bouton rond (le bouton ne cache plus « Envoyer »)
+   - bouton rond : bulle pour ouvrir, croix quand la fenêtre est ouverte
+   - sur téléphone : la fenêtre prend tout l'écran
+   Tout est rangé sous #chatbot / #ia-toggle-btn : rien ne déborde sur les autres pages.
    ================================================================ */
 
-/* Message utilisateur */
-.user {
-    background: #dce6ff;
-    color: #1A2E5A;
-    align-self: flex-end;
-    border-left: 4px solid #002395;
+:root {
+    --chat-bleu: #003b8e;
+    --chat-indigo: #4f46e5;
+    --chat-fond: #f6f8fc;
+    --chat-bord: #e3e8f2;
+    --chat-texte: #1e293b;
+    --chat-doux: #64748b;
+    --chat-bas: 24px;     /* distance du bouton au bas de l'écran */
+    --chat-bouton: 56px;  /* taille du bouton rond */
 }
 
-/* Message IA */
-.bot {
-    background: #ffffff;
-    color: #333;
-    align-self: flex-start;
-    border-left: 4px solid #ED2939;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-}
-
-#message {
-    flex: 1;
-    padding: 12px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 15px;
-}
-
-#send {
-    margin-left: 10px;
-    padding: 12px 18px;
-    background: #002395;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: 0.2s;
-}
-
-#send:hover {
-    background: #ED2939;
-}
-
-/* --- Messages --- */
-.message {
-    max-width: 80%;
-    padding: 10px 14px;
-    margin-bottom: 10px;
-    border-radius: 12px;
-    line-height: 1.4;
-    font-size: 14px;
-    animation: fadeIn 0.2s ease-in-out;
-}
-
-.user-message {
-    background: #d9eaff;
-    align-self: flex-end;
-    border-bottom-right-radius: 2px;
-}
-
-.bot-message {
-    background: #ffffff;
-    border: 1px solid #dcdcdc;
-    align-self: flex-start;
-    border-bottom-left-radius: 2px;
-}
-
-#chat-input button:hover {
-    background: #00408f;
-}
-
-/* loading de l'ia */
-#ia-loading {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 8px;
-    color: #444;
-    font-size: 14px;
-    font-style: italic;
-}
-
-.loader {
-    width: 16px;
-    height: 16px;
-    border: 3px solid #ccc;
-    border-top-color: #0078ff;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-}
-
-/* --- BOUTON FLOTTANT IA --- */
+/* ---------- Bouton rond ---------- */
 .ia-floating-btn {
     position: fixed;
-    bottom: 25px;
-    right: 25px;
-    background: #003b8e;
-    border: none;
-    border-radius: 50%;
-    width: 65px;
-    height: 65px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-    transition: 0.3s ease;
+    right: 24px;
+    bottom: var(--chat-bas);
     z-index: 9999;
+    display: grid;
+    place-items: center;
+    width: var(--chat-bouton);
+    height: var(--chat-bouton);
+    border: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--chat-bleu), var(--chat-indigo));
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 10px 25px -5px rgba(0, 59, 142, 0.45);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
-
 .ia-floating-btn:hover {
-    background: #002d6b;
-    transform: scale(1.05);
+    transform: scale(1.06);
+    box-shadow: 0 14px 30px -6px rgba(0, 59, 142, 0.55);
 }
-
-/* Tooltip IA */
-.ia-floating-btn::after {
-    content: "Assistant IA";
-    position: absolute;
-    right: 75px;
-    bottom: 18px;
-    background: #003b8e;
-    color: white;
-    padding: 6px 12px;
-    border-radius: 6px;
-    font-size: 14px;
+.ia-floating-btn:focus-visible {
+    outline: 3px solid #93c5fd;
+    outline-offset: 3px;
+}
+.ia-floating-btn > span {
+    grid-area: 1 / 1;
+    display: grid;
+    transition: opacity 0.2s ease, transform 0.25s ease;
+}
+.ia-floating-btn .icone-fermer,
+.ia-floating-btn[aria-expanded="true"] .icone-ouvrir {
     opacity: 0;
-    pointer-events: none;
-    white-space: nowrap;
-    transition: opacity 0.25s ease;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    transform: rotate(-90deg) scale(0.6);
 }
-
-.ia-floating-btn:hover::after {
+.ia-floating-btn[aria-expanded="true"] .icone-fermer {
     opacity: 1;
+    transform: none;
 }
 
-/* --- CHATBOT PREMIUM SLIDE-IN --- */
+/* ---------- Fenêtre ---------- */
 #chatbot {
-    margin: 40px auto;
-    border: 2px solid #1A2E5A;
-    margin-top: 40px;
-    border-radius: 12px;
-    overflow: hidden;
-    font-family: "Segoe UI", sans-serif;
     position: fixed;
-    bottom: 0;
-    right: 0;
-    width: 380px;
-    height: 520px;
-    background: white;
-    border-left: 3px solid #003b8e;
-    border-top: 3px solid #003b8e;
-    box-shadow: -4px 0 12px rgba(0,0,0,0.2);
+    right: 24px;
+    bottom: calc(var(--chat-bas) + var(--chat-bouton) + 14px); /* au-dessus du bouton */
+    z-index: 9998;
     display: flex;
     flex-direction: column;
-    transition: transform 0.35s ease;
-    z-index: 9998;
-}
-
-.chatbot-hidden {
-    transform: translateX(110%);
-}
-
-.chatbot-visible {
-    transform: translateX(0);
-}
-
-/* --- En-tête du chatbot --- */
-#chatbot-header {
-    letter-spacing: 1px;
-    border-radius: 8px 8px 0 0;
-    font-size: 16px;
-    background: #003b8e;
-    color: white;
-    padding: 12px;
-    font-weight: bold;
-    text-align: center;
-    border-bottom: 2px solid #002d6b;
-}
-
-/* --- Fenêtre de chat --- */
-#chat-window {
-    height: 250px;
-    border: 1px solid #ccc;
-    background: #f5f7fa;
-    flex: 1;
-    padding: 10px;
-    overflow-y: auto;
-}
-
-/* --- Zone d'entrée --- */
-#chat-input {
-    gap: 10px;
-    margin-top: 10px;
-    padding: 10px;
-    background: #ffffff;
-    display: flex;
-    border-top: 1px solid #ddd;
-}
-
-#chat-input input {
-    border-radius: 8px;
-    outline: none;
-    flex: 1;
-    padding: 10px;
-    border: none;
-}
-
-#chat-input button {
-    margin-left: 8px;
-    border-radius: 8px;
-    font-weight: bold;
-    background: #003b8e;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    cursor: pointer;
-}
-
-/* --- Chatbot : carte de confirmation d'une demande préparée par l'IA --- */
-.brouillon-demande {
-    margin: 8px 0;
-    padding: 12px;
-    border: 2px solid #000091;
-    border-radius: 8px;
-    background: #f5f5fe;
-    color: #161616;
-    font-size: 0.95rem;
-}
-
-.brouillon-demande .brouillon-infos {
-    margin: 6px 0;
-    color: #3a3a3a;
-}
-
-.brouillon-demande textarea {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 8px;
-    font: inherit;
-    border: 1px solid #929292;
-    border-radius: 4px;
-    resize: vertical;
-}
-
-.brouillon-demande .brouillon-aide {
-    margin: 6px 0;
-    font-size: 0.85rem;
-    color: #666;
-}
-
-.brouillon-demande .brouillon-boutons {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.brouillon-demande button {
-    padding: 8px 14px;
-    border: none;
-    border-radius: 4px;
-    background: #000091;
-    color: #fff;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.brouillon-demande button.secondaire {
+    width: min(390px, calc(100vw - 32px));
+    height: min(600px, calc(100vh - 140px));
+    overflow: hidden;
+    border-radius: 24px;
     background: #fff;
-    color: #000091;
-    border: 1px solid #000091;
+    color: var(--chat-texte);
+    font-family: inherit;
+    box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(15, 23, 42, 0.06);
+    transform-origin: bottom right;
+    transition: opacity 0.2s ease, transform 0.25s ease, visibility 0.25s;
+}
+#chatbot.chatbot-hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(16px) scale(0.96);
+}
+#chatbot.chatbot-visible {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
 }
 
-.brouillon-demande button:disabled {
+/* En-tête : avatar, nom, « En ligne », croix */
+#chatbot-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 14px 14px 16px;
+    background: linear-gradient(135deg, var(--chat-bleu), #1e3a9e 55%, var(--chat-indigo));
+    color: #fff;
+}
+#chatbot .chatbot-avatar {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.16);
+    font-size: 20px;
+}
+#chatbot .chatbot-identite {
+    flex: 1;
+    min-width: 0;
+}
+#chatbot .chatbot-identite h2 {
+    margin: 0;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+#chatbot .chatbot-identite p {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 2px 0 0;
+    color: #c7d7f5;
+    font-size: 12px;
+}
+#chatbot .chatbot-pastille {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #4ade80;
+    box-shadow: 0 0 0 3px rgba(74, 222, 128, 0.25);
+}
+#chatbot-fermer {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: #fff;
+    font-size: 20px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+#chatbot-fermer:hover {
+    background: rgba(255, 255, 255, 0.16);
+}
+
+/* Fil de la conversation */
+#chat-window {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+    overflow-y: auto;
+    background: var(--chat-fond);
+    border: 0;
+}
+#chatbot .message {
+    max-width: 85%;
+    margin: 0;
+    padding: 10px 14px;
+    border-radius: 18px;
+    font-size: 14px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    animation: chatApparition 0.2s ease-out;
+}
+#chatbot .bot-message {
+    align-self: flex-start;
+    border-bottom-left-radius: 6px;
+    background: #fff;
+    color: var(--chat-texte);
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 0 0 1px var(--chat-bord);
+}
+#chatbot .user-message {
+    align-self: flex-end;
+    border-bottom-right-radius: 6px;
+    background: linear-gradient(135deg, var(--chat-bleu), var(--chat-indigo));
+    color: #fff;
+}
+@keyframes chatApparition {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: none; }
+}
+
+/* Suggestions de l'accueil */
+#chatbot .chat-suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+#chatbot .chat-suggestions button {
+    padding: 7px 12px;
+    border: 1px solid #c9d6ee;
+    border-radius: 999px;
+    background: #fff;
+    color: var(--chat-bleu);
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+#chatbot .chat-suggestions button:hover {
+    border-color: var(--chat-bleu);
+    background: #e6eef9;
+}
+
+/* « L'assistant rédige… » avec trois points animés */
+#ia-loading {
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--chat-fond);
+    color: var(--chat-doux);
+    font-size: 13px;
+}
+#chatbot .points-attente {
+    display: inline-flex;
+    gap: 3px;
+}
+#chatbot .points-attente span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--chat-doux);
+    animation: chatPoint 1s infinite ease-in-out;
+}
+#chatbot .points-attente span:nth-child(2) { animation-delay: 0.15s; }
+#chatbot .points-attente span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes chatPoint {
+    0%, 80%, 100% { opacity: 0.3; transform: translateY(0); }
+    40%           { opacity: 1;   transform: translateY(-3px); }
+}
+
+/* Zone de saisie */
+#chat-input {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 12px;
+    border-top: 1px solid var(--chat-bord);
+    background: #fff;
+}
+#chatbot #message {
+    flex: 1;
+    min-width: 0;
+    padding: 11px 16px;
+    border: 1px solid var(--chat-bord);
+    border-radius: 999px;
+    background: var(--chat-fond);
+    color: var(--chat-texte);
+    font: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+#chatbot #message:focus {
+    border-color: var(--chat-bleu);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(0, 59, 142, 0.12);
+}
+#chatbot #send {
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+    width: 44px;
+    height: 44px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--chat-bleu), var(--chat-indigo));
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    transition: transform 0.15s ease, filter 0.15s ease;
+}
+#chatbot #send:hover {
+    filter: brightness(1.1);
+    transform: scale(1.05);
+}
+#chatbot #send:disabled {
+    cursor: wait;
+    opacity: 0.5;
+    transform: none;
+}
+
+/* ---------- Choix « l'assistant prépare » / « je la fais moi-même » ---------- */
+#chatbot .choix-demande {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-self: flex-start;
+}
+
+/* ---------- Carte de confirmation d'une demande préparée par l'IA ---------- */
+#chatbot .brouillon-demande {
+    align-self: stretch;
+    padding: 14px;
+    border-radius: 18px;
+    background: #fff;
+    color: var(--chat-texte);
+    font-size: 14px;
+    box-shadow: 0 0 0 2px #c9d6ee;
+}
+#chatbot .brouillon-demande strong {
+    color: var(--chat-bleu);
+}
+#chatbot .brouillon-infos {
+    margin: 6px 0 10px;
+    color: var(--chat-doux);
+    font-size: 13px;
+}
+#chatbot .brouillon-demande textarea {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--chat-bord);
+    border-radius: 12px;
+    background: var(--chat-fond);
+    font: inherit;
+    font-size: 14px;
+    resize: vertical;
+    outline: none;
+}
+#chatbot .brouillon-demande textarea:focus {
+    border-color: var(--chat-bleu);
+    box-shadow: 0 0 0 4px rgba(0, 59, 142, 0.12);
+}
+#chatbot .brouillon-aide {
+    margin: 8px 0 12px;
+    color: var(--chat-doux);
+    font-size: 12px;
+}
+#chatbot .brouillon-boutons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+/* Boutons du choix et de la carte : pilule pleine / pilule claire */
+#chatbot .choix-demande button,
+#chatbot .brouillon-demande button {
+    padding: 9px 16px;
+    border: 0;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--chat-bleu), var(--chat-indigo));
+    color: #fff;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+#chatbot .choix-demande button.secondaire,
+#chatbot .brouillon-demande button.secondaire {
+    background: #fff;
+    color: var(--chat-bleu);
+    box-shadow: inset 0 0 0 1px #c9d6ee;
+}
+#chatbot .choix-demande button:focus-visible,
+#chatbot .brouillon-demande button:focus-visible,
+#chatbot .chat-suggestions button:focus-visible {
+    outline: 3px solid #93c5fd;
+    outline-offset: 2px;
+}
+#chatbot .brouillon-demande button:disabled {
     opacity: 0.6;
     cursor: wait;
 }
-
-/* --- Chatbot : choix « préparée par l'assistant » ou « je la fais moi-même » --- */
-.choix-demande {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin: 8px 0;
-}
-
-.choix-demande button {
-    padding: 8px 14px;
-    border: none;
-    border-radius: 4px;
-    background: #000091;
-    color: #fff;
-    font-weight: bold;
-    cursor: pointer;
-}
-
-.choix-demande button.secondaire {
-    background: #fff;
-    color: #000091;
-    border: 1px solid #000091;
-}
-
-.choix-demande button:focus-visible,
-.brouillon-demande button:focus-visible {
-    outline: 3px solid #0a76f6;
-    outline-offset: 2px;
-}
-
-.bot-message a.lien-creer-demande {
-    color: #000091;
-    font-weight: bold;
+#chatbot .bot-message a.lien-creer-demande {
+    color: var(--chat-bleu);
+    font-weight: 700;
     text-decoration: underline;
+}
+
+/* ---------- Téléphone : plein écran, le bouton rond s'efface ---------- */
+@media (max-width: 640px) {
+    #chatbot {
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        height: 100dvh;
+        border-radius: 0;
+    }
+    .ia-floating-btn {
+        right: 16px;
+        bottom: 16px;
+    }
+    .ia-floating-btn[aria-expanded="true"] {
+        opacity: 0;
+        pointer-events: none;
+    }
+}
+
+/* Moins d'animations si le système le demande */
+@media (prefers-reduced-motion: reduce) {
+    #chatbot,
+    #chatbot .message,
+    #chatbot .points-attente span,
+    .ia-floating-btn,
+    .ia-floating-btn > span {
+        animation: none;
+        transition: none;
+    }
+}
+
+/* ================================================================
+   Tête de robot animée dans le bouton rond (fenêtre fermée)
+   Cycle de 6 s, en boucle : le robot flotte doucement, cligne des yeux,
+   fait « coucou » de la tête (antenne qui rebondit) et un halo pulse
+   autour du bouton. Assez visible pour donner envie de cliquer,
+   assez lent pour ne pas fatiguer.
+   ================================================================ */
+.ia-floating-btn .robot {
+    overflow: visible;
+    animation: robotFlotte 3s ease-in-out infinite;
+}
+.ia-floating-btn .robot,
+.ia-floating-btn .robot-yeux,
+.ia-floating-btn .robot-antenne {
+    transform-box: fill-box;
+    transform-origin: center;
+}
+.ia-floating-btn .robot-antenne {
+    transform-origin: bottom center;
+    animation: robotAntenne 6s ease-in-out infinite;
+}
+.ia-floating-btn .robot-yeux {
+    animation: robotCligne 6s infinite;
+}
+/* « Coucou » de la tête : porté par le conteneur pour ne pas gêner le flottement */
+.ia-floating-btn[aria-expanded="false"] .icone-ouvrir {
+    animation: robotCoucou 6s ease-in-out infinite;
+}
+/* Halo qui s'élargit puis disparaît */
+.ia-floating-btn[aria-expanded="false"]::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    z-index: -1; /* sous la tête du robot */
+    background: rgba(79, 70, 229, 0.45);
+    animation: robotHalo 6s ease-out infinite;
+    pointer-events: none;
+}
+
+/* Bulle « Assistant IA » au survol et au clavier */
+.ia-floating-btn::after {
+    content: "Besoin d’aide ? Demandez à l’IA";
+    position: absolute;
+    right: calc(100% + 12px);
+    top: 50%;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: #0f172a;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    transform: translate(6px, -50%);
+    pointer-events: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.ia-floating-btn[aria-expanded="false"]:hover::after,
+.ia-floating-btn[aria-expanded="false"]:focus-visible::after {
+    opacity: 1;
+    transform: translate(0, -50%);
+}
+
+@keyframes robotFlotte {
+    0%, 100% { transform: translateY(1px); }
+    50%      { transform: translateY(-2px); }
+}
+@keyframes robotCligne {
+    0%, 44%, 50%, 100% { transform: scaleY(1); }
+    47%                { transform: scaleY(0.1); }
+}
+@keyframes robotCoucou {
+    0%, 70%, 100% { transform: rotate(0); }
+    75% { transform: rotate(-14deg); }
+    80% { transform: rotate(12deg); }
+    85% { transform: rotate(-8deg); }
+    90% { transform: rotate(4deg); }
+}
+@keyframes robotAntenne {
+    0%, 70%, 100% { transform: scaleY(1); }
+    76% { transform: scaleY(1.35); }
+    82% { transform: scaleY(0.85); }
+    88% { transform: scaleY(1.1); }
+}
+@keyframes robotHalo {
+    0%, 68% { transform: scale(1); opacity: 0; }
+    70%     { transform: scale(1); opacity: 0.7; }
+    100%    { transform: scale(1.6); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .ia-floating-btn .robot,
+    .ia-floating-btn .robot-yeux,
+    .ia-floating-btn .robot-antenne,
+    .ia-floating-btn .icone-ouvrir,
+    .ia-floating-btn::before {
+        animation: none !important;
+    }
 }

@@ -36,7 +36,7 @@
 @import url("site/07-actualites.css");
 
 /* Assistant IA citoyen (chatbot) : fenêtre, messages, bouton flottant, brouillon de demande */
-@import url("site/08-chatbot.css");
+@import url("site/08-chatbot.css?v=3"); /* ?v= : à augmenter après chaque changement, sinon les navigateurs gardent l’ancien fichier */
 
 /* Espace citoyen : tableau de bord, demandes, messagerie avec la mairie, documents */
 @import url("site/09-espace-citoyen.css");

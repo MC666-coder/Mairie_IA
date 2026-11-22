@@ -153,21 +153,6 @@ $tableau = donneesTableauCitoyen($pdo, $citoyenId);
             <p id="annonce-tableau" class="visually-hidden" aria-live="polite"></p>
         </section>
 
-        <!-- CHATBOT PREMIUM -->
-        <div id="chatbot" class="chatbot-hidden" data-user="<?= htmlspecialchars((string)$citoyenId) ?>">
-            <div id="chatbot-header"><?= icone('assistant') ?> Assistant IA de la Mairie</div>
-            <div id="chat-window"></div>
-
-            <div id="ia-loading" style="display:none;">
-                <div class="loader"></div>
-                <span>L’assistant rédige sa réponse…</span>
-            </div>
-
-            <div id="chat-input">
-                <input type="text" id="message" maxlength="500" placeholder="Écrivez dans votre langue… / Write in any language…" dir="auto">
-                <button id="send" type="button">Envoyer</button>
-            </div>
-        </div>
 
     </main>
 
@@ -177,13 +162,59 @@ $tableau = donneesTableauCitoyen($pdo, $citoyenId);
 <script src="assets/js/chatbot.js?v=<?= @filemtime(__DIR__ . '/assets/js/chatbot.js') ?>"></script>
 <script src="assets/js/tableau_citoyen.js?v=<?= @filemtime(__DIR__ . '/assets/js/tableau_citoyen.js') ?>"></script>
 
-<!-- BOUTON FLOTTANT IA -->
-<button id="ia-toggle-btn" class="ia-floating-btn">
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2">
-        <circle cx="12" cy="12" r="10"/>
-        <path d="M12 16v.01"/>
-        <path d="M12 8v4"/>
-    </svg>
+<!-- ASSISTANT IA : fenêtre flottante au-dessus du bouton.
+     Hors de <main> : l'animation d'apparition de <main> fausserait sa position fixe. (08-chatbot.css, chatbot.js, click_chatbot.js) -->
+<section id="chatbot" class="chatbot-hidden" role="dialog" aria-labelledby="chatbot-titre" aria-hidden="true"
+         data-user="<?= htmlspecialchars((string)$citoyenId) ?>">
+    <header id="chatbot-header">
+        <span class="chatbot-avatar"><?= icone('assistant') ?></span>
+        <div class="chatbot-identite">
+            <h2 id="chatbot-titre">Assistant de la mairie</h2>
+            <p><span class="chatbot-pastille"></span> En ligne · répond en quelques secondes</p>
+        </div>
+        <button type="button" id="chatbot-fermer" aria-label="Fermer l’assistant"><?= icone('fermer') ?></button>
+    </header>
+
+    <div id="chat-window" role="log" aria-live="polite" aria-label="Conversation avec l’assistant">
+        <!-- Accueil : retiré dès le premier message (chatbot.js) -->
+        <div class="message bot-message">
+            Bonjour <?= htmlspecialchars($citoyen['prenom_citoyen'] ?? '', ENT_QUOTES, 'UTF-8') ?> ! Je peux répondre à vos questions sur la mairie
+            et préparer une demande pour vous. Que puis-je faire ?
+        </div>
+        <div id="chat-suggestions" class="chat-suggestions">
+            <button type="button" data-suggestion="Quels sont les horaires de la mairie ?">Horaires de la mairie</button>
+            <button type="button" data-suggestion="Comment inscrire mon enfant à la cantine ?">Inscription à la cantine</button>
+            <button type="button" data-suggestion="Je veux signaler un lampadaire en panne.">Signaler un problème</button>
+            <button type="button" data-suggestion="Comment obtenir un acte de naissance ?">Acte de naissance</button>
+        </div>
+    </div>
+
+    <div id="ia-loading" style="display:none;" aria-live="polite">
+        <span class="points-attente"><span></span><span></span><span></span></span>
+        L’assistant rédige sa réponse…
+    </div>
+
+    <div id="chat-input">
+        <label for="message" class="sr-only">Votre message</label>
+        <input type="text" id="message" maxlength="500" autocomplete="off"
+               placeholder="Écrivez dans votre langue… / Write in any language…" dir="auto">
+        <button id="send" type="button" aria-label="Envoyer le message"><?= icone('envoyer') ?></button>
+    </div>
+</section>
+
+<!-- BOUTON FLOTTANT IA : bulle pour ouvrir, croix quand la fenêtre est ouverte -->
+<button id="ia-toggle-btn" class="ia-floating-btn" type="button" aria-controls="chatbot" aria-expanded="false">
+    <!-- Tête de robot animée (08-chatbot.css) : on comprend tout de suite que c'est l'IA -->
+    <span class="icone-ouvrir">
+        <svg class="robot" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <g class="robot-antenne"><path d="M12 8V4"/><circle cx="12" cy="3" r="1" fill="currentColor"/></g>
+            <rect x="4" y="8" width="16" height="12" rx="3"/>
+            <path d="M2 14h2"/><path d="M20 14h2"/>
+            <g class="robot-yeux"><path d="M9 13v2"/><path d="M15 13v2"/></g>
+        </svg>
+    </span>
+    <span class="icone-fermer"><?= icone('fermer') ?></span>
 </button>
 
 <script src="assets/js/click_chatbot.js?v=<?= @filemtime(__DIR__ . '/assets/js/click_chatbot.js') ?>"></script>

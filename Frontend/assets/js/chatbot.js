@@ -24,6 +24,14 @@ document.addEventListener("DOMContentLoaded", () => {
         "X-CSRF-Token": jeton
     };
 
+    // Suggestions de l'accueil : un clic envoie la question
+    document.getElementById("chat-suggestions")?.addEventListener("click", e => {
+        const bouton = e.target.closest("button[data-suggestion]");
+        if (bouton) {
+            sendMessage(bouton.dataset.suggestion);
+        }
+    });
+
     sendBtn.addEventListener("click", () => sendMessage());
     input.addEventListener("keydown", e => {
         if (e.key === "Enter") {
@@ -41,6 +49,8 @@ document.addEventListener("DOMContentLoaded", () => {
             return;
         }
 
+        // Dès le premier message, les suggestions de l'accueil disparaissent
+        document.getElementById("chat-suggestions")?.remove();
         addMessage(text, "user");
         if (texteImpose === undefined) {
             input.value = "";
