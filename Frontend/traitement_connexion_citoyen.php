@@ -67,16 +67,20 @@ $stmt = $pdo->prepare("
 $stmt->execute([$email_citoyen]);
 $citoyen = $stmt->fetch(PDO::FETCH_ASSOC);
 
-// Adresse inconnue
-if (!$citoyen) {
-    $_SESSION['login_attempts_citoyen']++;
-    erreurConnexion("Aucun compte citoyen n'est associé à cette adresse e-mail.", $emailSaisi);
-}
+/* Anti-énumération : on ne doit pas pouvoir deviner quelles adresses ont un compte.
+   - un seul message pour « adresse inconnue » et « mauvais mot de passe » ;
+   - le mot de passe est TOUJOURS vérifié, avec un vrai hachage bcrypt (coût 10) d'un
+     mot de passe aléatoire si l'adresse est inconnue ou le compte sans mot de passe :
+     le temps de réponse est le même dans tous les cas ;
+   - « adresse non confirmée » n'est dit qu'après le bon mot de passe. */
+const HACHAGE_FACTICE = '$2y$10$MzBlAb1zTuclB1UeZGAwqeZ7X/7Fja/XD5btCq.wEPCkh5pK/Fcga';
 
-// Mauvais mot de passe (ou compte sans mot de passe)
-if (!password_verify($password, (string) $citoyen['password'])) {
+$hachage = ($citoyen && !empty($citoyen['password'])) ? (string) $citoyen['password'] : HACHAGE_FACTICE;
+$motDePasseCorrect = password_verify($password, $hachage) && $hachage !== HACHAGE_FACTICE;
+
+if (!$citoyen || !$motDePasseCorrect) {
     $_SESSION['login_attempts_citoyen']++;
-    erreurConnexion("Mot de passe incorrect.", $emailSaisi);
+    erreurConnexion("Adresse e-mail ou mot de passe incorrect.", $emailSaisi);
 }
 
 // Compte pas encore confirmé : il faut d'abord cliquer sur le bouton reçu par e-mail

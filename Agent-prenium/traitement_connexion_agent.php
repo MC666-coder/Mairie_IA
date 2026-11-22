@@ -63,36 +63,37 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 }
 
 /* ---------------------------------------------------------
-   5) Récupération de l’agent
+   5) Vérification de l'agent et du mot de passe
+   Anti-énumération : on ne doit pas pouvoir deviner quelles adresses
+   sont des comptes agents. Donc :
+   - un seul message pour « adresse inconnue » et « mauvais mot de passe » ;
+   - le mot de passe est TOUJOURS vérifié (avec un hachage factice si
+     l'adresse est inconnue) : le temps de réponse est le même ;
+   - « compte pas encore activé » n'est dit qu'à celui qui a donné le bon
+     mot de passe (il prouve alors que c'est bien son compte).
 --------------------------------------------------------- */
+const MESSAGE_IDENTIFIANTS = "Adresse e-mail ou mot de passe incorrect.";
+// Vrai hachage bcrypt (coût 10, comme les mots de passe des agents) d'un mot de passe
+// aléatoire que personne ne connaît : sa vérification prend le même temps qu'une vraie
+const HACHAGE_FACTICE = '$2y$10$MzBlAb1zTuclB1UeZGAwqeZ7X/7Fja/XD5btCq.wEPCkh5pK/Fcga';
+
 $sql = $pdo->prepare("SELECT * FROM agents WHERE email = ?");
 $sql->execute([$email]);
 $agent = $sql->fetch();
 
-if (!$agent) {
-    erreurConnexion("Aucun compte agent n'est associé à cette adresse e-mail.", $email);
+$motDePasseCorrect = password_verify($password, $agent ? (string) $agent['mot_de_passe'] : HACHAGE_FACTICE);
+
+if (!$agent || !$motDePasseCorrect) {
+    require_once __DIR__ . '/../Backend/Config/app.php';
+    journal_securite('connexion.log', 'Échec de connexion agent'); // sans l'adresse ni le mot de passe
+    erreurConnexion(MESSAGE_IDENTIFIANTS, $email);
 }
 
 /* ---------------------------------------------------------
-   6) Vérification statut du compte
+   6) Compte pas encore activé (seulement après le bon mot de passe)
 --------------------------------------------------------- */
-if ($agent['statut'] !== 'actif') {
-    // Statut « inactif » : compte créé mais pas encore activé avec le lien reçu par e-mail
+if ($agent['statut'] !== 'actif' || (int) $agent['doit_definir_mot_de_passe'] === 1) {
     erreurConnexion("Votre compte n'est pas encore activé : cliquez sur le lien reçu par e-mail. Sans e-mail, contactez votre responsable.", $email);
-}
-
-/* ---------------------------------------------------------
-   7) Vérification que l’agent a défini son mot de passe
---------------------------------------------------------- */
-if ($agent['doit_definir_mot_de_passe'] == 1) {
-    erreurConnexion("Votre compte n'est pas encore activé : cliquez sur le lien reçu par e-mail pour choisir votre mot de passe.", $email);
-}
-
-/* ---------------------------------------------------------
-   8) Vérification du mot de passe
---------------------------------------------------------- */
-if (!password_verify($password, $agent['mot_de_passe'])) {
-    erreurConnexion("Mot de passe incorrect.", $email);
 }
 
 /* ---------------------------------------------------------
