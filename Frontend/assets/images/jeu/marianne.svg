@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Illustration d'un buste à identifier">
+  <rect width="400" height="300" fill="#f1f5f9"/>
+  <rect x="0" y="0" width="133" height="300" fill="#1e3a8a" opacity="0.12"/>
+  <rect x="267" y="0" width="133" height="300" fill="#b91c1c" opacity="0.12"/>
+  <!-- Socle -->
+  <rect x="140" y="250" width="120" height="30" rx="4" fill="#a8a29e" stroke="#57534e" stroke-width="3"/>
+  <!-- Buste -->
+  <path d="M130 255 Q135 205 175 195 H225 Q265 205 270 255Z" fill="#f5f5f4" stroke="#78716c" stroke-width="3"/>
+  <rect x="185" y="170" width="30" height="32" fill="#f5f5f4" stroke="#78716c" stroke-width="3"/>
+  <!-- Visage -->
+  <ellipse cx="200" cy="140" rx="38" ry="44" fill="#fafaf9" stroke="#78716c" stroke-width="3"/>
+  <path d="M184 135 q5 -4 10 0 M206 135 q5 -4 10 0" fill="none" stroke="#57534e" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M200 140 v14 q-3 2 -6 1" fill="none" stroke="#a8a29e" stroke-width="2" stroke-linecap="round"/>
+  <path d="M190 164 q10 6 20 0" fill="none" stroke="#a8a29e" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Cheveux -->
+  <path d="M162 150 Q150 185 168 200 M238 150 Q250 185 232 200" fill="none" stroke="#a8a29e" stroke-width="6" stroke-linecap="round"/>
+  <!-- Bonnet phrygien -->
+  <path d="M160 118 Q160 70 210 72 Q262 76 256 112 Q268 104 270 92 Q282 110 262 126 Q236 106 160 118Z" fill="#dc2626" stroke="#7f1d1d" stroke-width="3" stroke-linejoin="round"/>
+  <!-- Cocarde -->
+  <circle cx="178" cy="108" r="11" fill="#1d4ed8"/><circle cx="178" cy="108" r="7" fill="#fff"/><circle cx="178" cy="108" r="3.5" fill="#dc2626"/>
+</svg>

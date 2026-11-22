@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "css": "tailwindcss -i assets/css/tailwind-source.css -o assets/css/tailwind.css --minify",
-    "css:watch": "tailwindcss -i assets/css/tailwind-source.css -o assets/css/tailwind.css --watch"
+    "css:watch": "tailwindcss -i assets/css/tailwind-source.css -o assets/css/tailwind.css --watch",
+    "jeu": "vite build --config vite.jeu.config.js",
+    "jeu:watch": "vite build --config vite.jeu.config.js --watch"
   },
   "keywords": [],
   "author": "",
@@ -15,6 +17,7 @@
   "type": "module",
   "devDependencies": {
     "@tailwindcss/cli": "^4.3.5",
+    "@vitejs/plugin-react": "^5.2.0",
     "tailwindcss": "^4.3.5",
     "vite": "^7.3.1"
   },
@@ -23,6 +26,8 @@
     "@fullcalendar/daygrid": "^6.1.20",
     "@fullcalendar/list": "^6.1.20",
     "@fullcalendar/rrule": "^6.1.20",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "rrule": "^2.8.1"
   }
 }

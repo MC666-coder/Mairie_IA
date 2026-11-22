@@ -34,6 +34,7 @@ const MENU_PUBLIC = [
 const MENU_CITOYEN = [
     'tableau'  => ['Portail_citoyen.php', 'Tableau de bord', 'tableau'],
     'demande'  => ['nouvelle_demande.php', 'Créer une demande', 'plus'],
+    'jeu'      => ['Jeu-enigme.php', 'Énigmes', 'trophee'],
 ];
 
 /** Feuille Tailwind + script du menu (dans le <head>, APRÈS les autres feuilles de style). */

@@ -9,10 +9,11 @@
        $citoyenId = exigerCitoyen();
    ========================================================= */
 
-/** Page de retour acceptée : un fichier .php du dossier Frontend (jamais une adresse extérieure). */
+/** Page de retour acceptée : un fichier .php du dossier Frontend (jamais une adresse extérieure).
+ *  Nom de fichier : lettres, « _ » et « - » (ex. Jeu-enigme.php) ; jamais de « / », « : » ou « .. ». */
 function retourCitoyenValide(?string $retour): ?string
 {
-    if ($retour === null || !preg_match('/^[A-Za-z_]+\.php(\?[A-Za-z0-9_=&%-]*)?$/', $retour)) {
+    if ($retour === null || !preg_match('/^[A-Za-z_-]+\.php(\?[A-Za-z0-9_=&%-]*)?$/', $retour)) {
         return null;
     }
     $fichier = strtok($retour, '?');

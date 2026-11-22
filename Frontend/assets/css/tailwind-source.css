@@ -18,6 +18,7 @@
 @source "../../*.php";
 @source "../js/menu.js";
 @source "../js/nouvelle_demande.js";
+@source "../../jeu/src";
 @source "../../../Backend/Fonctions/demande_citoyen.php";
 @source "../../../Backend/Fonctions/horaires_mairie.php";
 @source "../../../Backend/Fonctions/gabarit_public.php";

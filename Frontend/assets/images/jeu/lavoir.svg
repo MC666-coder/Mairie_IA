@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Illustration d'un lieu à identifier">
+  <defs>
+    <linearGradient id="ciel" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bae6fd"/><stop offset="1" stop-color="#f0f9ff"/></linearGradient>
+    <linearGradient id="eau" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38bdf8"/><stop offset="1" stop-color="#0369a1"/></linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#ciel)"/>
+  <path d="M0 175 H400 V300 H0Z" fill="#86efac"/>
+  <!-- Bassin d'eau -->
+  <path d="M40 215 H360 L340 275 H60Z" fill="url(#eau)" stroke="#475569" stroke-width="3"/>
+  <path d="M80 238 q20 -8 40 0 t40 0 M200 250 q20 -8 40 0 t40 0" fill="none" stroke="#e0f2fe" stroke-width="3" stroke-linecap="round"/>
+  <!-- Pierres inclinées pour laver -->
+  <path d="M40 215 L70 198 H330 L360 215Z" fill="#d6d3d1" stroke="#57534e" stroke-width="3"/>
+  <!-- Toit -->
+  <rect x="70" y="120" width="10" height="80" fill="#78350f"/>
+  <rect x="320" y="120" width="10" height="80" fill="#78350f"/>
+  <rect x="195" y="120" width="10" height="80" fill="#78350f"/>
+  <path d="M40 125 L200 70 L360 125Z" fill="#b45309" stroke="#78350f" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M60 120 L200 76 L340 120" fill="none" stroke="#f59e0b" stroke-width="2"/>
+  <!-- Linge et battoir -->
+  <rect x="110" y="190" width="38" height="10" rx="3" fill="#fafaf9" stroke="#a8a29e"/>
+  <rect x="250" y="189" width="28" height="12" rx="3" fill="#bfdbfe" stroke="#93c5fd"/>
+  <path d="M160 196 l18 -14" stroke="#92400e" stroke-width="5" stroke-linecap="round"/>
+</svg>

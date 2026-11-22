@@ -1,0 +1,6 @@
+# Point d entrée du jeu d énigmes ; tout autre fichier ajouté ici
+# reste interdit au navigateur (liste blanche)
+Require all denied
+<FilesMatch "^api\.php$">
+    Require all granted
+</FilesMatch>
