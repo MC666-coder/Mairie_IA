@@ -1,9 +1,7 @@
 <?php
 /* session_init.php : initialisation de la session pour les agents */
 require_once __DIR__ . '/../Backend/Config/session_init.php';
-require_once __DIR__ . '/../Backend/Fonctions/carte_profil.php';
-require_once __DIR__ . '/../Backend/Fonctions/icones.php';
-
+require_once __DIR__ . '/../Backend/Fonctions/gabarit_agent.php'; // barre latérale, pastilles, assistant IA, agent.css
 require_once __DIR__ . '/../Backend/Config/db.php';
 
 /* ---------------------------------------------------------
@@ -14,13 +12,13 @@ if (!isset($_SESSION['agent_id'])) {
     exit;
 }
 
-$agent_id = $_SESSION['agent_id'];
+$agent_id = (int) $_SESSION['agent_id'];
 
 /* ---------------------------------------------------------
    2) Récupération des infos agent
 --------------------------------------------------------- */
 $sql = $pdo->prepare("
-    SELECT 
+    SELECT
         a.nom AS nom_agent,
         a.prenom AS prenom_agent,
         a.role,
@@ -40,414 +38,346 @@ if (!$agent) {
     exit;
 }
 
-$agent_id = $_SESSION['agent_id'];
+/* ---------------------------------------------------------
+   3) Filtres & recherche (valeurs inconnues ignorées : liste blanche)
+--------------------------------------------------------- */
+$q               = trim((string) ($_GET['q'] ?? ''));
+$filtre_statut   = (string) ($_GET['statut'] ?? '');
+$filtre_priorite = (string) ($_GET['priorite'] ?? '');
+$filtre_service  = (string) ($_GET['service_id'] ?? '');
+$filtre_agent    = (string) ($_GET['agent_assigne'] ?? '');
+
+if (!isset(STATUTS_AGENT[$filtre_statut]))     { $filtre_statut = ''; }
+if (!isset(PRIORITES_AGENT[$filtre_priorite])) { $filtre_priorite = ''; }
+if (!ctype_digit($filtre_service))             { $filtre_service = ''; }
+// « aucun » = demandes que personne n'a encore prises en charge
+if ($filtre_agent !== 'aucun' && !ctype_digit($filtre_agent)) { $filtre_agent = ''; }
+
+$page    = max(1, (int) ($_GET['page'] ?? 1));
+$parPage = 20;
 
 /* ---------------------------------------------------------
-   3) Récupération des filtres & recherche
+   4) Services & agents pour les filtres
 --------------------------------------------------------- */
-$q              = isset($_GET['q']) ? trim($_GET['q']) : '';
-$filtre_statut  = isset($_GET['statut']) ? trim($_GET['statut']) : '';
-$filtre_priorite= isset($_GET['priorite']) ? trim($_GET['priorite']) : '';
-$filtre_service = isset($_GET['service_id']) ? trim($_GET['service_id']) : '';
-$filtre_agent   = isset($_GET['agent_assigne']) ? trim($_GET['agent_assigne']) : '';
-
-$page       = isset($_GET['page']) && is_numeric($_GET['page']) ? max(1, intval($_GET['page'])) : 1;
-$parPage    = 20;
-$offset     = ($page - 1) * $parPage;
+$services = $pdo->query("SELECT id, nom_service FROM services ORDER BY nom_service ASC")->fetchAll(PDO::FETCH_ASSOC);
+$agents   = $pdo->query("SELECT id, prenom, nom FROM agents ORDER BY nom ASC, prenom ASC")->fetchAll(PDO::FETCH_ASSOC);
 
 /* ---------------------------------------------------------
-   4) Récupération des services & agents pour filtres
+   5) Conditions de la requête (sans le statut : il sert aux onglets)
 --------------------------------------------------------- */
-$servicesStmt = $pdo->query("SELECT id, nom_service FROM services ORDER BY nom_service ASC");
-$services = $servicesStmt->fetchAll(PDO::FETCH_ASSOC);
-
-$agentsStmt = $pdo->query("SELECT id, prenom, nom FROM agents ORDER BY nom ASC, prenom ASC");
-$agents = $agentsStmt->fetchAll(PDO::FETCH_ASSOC);
-
-/* ---------------------------------------------------------
-   5) Construction dynamique de la requête
---------------------------------------------------------- */
-$where = [];
+$where  = [];
 $params = [];
 
-// Recherche globale
 if ($q !== '') {
-    $where[] = "(d.id LIKE ? 
-                 OR d.type LIKE ? 
-                 OR d.message LIKE ? 
-                 OR c.nom_citoyen LIKE ? 
-                 OR c.prenom_citoyen LIKE ? 
+    // « DEM-36 » ou « 36 » : recherche aussi par numéro
+    $numero = preg_replace('/^DEM-?/i', '', $q);
+    $where[] = "(d.id = ?
+                 OR td.libelle LIKE ?
+                 OR d.message LIKE ?
+                 OR c.nom_citoyen LIKE ?
+                 OR c.prenom_citoyen LIKE ?
                  OR c.email_citoyen LIKE ?)";
     $like = '%' . $q . '%';
-    $params = array_merge($params, [$like, $like, $like, $like, $like, $like]);
+    array_push($params, ctype_digit($numero) ? (int) $numero : 0, $like, $like, $like, $like, $like);
 }
-
-// Filtres
-if ($filtre_statut !== '') {
-    $where[] = "d.statut = ?";
-    $params[] = $filtre_statut;
-}
-
 if ($filtre_priorite !== '') {
-    $where[] = "d.priorite = ?";
+    $where[]  = "d.priorite = ?";
     $params[] = $filtre_priorite;
 }
-
 if ($filtre_service !== '') {
-    $where[] = "d.service_id = ?";
-    $params[] = $filtre_service;
+    $where[]  = "d.service_id = ?";
+    $params[] = (int) $filtre_service;
+}
+if ($filtre_agent === 'aucun') {
+    $where[] = "d.agent_id IS NULL";
+} elseif ($filtre_agent !== '') {
+    $where[]  = "d.agent_id = ?";
+    $params[] = (int) $filtre_agent;
 }
 
-if ($filtre_agent !== '') {
-    $where[] = "d.agent_id = ?";
-    $params[] = $filtre_agent;
-}
-
-$whereSql = '';
-if (!empty($where)) {
-    $whereSql = 'WHERE ' . implode(' AND ', $where);
-}
-
-/* ---------------------------------------------------------
-   6) Requête de comptage pour pagination
---------------------------------------------------------- */
-$countSql = "
-    SELECT COUNT(*) AS total
-    FROM demandes d
-    LEFT JOIN citoyens c ON d.citoyen_id = c.id
-    $whereSql
-";
-try{
-    $countStmt = $pdo->prepare($countSql);
-    $countStmt->execute($params);
-    $total = (int)$countStmt->fetchColumn();
-    $pagesTotal = max(1, ceil($total / $parPage));
-} catch (PDOException $e) {
-    $total = 0;
-    $pagesTotal = 1;
-}
-
-/* ---------------------------------------------------------
-   7) Requête principale
---------------------------------------------------------- */
-$listSql = "
-    SELECT 
-    d.id,
-    d.type_id,
-    td.code AS type_code,
-    td.libelle AS type_libelle,
-    td.couleur AS type_couleur,
-    td.icone AS type_icone,
-    d.message,
-    d.priorite,
-    d.statut,
-    d.service_id,
-    d.citoyen_id,
-    d.agent_id,
-    d.created_at,
-
-    s.nom_service,
-
-    c.prenom_citoyen,
-    c.nom_citoyen,
-
-    a.prenom AS prenom_agent,
-    a.nom AS nom_agent
-
+$jointures = "
     FROM demandes d
     LEFT JOIN types_demandes td ON d.type_id = td.id
     LEFT JOIN services s ON d.service_id = s.id
     LEFT JOIN citoyens c ON d.citoyen_id = c.id
     LEFT JOIN agents a ON d.agent_id = a.id
-
-    $whereSql
-
-    ORDER BY d.created_at DESC
-    LIMIT $parPage OFFSET $offset;
-
 ";
-try{
-    $listStmt = $pdo->prepare($listSql);
-    $listStmt->execute($params);
-    $demandes = $listStmt->fetchAll(PDO::FETCH_ASSOC);
+
+/* ---------------------------------------------------------
+   6) Nombre de demandes par statut (onglets), avec les autres filtres
+--------------------------------------------------------- */
+$compteurs = array_fill_keys(array_keys(STATUTS_AGENT), 0);
+$toutes = 0;
+try {
+    $stmt = $pdo->prepare("SELECT d.statut, COUNT(*) AS n $jointures"
+        . ($where ? ' WHERE ' . implode(' AND ', $where) : '') . " GROUP BY d.statut");
+    $stmt->execute($params);
+    foreach ($stmt as $ligne) {
+        if (isset($compteurs[$ligne['statut']])) {
+            $compteurs[$ligne['statut']] = (int) $ligne['n'];
+        }
+        $toutes += (int) $ligne['n'];
+    }
 } catch (PDOException $e) {
-    $demandes = [];
-    $total = 0;
-    $pagesTotal = 1;
+    error_log('gestion_demandes : comptage impossible');
 }
 
 /* ---------------------------------------------------------
-   8) Fonctions utilitaires d'affichage
+   7) Liste de la page (statut compris)
 --------------------------------------------------------- */
-function badgeStatut($statut) {
-    $class = 'badge-default';
-    switch ($statut) {
-        case 'nouvelle':    $class = 'badge-nouvelle'; break;
-        case 'analyse_ia':  $class = 'badge-analyse'; break;
-        case 'en_cours':    $class = 'badge-encours'; break;
-        case 'resolue':     $class = 'badge-resolue'; break;
-        case 'cloturee':    $class = 'badge-cloturee'; break;
-    }
-    return '<span class="badge ' . $class . '">' . htmlspecialchars((string) $statut) . '</span>';
+if ($filtre_statut !== '') {
+    $where[]  = "d.statut = ?";
+    $params[] = $filtre_statut;
+}
+$whereSql = $where ? 'WHERE ' . implode(' AND ', $where) : '';
+
+$total      = $filtre_statut !== '' ? $compteurs[$filtre_statut] : $toutes;
+$pagesTotal = max(1, (int) ceil($total / $parPage));
+$page       = min($page, $pagesTotal);
+$offset     = ($page - 1) * $parPage;
+
+$demandes = [];
+try {
+    $listStmt = $pdo->prepare("
+        SELECT d.id, td.libelle AS type_libelle, d.message, d.priorite, d.statut, d.agent_id, d.created_at,
+               s.nom_service, c.prenom_citoyen, c.nom_citoyen, a.prenom AS prenom_agent, a.nom AS nom_agent
+        $jointures
+        $whereSql
+        ORDER BY d.created_at DESC, d.id DESC
+        LIMIT $parPage OFFSET $offset
+    ");
+    $listStmt->execute($params);
+    $demandes = $listStmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    error_log('gestion_demandes : lecture impossible');
 }
 
-function badgePriorite($priorite) {
-    $class = 'badge-prio-default';
-    switch ($priorite) {
-        case 'basse':   $class = 'badge-prio-basse'; break;
-        case 'normale': $class = 'badge-prio-normale'; break;
-        case 'haute':   $class = 'badge-prio-haute'; break;
-        case 'urgente': $class = 'badge-prio-urgente'; break;
+/* ---------------------------------------------------------
+   8) Adresses des onglets et des pages (en gardant les autres filtres)
+--------------------------------------------------------- */
+$filtresActifs = array_filter([
+    'q' => $q, 'statut' => $filtre_statut, 'priorite' => $filtre_priorite,
+    'service_id' => $filtre_service, 'agent_assigne' => $filtre_agent,
+], fn ($v) => $v !== '');
+
+function urlGestion(array $filtres, array $changements = []): string
+{
+    $tout = array_filter(array_merge($filtres, $changements), fn ($v) => $v !== '' && $v !== null);
+    unset($tout['page']);
+    if (isset($changements['page']) && $changements['page'] > 1) {
+        $tout['page'] = $changements['page'];
     }
-    return '<span class="badge ' . $class . '">' . htmlspecialchars((string) $priorite) . '</span>';
+    return 'gestion_demandes.php' . ($tout ? '?' . http_build_query($tout) : '');
 }
 
+$autresFiltres = $q !== '' || $filtre_priorite !== '' || $filtre_service !== '' || $filtre_agent !== '';
+
+/** Classes d'une liste déroulante de filtre (plus visible quand un filtre est choisi). */
+function classeFiltre(bool $actif): string
+{
+    return 'cursor-pointer appearance-none rounded-xl border py-2.5 pr-9 pl-3 text-sm font-medium outline-none transition focus:ring-4 focus:ring-marque-500/15 '
+        . ($actif ? 'border-marque-500 bg-marque-50 text-marque-800' : 'border-encre-200 bg-white text-encre-700 hover:border-encre-300');
+}
 ?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Gestion des demandes</title>
-    <link rel="stylesheet" href="../Frontend/assets/css/gestion_demandes.css?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/css/gestion_demandes.css') ?>">
-    <link rel="stylesheet" href="../Frontend/assets/css/carte_profil.css?v=<?= @filemtime(__DIR__ . '/../Frontend/assets/css/carte_profil.css') ?>">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des demandes - Espace agent</title>
+    <?= feuillesAgent() ?>
+
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self';
+                   img-src 'self' data:;
+                   style-src 'self' 'unsafe-inline';
+                   script-src 'self';
+                   object-src 'none';
+                   base-uri 'self';
+                   connect-src 'self' https://generativelanguage.googleapis.com;">
 </head>
+
 <body>
 
-<div class="page-wrapper">
-    <!-- HEADER PREMIUM -->
-    <header id="header-agent">
+<?= debutPageAgent('demandes', $agent) ?>
 
-        <div class="rf-banner">
-            <span class="rf-title">République Française</span>
-            <span class="rf-subtitle">Liberté • Égalité • Fraternité</span>
+<main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-10 lg:py-10">
+
+    <!-- EN-TÊTE -->
+    <div>
+        <h1 class="text-2xl font-extrabold tracking-tight text-encre-900 sm:text-3xl">Gestion des demandes</h1>
+        <p class="mt-1 text-sm text-encre-500">Recherchez, filtrez et ouvrez une demande pour la traiter.</p>
+    </div>
+
+    <!-- ONGLETS DE STATUT (un clic = filtre appliqué) -->
+    <nav class="-mx-4 mt-6 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:flex-wrap sm:px-0" aria-label="Filtrer par statut">
+        <?php
+        $onglets = ['' => ['Toutes', $toutes]];
+        foreach (STATUTS_AGENT as $cle => [$libelle]) {
+            $onglets[$cle] = [$libelle, $compteurs[$cle]];
+        }
+        foreach ($onglets as $cle => [$libelle, $nombre]):
+            $actif = $filtre_statut === (string) $cle; ?>
+            <a href="<?= eAgent(urlGestion($filtresActifs, ['statut' => $cle])) ?>"
+               <?= $actif ? 'aria-current="page"' : '' ?>
+               class="inline-flex shrink-0 items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold whitespace-nowrap transition <?= $actif
+                   ? 'bg-marque-600 text-white shadow-sm shadow-marque-900/20'
+                   : 'bg-white text-encre-600 ring-1 ring-encre-900/5 hover:bg-encre-50 hover:text-encre-900' ?>">
+                <?= eAgent($libelle) ?>
+                <span class="rounded-full px-2 py-0.5 text-xs font-bold <?= $actif ? 'bg-white/20' : 'bg-encre-100 text-encre-500' ?>"><?= (int) $nombre ?></span>
+            </a>
+        <?php endforeach; ?>
+    </nav>
+
+    <!-- RECHERCHE ET FILTRES (appliqués dès qu'on change une liste : portail_agent.js) -->
+    <form method="GET" action="gestion_demandes.php" data-filtres-auto
+          class="mt-4 flex flex-col gap-2 rounded-2xl bg-white p-3 shadow-sm ring-1 ring-encre-900/5 xl:flex-row xl:items-center">
+        <?php if ($filtre_statut !== ''): ?>
+            <input type="hidden" name="statut" value="<?= eAgent($filtre_statut) ?>">
+        <?php endif; ?>
+
+        <div class="relative min-w-0 flex-1 xl:min-w-64">
+            <label for="q" class="sr-only">Rechercher une demande</label>
+            <span class="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-encre-400"><?= icone('loupe') ?></span>
+            <input type="search" id="q" name="q" value="<?= eAgent($q) ?>" maxlength="100"
+                   placeholder="N° (DEM-36), citoyen, e-mail, type, message…"
+                   class="w-full rounded-xl border border-encre-200 bg-encre-50 py-2.5 pr-3 pl-9 text-sm outline-none transition focus:border-marque-500 focus:bg-white focus:ring-4 focus:ring-marque-500/15">
         </div>
 
-        <div class="header-main">
-
-            <nav id="nav-agent">
-                <a href="dashboard_agent.php" >Tableau de Bord</a>
-                <a href="gestion_demandes.php" class="active">Gestion des demandes</a>
-
-                <a href="logout.php" class="nav-btn">
-                    <span class="nav-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"
-                             stroke="#eef0f2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
-                            <polyline points="10 17 15 12 10 7"/>
-                            <line x1="15" y1="12" x2="3" y2="12"/>
-                        </svg>
-                    </span>
-                    Déconnexion
-                </a>
-            </nav>
-
-            <?= carteProfilAgent($agent) ?>
-
-        </div>
-
-    <header class="header-gestion">
-        <h1>Gestion des demandes citoyennes</h1>
-        <p>Vue complète des demandes avec recherche, filtres et accès à la fiche détaillée.</p>
-    </header>
-
-    <!-- Barre de recherche & filtres -->
-    <section class="filtres-section">
-        <form method="GET" class="filtres-form">
-
-            <div class="filtres-row">
-                <div class="champ">
-                    <label for="q">Recherche globale</label>
-                    <input type="text" id="q" name="q" placeholder="ID, citoyen, email, type, message..."
-                           value="<?= htmlspecialchars($q) ?>">
-                </div>
-
-                <div class="champ">
-                    <label for="statut">Statut</label>
-                    <select name="statut" id="statut">
-                        <option value="">Tous</option>
-                        <option value="nouvelle"   <?= $filtre_statut === 'nouvelle' ? 'selected' : '' ?>>Nouvelle</option>
-                        <option value="analyse_ia" <?= $filtre_statut === 'analyse_ia' ? 'selected' : '' ?>>Analyse IA</option>
-                        <option value="en_cours"   <?= $filtre_statut === 'en_cours' ? 'selected' : '' ?>>En cours</option>
-                        <option value="resolue"    <?= $filtre_statut === 'resolue' ? 'selected' : '' ?>>Résolue</option>
-                        <option value="cloturee"   <?= $filtre_statut === 'cloturee' ? 'selected' : '' ?>>Clôturée</option>
-                    </select>
-                </div>
-
-                <div class="champ">
-                    <label for="priorite">Priorité</label>
-                    <select name="priorite" id="priorite">
-                        <option value="">Toutes</option>
-                        <option value="basse"   <?= $filtre_priorite === 'basse' ? 'selected' : '' ?>>Basse</option>
-                        <option value="normale" <?= $filtre_priorite === 'normale' ? 'selected' : '' ?>>Normale</option>
-                        <option value="haute"   <?= $filtre_priorite === 'haute' ? 'selected' : '' ?>>Haute</option>
-                        <option value="urgente" <?= $filtre_priorite === 'urgente' ? 'selected' : '' ?>>Urgente</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="filtres-row">
-                <div class="champ">
-                    <label for="service_id">Service</label>
-                    <select name="service_id" id="service_id">
-                        <option value="">Tous</option>
-                        <?php foreach ($services as $s): ?>
-                            <option value="<?= $s['id'] ?>" <?= $filtre_service == $s['id'] ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($s['nom_service']) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-
-                <div class="champ">
-                    <label for="agent_assigne">Agent assigné</label>
-                    <select name="agent_assigne" id="agent_assigne">
-                        <option value="">Tous</option>
-                        <?php foreach ($agents as $ag): ?>
-                            <option value="<?= $ag['id'] ?>" <?= $filtre_agent == $ag['id'] ? 'selected' : '' ?>>
-                                <?= htmlspecialchars($ag['prenom'] . ' ' . $ag['nom']) ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-
-                <div class="champ actions-filtres">
-                    <button type="submit" class="btn-primary">Appliquer</button>
-                    <a href="gestion_demandes.php" class="btn-secondary">Réinitialiser</a>
-                </div>
-            </div>
-
-        </form>
-    </section>
-
-    <!-- Résumé -->
-    <section class="resume-section">
-        <p>
-            <strong><?= $total ?></strong> demande(s) trouvée(s)
-            <?php if ($total > 0): ?>
-                — page <?= $page ?> / <?= $pagesTotal ?>
-            <?php endif; ?>
-        </p>
-    </section>
-
-    <!-- Tableau principal (desktop) -->
-    <section class="table-section">
-        <?php if (empty($demandes)): ?>
-            <p class="no-data">Aucune demande ne correspond à vos critères.</p>
-        <?php else: ?>
-            <div class="table-responsive">
-                <table class="table-demandes">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Type</th>
-                            <th>Message</th>
-                            <th>Priorité</th>
-                            <th>Statut</th>
-                            <th>Service</th>
-                            <th>Citoyen</th>
-                            <th>Assigné à</th>
-                            <th>Soumise le</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    <?php foreach ($demandes as $d): ?>
-                        <tr>
-                            <td>DEM-<?= htmlspecialchars($d['id']) ?></td>
-                            <td><?= htmlspecialchars($d['type_libelle'] ?? 'Non renseigné') ?></td>
-                            <td class="col-message">
-                                <?= htmlspecialchars(mb_strimwidth((string) ($d['message'] ?? ''), 0, 80, '…')) ?>
-                            </td>
-                            <td><?= badgePriorite($d['priorite']?? 'non renseigné') ?></td>
-                            <td><?= badgeStatut($d['statut']) ?></td>
-                            <td><?php if (!empty($d['nom_service'])): ?><?= htmlspecialchars($d['nom_service']) ?><?php else: ?><em>Non attribué</em><?php endif; ?></td>
-                            <td>
-                                <?= htmlspecialchars(trim(($d['prenom_citoyen'] ?? '') . ' ' . ($d['nom_citoyen'] ?? ''))) ?>
-                            </td>
-                            <td>
-                                <?php if ($d['agent_id']): ?>
-                                    <?= htmlspecialchars(trim(($d['prenom_agent'] ?? '') . ' ' . ($d['nom_agent'] ?? ''))) ?>
-                                <?php else: ?>
-                                    <em>Non assignée</em>
-                                <?php endif; ?>
-                            </td>
-                            <td><?= htmlspecialchars((string) ($d['created_at'] ?? '')) ?></td>
-                            <td>
-                                <a href="gestion_demande.php?id=<?= $d['id'] ?>" class="btn-gestion">
-                                    Gérer <?= icone('fleche-droite') ?>
-                                </a>
-                            </td>
-                        </tr>
+        <div class="grid grid-cols-1 gap-2 sm:grid-cols-3 xl:flex">
+            <label class="relative">
+                <span class="sr-only">Priorité</span>
+                <select name="priorite" class="w-full <?= classeFiltre($filtre_priorite !== '') ?>">
+                    <option value="">Toutes priorités</option>
+                    <?php foreach (PRIORITES_AGENT as $cle => [$libelle]): ?>
+                        <option value="<?= $cle ?>" <?= $filtre_priorite === $cle ? 'selected' : '' ?>>Priorité <?= mb_strtolower($libelle, 'UTF-8') ?></option>
                     <?php endforeach; ?>
-                    </tbody>
-                </table>
+                </select>
+                <span class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-encre-400"><?= icone('chevron-bas') ?></span>
+            </label>
+
+            <label class="relative">
+                <span class="sr-only">Service</span>
+                <select name="service_id" class="w-full <?= classeFiltre($filtre_service !== '') ?>">
+                    <option value="">Tous les services</option>
+                    <?php foreach ($services as $s): ?>
+                        <option value="<?= (int) $s['id'] ?>" <?= $filtre_service === (string) $s['id'] ? 'selected' : '' ?>><?= eAgent($s['nom_service']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <span class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-encre-400"><?= icone('chevron-bas') ?></span>
+            </label>
+
+            <label class="relative">
+                <span class="sr-only">Agent assigné</span>
+                <select name="agent_assigne" class="w-full <?= classeFiltre($filtre_agent !== '') ?>">
+                    <option value="">Tous les agents</option>
+                    <option value="aucun" <?= $filtre_agent === 'aucun' ? 'selected' : '' ?>>Non assignées</option>
+                    <option value="<?= $agent_id ?>" <?= $filtre_agent === (string) $agent_id ? 'selected' : '' ?>>Mes demandes</option>
+                    <?php foreach ($agents as $ag): if ((int) $ag['id'] === $agent_id) continue; ?>
+                        <option value="<?= (int) $ag['id'] ?>" <?= $filtre_agent === (string) $ag['id'] ? 'selected' : '' ?>><?= eAgent($ag['prenom'] . ' ' . $ag['nom']) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <span class="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-encre-400"><?= icone('chevron-bas') ?></span>
+            </label>
+        </div>
+
+        <div class="flex gap-2">
+            <button type="submit" class="flex-1 cursor-pointer rounded-xl bg-encre-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-encre-800 xl:flex-none">Rechercher</button>
+            <?php if ($autresFiltres || $filtre_statut !== ''): ?>
+                <a href="gestion_demandes.php" class="inline-flex items-center gap-1.5 rounded-xl px-3 py-2.5 text-sm font-semibold text-encre-500 transition hover:bg-encre-100 hover:text-encre-800">
+                    <?= icone('fermer') ?> Effacer
+                </a>
+            <?php endif; ?>
+        </div>
+    </form>
+
+    <!-- RÉSUMÉ -->
+    <p class="mt-5 text-sm text-encre-500" role="status">
+        <strong class="text-encre-900"><?= $total ?></strong> demande<?= $total > 1 ? 's' : '' ?>
+        <?= $total > $parPage ? '· page ' . $page . ' sur ' . $pagesTotal : '' ?>
+    </p>
+
+    <!-- LISTE -->
+    <section class="mt-3 overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-encre-900/5" aria-label="Liste des demandes">
+        <?php if (!$demandes): ?>
+            <div class="px-5 py-14 text-center">
+                <span class="mx-auto grid size-12 place-items-center rounded-2xl bg-encre-100 text-2xl text-encre-400"><?= icone('loupe') ?></span>
+                <p class="mt-3 font-semibold text-encre-900">Aucune demande ne correspond</p>
+                <p class="mt-1 text-sm text-encre-500">Modifiez la recherche ou les filtres.</p>
+                <?php if ($autresFiltres || $filtre_statut !== ''): ?>
+                    <a href="gestion_demandes.php" class="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-marque-600 px-4 py-2 text-sm font-semibold text-white hover:bg-marque-700">Voir toutes les demandes</a>
+                <?php endif; ?>
             </div>
+        <?php else: ?>
+            <!-- En-têtes (grand écran) -->
+            <div class="hidden grid-cols-[84px_minmax(0,1fr)_120px_150px_140px_20px] gap-4 border-b border-encre-100 bg-encre-50 px-5 py-3 text-xs font-semibold uppercase tracking-wider text-encre-500 xl:grid">
+                <span>N°</span><span>Demande</span><span>Statut</span><span>Assignée à</span><span>Reçue le</span><span></span>
+            </div>
+            <ul class="divide-y divide-encre-100">
+                <?php foreach ($demandes as $d):
+                    $citoyen = trim(($d['prenom_citoyen'] ?? '') . ' ' . ($d['nom_citoyen'] ?? '')) ?: 'Citoyen inconnu';
+                    $assigne = $d['agent_id'] ? trim(($d['prenom_agent'] ?? '') . ' ' . ($d['nom_agent'] ?? '')) : ''; ?>
+                    <li>
+                        <a href="gestion_demande.php?id=<?= (int) $d['id'] ?>"
+                           class="group grid gap-2 px-5 py-4 transition hover:bg-encre-50 xl:grid-cols-[84px_minmax(0,1fr)_120px_150px_140px_20px] xl:items-center xl:gap-4">
+                            <div class="flex items-center justify-between gap-2 xl:block">
+                                <span class="font-mono text-sm font-bold text-encre-900">DEM-<?= (int) $d['id'] ?></span>
+                                <span class="xl:hidden"><?= pastilleStatut($d['statut']) ?></span>
+                            </div>
+                            <div class="min-w-0">
+                                <p class="truncate text-sm font-semibold text-encre-900">
+                                    <?= eAgent($d['type_libelle'] ?? 'Type non renseigné') ?>
+                                    <span class="font-normal text-encre-400">·</span>
+                                    <span class="font-medium text-encre-600"><?= eAgent($d['nom_service'] ?? 'Service non attribué') ?></span>
+                                </p>
+                                <p class="mt-0.5 line-clamp-1 text-sm text-encre-500"><?= eAgent($d['message']) ?></p>
+                                <p class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-encre-500">
+                                    <span class="inline-flex items-center gap-1"><?= icone('utilisateur') ?> <?= eAgent($citoyen) ?></span>
+                                    <?= textePriorite($d['priorite']) ?>
+                                </p>
+                            </div>
+                            <div class="hidden xl:block"><?= pastilleStatut($d['statut']) ?></div>
+                            <div class="text-xs text-encre-600">
+                                <?php if ($assigne !== ''): ?>
+                                    <span class="inline-flex items-center gap-1.5"><span class="grid size-6 place-items-center rounded-full bg-marque-100 text-[10px] font-bold text-marque-800"><?= eAgent(initialesAgent(['prenom_agent' => $d['prenom_agent'], 'nom_agent' => $d['nom_agent']])) ?></span> <?= eAgent($assigne) ?></span>
+                                <?php else: ?>
+                                    <span class="inline-flex items-center gap-1 text-encre-400"><?= icone('utilisateur') ?> Non assignée</span>
+                                <?php endif; ?>
+                            </div>
+                            <div class="flex items-center gap-1.5 text-xs text-encre-500"><?= icone('horloge') ?> <?= eAgent(dateAgent($d['created_at'])) ?></div>
+                            <span class="hidden text-encre-300 transition group-hover:translate-x-0.5 group-hover:text-marque-600 xl:block"><?= icone('chevron-droite') ?></span>
+                        </a>
+                    </li>
+                <?php endforeach; ?>
+            </ul>
         <?php endif; ?>
     </section>
 
-    <!-- Version cartes (mobile / responsive) -->
-    <section class="cards-section">
-        <?php foreach ($demandes as $d): ?>
-            <article class="demande-card">
-                <header class="demande-card-header">
-                    <span class="demande-id">DEM-<?= htmlspecialchars($d['id']) ?></span>
-                    <span class="demande-statut"><?= badgeStatut($d['statut']) ?></span>
-                </header>
-
-                <p><strong>Type :</strong> <?= htmlspecialchars($d['type_libelle'] ?? 'Non renseigné') ?></p>
-                <p><strong>Message :</strong><br>
-                    <?= nl2br(htmlspecialchars(mb_strimwidth($d['message'], 0, 160, '…'))) ?>
-                </p>
-                <p><strong>Priorité :</strong> <?= badgePriorite($d['priorite']) ?></p>
-                <p><strong>Service :</strong> <?= htmlspecialchars($d['nom_service'] ?? 'Non attribué') ?></p>
-                <p><strong>Citoyen :</strong>
-                    <?= htmlspecialchars(trim(($d['prenom_citoyen'] ?? '') . ' ' . ($d['nom_citoyen'] ?? ''))) ?>
-                </p>
-                <p><strong>Assigné à :</strong>
-                    <?php if ($d['agent_id']): ?>
-                        <?= htmlspecialchars(trim(($d['prenom_agent'] ?? '') . ' ' . ($d['nom_agent'] ?? ''))) ?>
-                    <?php else: ?>
-                        <em>Non assignée</em>
-                    <?php endif; ?>
-                </p>
-                <p><strong>Soumise le :</strong> <?= htmlspecialchars((string) ($d['created_at'] ?? '')) ?></p>
-
-                <footer class="demande-card-footer">
-                    <a href="gestion_demande.php?id=<?= $d['id'] ?>" class="btn-gestion">
-                        Gérer la demande <?= icone('fleche-droite') ?>
-                    </a>
-                </footer>
-            </article>
-        <?php endforeach; ?>
-    </section>
-
-    <!-- Pagination -->
+    <!-- PAGINATION -->
     <?php if ($pagesTotal > 1): ?>
-        <nav class="pagination">
+        <nav class="mt-6 flex flex-wrap items-center justify-center gap-1.5" aria-label="Pages">
             <?php if ($page > 1): ?>
-                <a href="?<?= http_build_query(array_merge($_GET, ['page' => $page - 1])) ?>" class="page-link"><?= icone('fleche-gauche') ?> Précédent</a>
-            <?php endif; ?>
-
-            <?php for ($p = 1; $p <= $pagesTotal; $p++): ?>
-                <a href="?<?= http_build_query(array_merge($_GET, ['page' => $p])) ?>"
-                   class="page-link <?= $p === $page ? 'active' : '' ?>">
-                    <?= $p ?>
+                <a href="<?= eAgent(urlGestion($filtresActifs, ['page' => $page - 1])) ?>" class="inline-flex items-center gap-1 rounded-xl bg-white px-3 py-2 text-sm font-semibold text-encre-700 ring-1 ring-encre-900/5 hover:bg-encre-50">
+                    <?= icone('fleche-gauche') ?> Précédente
                 </a>
+            <?php endif; ?>
+            <?php for ($p = 1; $p <= $pagesTotal; $p++): ?>
+                <?php if ($p === $page): ?>
+                    <span aria-current="page" class="grid size-10 place-items-center rounded-xl bg-marque-600 text-sm font-bold text-white"><?= $p ?></span>
+                <?php else: ?>
+                    <a href="<?= eAgent(urlGestion($filtresActifs, ['page' => $p])) ?>" class="grid size-10 place-items-center rounded-xl bg-white text-sm font-semibold text-encre-700 ring-1 ring-encre-900/5 hover:bg-encre-50"><?= $p ?></a>
+                <?php endif; ?>
             <?php endfor; ?>
-
             <?php if ($page < $pagesTotal): ?>
-                <a href="?<?= http_build_query(array_merge($_GET, ['page' => $page + 1])) ?>" class="page-link">Suivant <?= icone('fleche-droite') ?></a>
+                <a href="<?= eAgent(urlGestion($filtresActifs, ['page' => $page + 1])) ?>" class="inline-flex items-center gap-1 rounded-xl bg-white px-3 py-2 text-sm font-semibold text-encre-700 ring-1 ring-encre-900/5 hover:bg-encre-50">
+                    Suivante <?= icone('fleche-droite') ?>
+                </a>
             <?php endif; ?>
         </nav>
     <?php endif; ?>
+</main>
 
-    <div class="bande-tricolore">
-        <div class="bleu"></div>
-        <div class="blanc"></div>
-        <div class="rouge"></div>
-    </div>
-
-</div>
+<?= finPageAgent() ?>
 
 </body>
 </html>

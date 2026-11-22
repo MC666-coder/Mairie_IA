@@ -36,3 +36,4 @@ Frontend/dist/
 # Dumps SQL réels (données personnelles) — seule la base de démo est versionnée
 sql/*.sql
 !sql/mairie_ia_demo.sql
+/Agent-prenium/node_modules/

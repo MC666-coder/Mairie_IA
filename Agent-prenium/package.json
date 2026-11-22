@@ -1,0 +1,14 @@
+{
+  "name": "portail_agent",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Portail agent de la mairie : feuille de style indépendante du site citoyen",
+  "scripts": {
+    "css": "tailwindcss -i assets/css/agent-source.css -o assets/css/agent.css --minify",
+    "css:watch": "tailwindcss -i assets/css/agent-source.css -o assets/css/agent.css --watch"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "4.3.5",
+    "tailwindcss": "4.3.5"
+  }
+}

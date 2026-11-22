@@ -1,0 +1,170 @@
+/* ================================================================
+   PORTAIL AGENT — feuille de style indépendante du site citoyen
+   ----------------------------------------------------------------
+   Source Tailwind (NE PAS lier dans les pages). Compilée en agent.css :
+       cd Agent-prenium
+       npm run css          (une fois)
+       npm run css:watch    (recompile à chaque modification)
+
+   Palette « ardoise et émeraude » : changer les couleurs du portail
+   = changer seulement les variables --color-marque-* et --color-encre-*
+   ci-dessous (toutes les pages utilisent bg-marque-600, text-encre-900…).
+   ================================================================ */
+@import "tailwindcss";
+
+/* Fichiers où Tailwind cherche les classes utilisées */
+@source "../../*.php";
+@source "../js/*.js";
+@source "../../../Backend/Fonctions/gabarit_agent.php";
+
+@theme {
+    /* Couleur de marque : émeraude */
+    --color-marque-50:  var(--color-emerald-50);
+    --color-marque-100: var(--color-emerald-100);
+    --color-marque-200: var(--color-emerald-200);
+    --color-marque-300: var(--color-emerald-300);
+    --color-marque-400: var(--color-emerald-400);
+    --color-marque-500: var(--color-emerald-500);
+    --color-marque-600: var(--color-emerald-600);
+    --color-marque-700: var(--color-emerald-700);
+    --color-marque-800: var(--color-emerald-800);
+    --color-marque-900: var(--color-emerald-900);
+
+    /* Encre : ardoise (barre latérale, textes) */
+    --color-encre-50:  var(--color-slate-50);
+    --color-encre-100: var(--color-slate-100);
+    --color-encre-200: var(--color-slate-200);
+    --color-encre-300: var(--color-slate-300);
+    --color-encre-400: var(--color-slate-400);
+    --color-encre-500: var(--color-slate-500);
+    --color-encre-600: var(--color-slate-600);
+    --color-encre-700: var(--color-slate-700);
+    --color-encre-800: var(--color-slate-800);
+    --color-encre-900: var(--color-slate-900);
+    --color-encre-950: var(--color-slate-950);
+
+    --font-sans: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+@layer base {
+    html {
+        @apply bg-encre-100 text-encre-900 antialiased;
+    }
+    /* Un élément « hidden » reste caché même avec une classe d'affichage */
+    [hidden] {
+        display: none !important;
+    }
+    :focus-visible {
+        @apply outline-2 outline-offset-2 outline-marque-500;
+    }
+}
+
+/* ================================================================
+   Assistant IA agent (Frontend/IA/assistant.js crée les messages :
+   .msg-agent, .msg-ia, .msg-erreur ; la réponse de l'IA contient du
+   HTML simple : p, strong, ul, ol, li, h3…)
+   ================================================================ */
+@layer components {
+    .ia-messages .msg-agent,
+    .ia-messages .msg-ia {
+        @apply max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed break-words;
+    }
+    .ia-messages .msg-agent {
+        @apply self-end rounded-br-md bg-marque-600 text-white;
+    }
+    .ia-messages .msg-ia {
+        @apply self-start rounded-bl-md bg-white text-encre-800 shadow-sm ring-1 ring-encre-900/5;
+    }
+    .ia-messages .msg-ia p { @apply my-1.5 first:mt-0 last:mb-0; }
+    .ia-messages .msg-ia strong { @apply font-semibold text-encre-900; }
+    .ia-messages .msg-ia ul { @apply my-1.5 list-disc pl-5; }
+    .ia-messages .msg-ia ol { @apply my-1.5 list-decimal pl-5; }
+    .ia-messages .msg-ia li { @apply my-0.5; }
+    .ia-messages .msg-ia h1,
+    .ia-messages .msg-ia h2,
+    .ia-messages .msg-ia h3,
+    .ia-messages .msg-ia h4 { @apply mt-2 mb-1 text-sm font-bold text-encre-900; }
+    .ia-messages .msg-ia code { @apply rounded bg-encre-100 px-1 text-xs; }
+    .ia-messages .msg-ia a { @apply font-semibold text-marque-700 underline; }
+    .ia-messages .msg-ia button {
+        @apply mt-2 mr-2 cursor-pointer rounded-full bg-marque-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-marque-700;
+    }
+    .ia-messages .msg-erreur {
+        @apply flex items-start gap-2 bg-red-50 text-red-800 ring-red-600/20;
+    }
+    .ia-messages .msg-erreur .icone { @apply mt-0.5 shrink-0; }
+    #ia-input.disabled { @apply opacity-60; }
+}
+
+/* ================================================================
+   Tête de robot animée (bouton de l'assistant, fenêtre fermée)
+   Cycle de 6 s : flotte, cligne des yeux, « coucou » avec l'antenne,
+   halo autour du bouton.
+   ================================================================ */
+.bouton-robot .robot {
+    overflow: visible;
+    animation: robotFlotte 3s ease-in-out infinite;
+}
+.bouton-robot .robot,
+.bouton-robot .robot-yeux {
+    transform-box: fill-box;
+    transform-origin: center;
+}
+.bouton-robot .robot-antenne {
+    transform-box: fill-box;
+    transform-origin: bottom center;
+    animation: robotAntenne 6s ease-in-out infinite;
+}
+.bouton-robot .robot-yeux { animation: robotCligne 6s infinite; }
+.bouton-robot .robot-tete { animation: robotCoucou 6s ease-in-out infinite; }
+.bouton-robot::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: 9999px;
+    background: color-mix(in oklab, var(--color-marque-500) 45%, transparent);
+    animation: robotHalo 6s ease-out infinite;
+    pointer-events: none;
+}
+@keyframes robotFlotte {
+    0%, 100% { transform: translateY(1px); }
+    50%      { transform: translateY(-2px); }
+}
+@keyframes robotCligne {
+    0%, 44%, 50%, 100% { transform: scaleY(1); }
+    47%                { transform: scaleY(0.1); }
+}
+@keyframes robotCoucou {
+    0%, 70%, 100% { transform: rotate(0); }
+    75% { transform: rotate(-14deg); }
+    80% { transform: rotate(12deg); }
+    85% { transform: rotate(-8deg); }
+    90% { transform: rotate(4deg); }
+}
+@keyframes robotAntenne {
+    0%, 70%, 100% { transform: scaleY(1); }
+    76% { transform: scaleY(1.35); }
+    82% { transform: scaleY(0.85); }
+    88% { transform: scaleY(1.1); }
+}
+@keyframes robotHalo {
+    0%, 68% { transform: scale(1); opacity: 0; }
+    70%     { transform: scale(1); opacity: 0.7; }
+    100%    { transform: scale(1.6); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* assistant.js cache la fenêtre et l'attente avec la classe « hidden » :
+   règle par id pour passer devant « flex » (sinon les deux se contredisent) */
+#ia-agent-window.hidden,
+#ia-loader.hidden {
+    display: none;
+}
