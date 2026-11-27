@@ -113,7 +113,12 @@ function etatJeu(PDO $pdo, int $citoyenId): array
             // Énigme pas encore débloquée : ni titre ni lieu (ils donnent déjà des indices)
             $carte['titre'] = '';
             $carte['lieu']  = null;
-        } else {
+        } elseif ($statut === 'disponible') {
+            // Énigme en cours : le lieu reste caché (il donne souvent la réponse,
+            // ex. « Le moulin »). Il n'apparaît qu'une fois l'énigme terminée.
+            $carte['lieu'] = null;
+        }
+        if ($statut !== 'verrouillee') {
             $carte['question'] = $e['question'];
             $carte['image']    = urlImage($e['image']);
         }
