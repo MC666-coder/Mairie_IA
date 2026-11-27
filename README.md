@@ -1,14 +1,16 @@
 # Mairie_IA — Plateforme municipale avec assistants IA
 
-> Portail citoyen et portail agent pour une mairie, avec deux assistants IA **encadrés** (Google Gemini), une messagerie mairie ↔ citoyen et une sécurité auditée selon l'OWASP.
+> Portail citoyen et portail agent pour une mairie, avec deux assistants IA **encadrés** (Google Gemini), une messagerie mairie ↔ citoyen, un jeu d'énigmes sur le patrimoine en **React** et une sécurité auditée selon l'OWASP.
 
 ![PHP](https://img.shields.io/badge/PHP-8.3-777BB4?logo=php&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-9-4479A1?logo=mysql&logoColor=white)
 ![JavaScript](https://img.shields.io/badge/JavaScript-ES2022-F7DF1E?logo=javascript&logoColor=black)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=black)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
 ![IA](https://img.shields.io/badge/IA-Google%20Gemini-8E75B2)
 ![Statut](https://img.shields.io/badge/statut-en%20d%C3%A9veloppement%20actif-orange)
 
-**Statut : en développement actif.** Les portails citoyen et agent, les deux assistants IA, la messagerie et l'agenda fonctionnent ; d'autres modules sont en cours (voir [Feuille de route](#feuille-de-route)).
+**Statut : en développement actif.** Les portails citoyen et agent, les deux assistants IA, la messagerie, l'agenda et le jeu d'énigmes fonctionnent, avec une interface entièrement redessinée ; d'autres modules sont en cours (voir [Feuille de route](#feuille-de-route)).
 
 ---
 
@@ -21,7 +23,7 @@
 - [Architecture](#architecture)
 - [Sécurité et RGPD](#sécurité-et-rgpd)
 - [Installation](#installation)
-- [Tester les assistants IA](#tester-les-assistants-ia)
+- [Tester le site](#tester-le-site)
 - [Difficultés rencontrées](#difficultés-rencontrées)
 - [Feuille de route](#feuille-de-route)
 - [Méthode de travail](#méthode-de-travail)
@@ -49,6 +51,8 @@ L'IA y est un **assistant, jamais un décideur** : elle propose, l'humain valide
 | 🌍 **Multilingue** | L'assistant d'accueil répond dans la langue du citoyen (testé en 7 langues, dont l'arabe et le chinois) ; les agents reçoivent une traduction française. |
 | 🔒 **Sécurité auditée** | Audit complet selon l'**OWASP Top 10** et corrections : contrôle d'accès, CSRF, XSS, IDOR, sessions, fichiers déposés. |
 | 🛡️ **RGPD** | Données personnelles masquées avant tout envoi à l'IA, aucune conversation conservée, purge des anciennes données. |
+| 🎨 **Interface moderne** | Site citoyen et portail agent redessinés en Tailwind CSS, chacun avec son propre style, adaptés au mobile, icônes SVG. |
+| 🎮 **Jeu en React** | Un jeu d'énigmes sur le patrimoine de la commune, avec classement par pseudonyme. |
 | ⚡ **Temps réel** | Tableaux de bord, messagerie et historique se mettent à jour sans recharger la page. |
 | 🔌 **IA facile à faire évoluer** | Tout l'accès à l'IA passe par un seul module : on change de modèle (ou de fournisseur) dans `.env`, sans toucher au reste du code. |
 
@@ -57,32 +61,47 @@ L'IA y est un **assistant, jamais un décideur** : elle propose, l'humain valide
 ## Fonctionnalités
 
 ### Portail citoyen
+- Inscription avec **confirmation de l'adresse email** et mot de passe oublié (lien à usage unique)
 - Création et suivi des demandes en ligne, tableau de bord **mis à jour automatiquement**
 - **Assistant d'accueil IA 24h/24** : répond aux questions sur la commune, donne les numéros d'urgence en priorité, et propose de **préparer une demande que le citoyen relit et confirme lui-même** (ou lui indique comment la faire seul)
 - **Échanges avec la mairie** : le citoyen lit les messages de l'agent, télécharge les documents envoyés (attestations…) et répond par un document et/ou un court message
 - Badge « Nouveau message de la mairie » et notification par email (sans le contenu du message)
 - Agenda municipal (FullCalendar) et page de détail des événements
+- **Recherche de services** qui comprend les synonymes et les phrases du quotidien
+- **Jeu d'énigmes du patrimoine** (React) : devinettes, photos à reconnaître, dates à retrouver ; indices, explication après chaque énigme, progression enregistrée et **classement de la commune par pseudonyme** (jamais le vrai nom)
+- Newsletter avec mention RGPD
 
 ### Portail agent
-- Gestion des dossiers : statut, assignation, notes internes
+- **Tableau de bord** avec statistiques cliquables et accès direct aux nouvelles demandes
+- **Liste des demandes** : onglets par statut, filtres, « Non assignées » / « Mes demandes », pagination
+- Espace de travail d'une demande en deux colonnes : statut, assignation, notes internes
 - **Historique des actions** et **notes internes** avec filtres (type, 24 h, semaine, archive par mois)
 - **Conversation avec le citoyen** : seul l'agent assigné à la demande peut écrire ; envoi de documents au citoyen
 - **Documents du dossier** classés en trois cases : reçus du citoyen, envoyés au citoyen, internes à la mairie
+- Création des comptes agents par un administrateur, avec aperçu et activation par email
 - **Assistant IA agent** : analyse des demandes ambiguës, orientation vers le bon service (14 services), proposition de transfert **validée par l'agent**, rédaction de messages
 
 ---
 
 ## Captures d'écran
 
-> Captures à venir.
+> Toutes les données visibles sont **fictives** (comptes et demandes de démonstration).
 
-<!--
-Ajouter les captures dans docs/captures/ puis décommenter :
-![Portail citoyen](docs/captures/portail-citoyen.png)
-![Assistant d'accueil IA](docs/captures/assistant-citoyen.png)
-![Conversation avec la mairie](docs/captures/conversation.png)
-![Portail agent](docs/captures/portail-agent.png)
--->
+### Côté citoyen
+
+| Accueil du site | Assistant IA (question posée en espagnol) |
+|---|---|
+| ![Accueil du site](docs/captures/accueil.png) | ![Assistant d'accueil IA](docs/captures/assistant-citoyen.png) |
+| **Échanges avec la mairie sur une demande** | **Jeu d'énigmes du patrimoine (React)** |
+| ![Conversation avec la mairie](docs/captures/conversation.png) | ![Jeu d'énigmes](docs/captures/jeu-enigmes.png) |
+| **Agenda municipal** | **Portail citoyen sur mobile** |
+| ![Agenda municipal](docs/captures/agenda.png) | <img src="docs/captures/mobile-citoyen.png" alt="Portail citoyen sur mobile" width="260"> |
+
+### Côté agent
+
+| Tableau de bord | Traitement d'une demande |
+|---|---|
+| ![Tableau de bord agent](docs/captures/portail-agent.png) | ![Traitement d'une demande](docs/captures/gestion-demande.png) |
 
 ---
 
@@ -91,7 +110,8 @@ Ajouter les captures dans docs/captures/ puis décommenter :
 ```
 Mairie_IA/
 ├── Frontend/              Portail citoyen et pages publiques (agenda, actualités…)
-│   └── assets/            CSS, JavaScript (rafraîchissement automatique, messagerie…)
+│   ├── assets/            CSS (Tailwind), JavaScript, jeu construit (assets/jeu/jeu.js)
+│   └── jeu/src/           Code source React du jeu d'énigmes
 ├── Agent-prenium/         Portail agent (tableau de bord, gestion d'une demande)
 ├── Backend/
 │   ├── Config/            Configuration (.env), base de données, IA d'accueil
@@ -100,11 +120,14 @@ Mairie_IA/
 │   ├── ajax/              Points d'entrée AJAX du portail agent
 │   ├── citoyen/           Points d'entrée du portail citoyen
 │   ├── chatbot/           Assistant d'accueil citoyen
+│   ├── jeu/               API du jeu d'énigmes (réponses vérifiées côté serveur)
 │   └── Agent_API/         Assistant IA agent, fournisseurs d'IA, masquage RGPD
 ├── sql/
 │   ├── mairie_ia_demo.sql Base de démonstration (données fictives)
 │   └── migrations/        Migrations versionnées et relançables
-└── tests/ia/              Scénarios de test des assistants IA
+└── tests/
+    ├── ia/                Scénarios de test des assistants IA
+    └── jeu/               Tests des règles du jeu
 ```
 
 ### Comment l'IA est encadrée
@@ -121,7 +144,7 @@ flowchart LR
     G -- Non --> I[Rien n'est envoyé]
 ```
 
-**Stack :** PHP 8.3 (PDO, sessions), MySQL 9, JavaScript (AJAX, Fetch), FullCalendar 6, Composer (`vlucas/phpdotenv`), API Google Gemini, WampServer / Apache.
+**Stack :** PHP 8.3 (PDO, sessions), MySQL 9, JavaScript (AJAX, Fetch), React 19 et Vite 7 (jeu), Tailwind CSS 4, FullCalendar 6, Composer (`vlucas/phpdotenv`), npm, API Google Gemini, WampServer / Apache.
 
 ---
 
@@ -129,6 +152,8 @@ flowchart LR
 
 | Risque (OWASP) | Protection mise en place |
 |---|---|
+| Authentification | Mots de passe hachés (bcrypt), adresse email confirmée avant la première connexion, liens de confirmation et de réinitialisation à usage unique et limités dans le temps (côté citoyen, seule leur empreinte SHA-256 est stockée) |
+| Découverte des comptes | Même message et même temps de réponse, que l'adresse ait un compte ou non (connexion, inscription, newsletter) |
 | Contrôle d'accès défaillant | Middleware `exiger_agent()` / niveaux d'accès ; un citoyen ne voit que **ses** demandes (anti-IDOR) |
 | CSRF | Jeton par session, vérifié sur chaque requête qui modifie des données |
 | XSS | Échappement à l'affichage côté serveur, `textContent` côté navigateur, Content Security Policy |
@@ -136,6 +161,7 @@ flowchart LR
 | Exposition de fichiers | Listes blanches `.htaccess` : seuls les points d'entrée prévus sont accessibles |
 | Abus | Limitation du nombre de messages et d'envois |
 | Injection de prompt | Le texte du citoyen est traité comme une donnée, jamais comme une instruction |
+| Triche au jeu | Les réponses restent sur le serveur, qui vérifie chaque proposition ; les énigmes verrouillées ne sont pas envoyées au navigateur |
 
 **RGPD :** les noms, coordonnées et données de santé sont masqués avant tout envoi à l'IA ; aucune conversation n'est conservée en base ; les journaux ne contiennent aucune donnée personnelle ; des migrations purgent les données des anciennes versions.
 
@@ -146,6 +172,7 @@ flowchart LR
 ### Prérequis
 - [WampServer](https://www.wampserver.com/) (Apache, PHP 8.1 ou plus, MySQL) ou équivalent
 - [Composer](https://getcomposer.org/)
+- [Node.js](https://nodejs.org/) **seulement pour modifier** le jeu ou les styles : les fichiers construits sont déjà dans le dépôt
 - Une clé API [Google Gemini](https://aistudio.google.com/apikey) (gratuite) pour activer les assistants IA — le reste du site fonctionne sans
 
 ### Étapes
@@ -172,7 +199,13 @@ flowchart LR
    - `sql/mairie_ia_demo.sql` (base de démonstration, données fictives) ;
    - les fichiers de `sql/migrations/`, du plus petit numéro au plus grand (ils peuvent être relancés sans risque). La migration `009_comptes_demo.sql` crée aussi les comptes de démonstration dans une base existante.
 
-5. **Ouvrir le site :** <http://localhost/Mairie_IA/Frontend/index.php>
+5. *(Facultatif, pour modifier le code)* reconstruire le jeu et les styles :
+   ```bash
+   cd Frontend && npm install && npm run jeu && npm run css
+   cd ../Agent-prenium && npm install && npm run css
+   ```
+
+6. **Ouvrir le site :** <http://localhost/Mairie_IA/Frontend/index.php>
 
 ### Comptes de démonstration (fictifs)
 
@@ -183,9 +216,9 @@ flowchart LR
 
 ---
 
-## Tester les assistants IA
+## Tester le site
 
-### Essayez vous-même
+### Essayez l'assistant IA
 
 Connectez-vous avec le **compte citoyen de démonstration**, puis ouvrez l'assistant depuis le portail citoyen. Quelques idées pour voir comment il réagit (vous pouvez bien sûr écrire ce que vous voulez) :
 
@@ -201,9 +234,15 @@ Côté agent, connectez-vous avec le **compte agent de démonstration**, ouvrez 
 
 > Les assistants ont besoin d'une clé Google Gemini dans `.env` (voir [Installation](#installation)).
 
+### Jouez au jeu d'énigmes
+
+Une fois connecté comme citoyen, ouvrez **Énigmes** dans le menu : choisissez un pseudonyme, résolvez les énigmes du parcours, demandez un indice si besoin et regardez votre place dans le classement. Vous pouvez quitter et reprendre à la même énigme.
+
 ### Tests automatisés
 
-Pour les profils techniques : un jeu de 13 scénarios fictifs (demande ambiguë, manipulation, urgence sociale, données personnelles, hors sujet…) évalue l'assistant agent, avec une grille de notation par critère : `php tests/ia/comparer_ia.php --fournisseurs=gemini`.
+Pour les profils techniques :
+- **Assistant agent :** 13 scénarios fictifs (demande ambiguë, manipulation, urgence sociale, données personnelles, hors sujet…) avec une grille de notation par critère : `php tests/ia/comparer_ia.php --fournisseurs=gemini`
+- **Jeu d'énigmes :** 26 tests des règles (points, indices, pseudonymes refusés…) : `php tests/jeu/regles_test.php`
 
 ---
 
@@ -244,10 +283,12 @@ Pour les profils techniques : un jeu de 13 scénarios fictifs (demande ambiguë,
 - [x] Assistants IA encadrés et multilingues (Gemini)
 - [x] Messagerie mairie ↔ citoyen avec documents
 - [x] Agenda municipal et historique des actions
-- [ ] Espace agent pour gérer les événements de l'agenda
-- [ ] Quiz sur le patrimoine de la commune, avec classements
+- [x] Refonte de l'interface (Tailwind CSS, icônes SVG, portail agent indépendant)
+- [x] Confirmation de l'adresse email et protection contre la découverte des comptes
+- [x] Jeu d'énigmes sur le patrimoine en React, avec classement
+- [ ] Espace agent pour gérer les événements de l'agenda et les énigmes
 - [ ] Notifications
-- [ ] Conteneurisation (Docker) et tests automatisés (PHPUnit)
+- [ ] Conteneurisation (Docker) et tests automatisés complets (PHPUnit)
 - [ ] Mise en ligne
 
 ---
